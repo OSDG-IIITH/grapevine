@@ -1,0 +1,7 @@
+# ai slop
+.claude/
+.vscode/
+CLAUDE.md
+AGENTS.md
+.mcp.json
+design/
