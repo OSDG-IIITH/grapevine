@@ -1,8 +1,7 @@
 use axum::{routing::get, Router};
-use axum::http::StatusCode;
-use crate::state::AppState;
+use crate::{handlers::reviews, state::AppState};
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/offerings", get(|| async { StatusCode::OK }))
+        .route("/offerings/:id/reviews", get(reviews::offering_reviews).post(reviews::create_course_review))
 }

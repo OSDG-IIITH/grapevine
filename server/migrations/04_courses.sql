@@ -3,7 +3,7 @@ CREATE TYPE course_type AS ENUM (
 );
 
 CREATE TABLE courses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT,

@@ -1,13 +1,18 @@
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
+use std::convert::Infallible;
 use tower_sessions::Session;
-use uuid::Uuid;
 use crate::error::AppError;
 
 pub const USER_ID_KEY: &str = "user_id";
+pub const IS_ADMIN_KEY: &str = "is_admin";
 
 pub struct AuthUser {
-    pub id: Uuid,
+    pub id: String,
+    pub is_admin: bool,
 }
+
+/// extractor for public endpoints that want user_vote when a session exists
+pub struct MaybeAuth(pub String);
 
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for AuthUser {
@@ -17,11 +22,31 @@ impl<S: Send + Sync> FromRequestParts<S> for AuthUser {
         let session = Session::from_request_parts(parts, state)
             .await
             .map_err(|_| AppError::Unauthorized)?;
-        let id: Uuid = session
+        let id: String = session
             .get(USER_ID_KEY)
             .await
             .map_err(|_| AppError::Unauthorized)?
             .ok_or(AppError::Unauthorized)?;
-        Ok(AuthUser { id })
+        let is_admin: bool = session
+            .get(IS_ADMIN_KEY)
+            .await
+            .unwrap_or(None)
+            .unwrap_or(false);
+        Ok(AuthUser { id, is_admin })
+    }
+}
+
+#[async_trait]
+impl<S: Send + Sync> FromRequestParts<S> for MaybeAuth {
+    type Rejection = Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Infallible> {
+        let id = async {
+            let session = Session::from_request_parts(parts, state).await.ok()?;
+            session.get::<String>(USER_ID_KEY).await.ok()?
+        }
+        .await
+        .unwrap_or_default();
+        Ok(MaybeAuth(id))
     }
 }

@@ -1,0 +1,1095 @@
+openapi: 3.0.3
+info:
+  title: Grapevine
+  description: Course and advisor review platform for IIIT Hyderabad
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: local dev
+
+tags:
+  - name: auth
+    description: CAS single sign-on
+  - name: courses
+  - name: offerings
+    description: a course taught in a specific semester
+  - name: faculty
+  - name: labs
+  - name: reviews
+  - name: admin
+    description: moderation (requires is_admin)
+
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: id
+
+  responses:
+    Unauthorized:
+      description: not logged in
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: unauthorized
+    Forbidden:
+      description: insufficient permissions
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: forbidden
+    NotFound:
+      description: resource not found
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: not found
+    BadRequest:
+      description: bad request
+      content:
+        text/plain:
+          schema:
+            type: string
+
+  schemas:
+    # ── primitives ──────────────────────────────────────────────────────────────
+
+    Ulid:
+      type: string
+      description: ULID identifier
+      example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+
+    Rating:
+      type: integer
+      minimum: 1
+      maximum: 5
+
+    CourseType:
+      type: string
+      enum: [core, open, breadth, stream, bouquet, hs, sci, math]
+
+    Season:
+      type: string
+      enum: [M, S]
+      description: "M = monsoon, S = spring"
+
+    # ── shared refs ─────────────────────────────────────────────────────────────
+
+    FacultyRef:
+      type: object
+      required: [id, slug, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        slug:
+          type: string
+          example: girish-varma
+        name:
+          type: string
+
+    LabRef:
+      type: object
+      required: [id, shortname, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        shortname:
+          type: string
+          example: cvit
+        name:
+          type: string
+
+    CourseRef:
+      type: object
+      required: [id, code, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        code:
+          type: string
+          example: CS7.301
+        name:
+          type: string
+
+    AuthorRef:
+      type: object
+      required: [id, display_name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        display_name:
+          type: string
+
+    # ── courses ─────────────────────────────────────────────────────────────────
+
+    CourseLean:
+      type: object
+      required: [id, code, name, type]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/CourseType'
+
+    OfferingDetail:
+      type: object
+      required: [id, season, year, faculty]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        season:
+          $ref: '#/components/schemas/Season'
+        year:
+          type: integer
+          example: 2024
+        faculty:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacultyRef'
+
+    CourseDetail:
+      type: object
+      required: [id, code, name, type, offerings]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          $ref: '#/components/schemas/CourseType'
+        offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferingDetail'
+
+    # ── faculty ─────────────────────────────────────────────────────────────────
+
+    FacultyLean:
+      type: object
+      required: [id, slug, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        slug:
+          type: string
+          example: girish-varma
+        name:
+          type: string
+        lab_id:
+          type: string
+          nullable: true
+        lab_name:
+          type: string
+          nullable: true
+
+    OfferingWithCourse:
+      type: object
+      required: [id, season, year, course]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        season:
+          $ref: '#/components/schemas/Season'
+        year:
+          type: integer
+        course:
+          $ref: '#/components/schemas/CourseRef'
+
+    FacultyDetail:
+      type: object
+      required: [id, slug, name, offerings]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        slug:
+          type: string
+          example: girish-varma
+        name:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        lab:
+          allOf:
+            - $ref: '#/components/schemas/LabRef'
+          nullable: true
+        offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferingWithCourse'
+
+    # ── labs ────────────────────────────────────────────────────────────────────
+
+    LabLean:
+      type: object
+      required: [id, shortname, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        shortname:
+          type: string
+          example: cvit
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    LabDetail:
+      type: object
+      required: [id, shortname, name, faculty]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        shortname:
+          type: string
+          example: cvit
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        faculty:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacultyRef'
+
+    # ── reviews ─────────────────────────────────────────────────────────────────
+
+    CourseReview:
+      type: object
+      required: [id, offering_id, anonymous, difficulty, teaching, grading, content, workload, overall, body, score, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        offering_id:
+          $ref: '#/components/schemas/Ulid'
+        author:
+          allOf:
+            - $ref: '#/components/schemas/AuthorRef'
+          nullable: true
+          description: null when the review is anonymous
+        anonymous:
+          type: boolean
+        difficulty:
+          $ref: '#/components/schemas/Rating'
+        teaching:
+          $ref: '#/components/schemas/Rating'
+        grading:
+          $ref: '#/components/schemas/Rating'
+        content:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        overall:
+          type: number
+          format: float
+          description: mean of the five axes, rounded to 2 decimal places
+          example: 3.8
+        body:
+          type: string
+        score:
+          type: integer
+          description: sum of all votes (upvotes minus downvotes)
+        user_vote:
+          type: integer
+          nullable: true
+          description: "current user's vote: 1 (up), -1 (down), or null if no vote cast"
+        edited_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    AdvisorReview:
+      type: object
+      required: [id, faculty_id, anonymous, research, availability, mentorship, support, workload, overall, body, score, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        faculty_id:
+          $ref: '#/components/schemas/Ulid'
+        author:
+          allOf:
+            - $ref: '#/components/schemas/AuthorRef'
+          nullable: true
+          description: null when the review is anonymous
+        anonymous:
+          type: boolean
+        research:
+          $ref: '#/components/schemas/Rating'
+        availability:
+          $ref: '#/components/schemas/Rating'
+        mentorship:
+          $ref: '#/components/schemas/Rating'
+        support:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        overall:
+          type: number
+          format: float
+          description: mean of the five axes, rounded to 2 decimal places
+          example: 4.2
+        body:
+          type: string
+        score:
+          type: integer
+        user_vote:
+          type: integer
+          nullable: true
+          description: "1 (up), -1 (down), or null if no vote cast"
+        edited_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    # ── review request bodies ────────────────────────────────────────────────────
+
+    CreateCourseReview:
+      type: object
+      required: [anonymous, difficulty, teaching, grading, content, workload, body]
+      properties:
+        anonymous:
+          type: boolean
+        difficulty:
+          $ref: '#/components/schemas/Rating'
+        teaching:
+          $ref: '#/components/schemas/Rating'
+        grading:
+          $ref: '#/components/schemas/Rating'
+        content:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        body:
+          type: string
+
+    EditCourseReview:
+      type: object
+      description: all fields optional; only provided fields are updated
+      properties:
+        difficulty:
+          $ref: '#/components/schemas/Rating'
+        teaching:
+          $ref: '#/components/schemas/Rating'
+        grading:
+          $ref: '#/components/schemas/Rating'
+        content:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        body:
+          type: string
+
+    CreateAdvisorReview:
+      type: object
+      required: [anonymous, research, availability, mentorship, support, workload, body]
+      properties:
+        anonymous:
+          type: boolean
+        research:
+          $ref: '#/components/schemas/Rating'
+        availability:
+          $ref: '#/components/schemas/Rating'
+        mentorship:
+          $ref: '#/components/schemas/Rating'
+        support:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        body:
+          type: string
+
+    EditAdvisorReview:
+      type: object
+      description: all fields optional; only provided fields are updated
+      properties:
+        research:
+          $ref: '#/components/schemas/Rating'
+        availability:
+          $ref: '#/components/schemas/Rating'
+        mentorship:
+          $ref: '#/components/schemas/Rating'
+        support:
+          $ref: '#/components/schemas/Rating'
+        workload:
+          $ref: '#/components/schemas/Rating'
+        body:
+          type: string
+
+    VoteBody:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: integer
+          enum: [1, -1]
+
+    FlagBody:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    # ── admin ────────────────────────────────────────────────────────────────────
+
+    FlagResponse:
+      type: object
+      required: [id, reason, created_at, review_type, review_id, review_body, reporter]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        review_type:
+          type: string
+          enum: [course, advisor]
+        review_id:
+          $ref: '#/components/schemas/Ulid'
+        review_body:
+          type: string
+          description: first 200 characters of the flagged review
+        reporter:
+          $ref: '#/components/schemas/AuthorRef'
+
+paths:
+  # ── auth ────────────────────────────────────────────────────────────────────
+
+  /auth/login:
+    get:
+      operationId: casLogin
+      summary: start CAS login
+      tags: [auth]
+      responses:
+        '302':
+          description: redirect to CAS login page
+
+  /auth/callback:
+    get:
+      operationId: casCallback
+      summary: CAS callback — validates ticket and creates session
+      tags: [auth]
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: redirect to frontend on success
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      operationId: casLogout
+      summary: flush session and redirect to CAS logout
+      tags: [auth]
+      responses:
+        '302':
+          description: redirect to CAS logout page
+
+  # ── courses ─────────────────────────────────────────────────────────────────
+
+  /courses:
+    get:
+      operationId: listCourses
+      summary: list courses
+      tags: [courses]
+      parameters:
+        - name: q
+          in: query
+          description: search term matched against code and name (ILIKE)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseLean'
+
+  /courses/{code}:
+    get:
+      operationId: getCourse
+      summary: get course with offerings and faculty
+      tags: [courses]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+            example: CS3.401
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /courses/{code}/reviews:
+    get:
+      operationId: listCourseReviews
+      summary: list all reviews for a course across all offerings
+      tags: [courses, reviews]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+            example: CS3.401
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseReview'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── offerings ───────────────────────────────────────────────────────────────
+
+  /offerings/{id}/reviews:
+    get:
+      operationId: listOfferingReviews
+      summary: list reviews for a specific offering
+      tags: [offerings, reviews]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseReview'
+
+    post:
+      operationId: createCourseReview
+      summary: submit a course review for this offering
+      tags: [offerings, reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseReview'
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseReview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── faculty ─────────────────────────────────────────────────────────────────
+
+  /faculty:
+    get:
+      operationId: listFaculty
+      summary: list faculty members
+      tags: [faculty]
+      parameters:
+        - name: q
+          in: query
+          description: search term matched against name (ILIKE)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FacultyLean'
+
+  /faculty/{slug}:
+    get:
+      operationId: getFaculty
+      summary: get faculty member with lab and offering history
+      tags: [faculty]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: girish-varma
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacultyDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /faculty/{slug}/reviews:
+    get:
+      operationId: listAdvisorReviews
+      summary: list advisor reviews for a faculty member
+      tags: [faculty, reviews]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: girish-varma
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdvisorReview'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: createAdvisorReview
+      summary: submit an advisor review for this faculty member
+      tags: [faculty, reviews]
+      security:
+        - session: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: girish-varma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdvisorReview'
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorReview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── labs ────────────────────────────────────────────────────────────────────
+
+  /labs:
+    get:
+      operationId: listLabs
+      summary: list research labs
+      tags: [labs]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LabLean'
+
+  /labs/{shortname}:
+    get:
+      operationId: getLab
+      summary: get lab with faculty list
+      tags: [labs]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+            example: cvit
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── course review mutations ──────────────────────────────────────────────────
+
+  /reviews/course/{id}:
+    patch:
+      operationId: editCourseReview
+      summary: edit own course review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditCourseReview'
+      responses:
+        '200':
+          description: updated review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseReview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      operationId: deleteCourseReview
+      summary: delete own course review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reviews/course/{id}/vote:
+    post:
+      operationId: voteCourseReview
+      summary: cast or update a vote on a course review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteBody'
+      responses:
+        '204':
+          description: vote recorded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      operationId: unvoteCourseReview
+      summary: remove own vote from a course review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: vote removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /reviews/course/{id}/flag:
+    post:
+      operationId: flagCourseReview
+      summary: flag a course review for moderation
+      description: duplicate flags from the same user are silently ignored
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagBody'
+      responses:
+        '204':
+          description: flagged
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── advisor review mutations ─────────────────────────────────────────────────
+
+  /reviews/advisor/{id}:
+    patch:
+      operationId: editAdvisorReview
+      summary: edit own advisor review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditAdvisorReview'
+      responses:
+        '200':
+          description: updated review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorReview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      operationId: deleteAdvisorReview
+      summary: delete own advisor review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reviews/advisor/{id}/vote:
+    post:
+      operationId: voteAdvisorReview
+      summary: cast or update a vote on an advisor review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteBody'
+      responses:
+        '204':
+          description: vote recorded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      operationId: unvoteAdvisorReview
+      summary: remove own vote from an advisor review
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: vote removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /reviews/advisor/{id}/flag:
+    post:
+      operationId: flagAdvisorReview
+      summary: flag an advisor review for moderation
+      description: duplicate flags from the same user are silently ignored
+      tags: [reviews]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagBody'
+      responses:
+        '204':
+          description: flagged
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── admin ────────────────────────────────────────────────────────────────────
+
+  /admin/flags:
+    get:
+      operationId: listFlags
+      summary: list all flagged reviews
+      tags: [admin]
+      security:
+        - session: []
+      responses:
+        '200':
+          description: flags sorted by created_at descending
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlagResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/flags/{id}/dismiss:
+    post:
+      operationId: dismissFlag
+      summary: delete the flag without removing the review
+      tags: [admin]
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: flag deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/flags/{id}/delete-review:
+    post:
+      operationId: deleteFlaggedReview
+      summary: delete the flagged review (cascades all its flags)
+      security:
+        - session: []
+      description: "`id` is the flag's id, not the review's id. The review (and all flags on it) are deleted by looking up which review the flag points to."
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          description: flag id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '204':
+          description: review deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

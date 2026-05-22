@@ -1,7 +1,7 @@
 CREATE TABLE course_reviews (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  offering_id UUID NOT NULL REFERENCES offerings(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  offering_id TEXT NOT NULL REFERENCES offerings(id) ON DELETE CASCADE,
   anonymous BOOLEAN NOT NULL DEFAULT false,
   difficulty SMALLINT NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
   teaching SMALLINT NOT NULL CHECK (teaching BETWEEN 1 AND 5),
@@ -15,9 +15,9 @@ CREATE TABLE course_reviews (
 );
 
 CREATE TABLE advisor_reviews (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  faculty_id UUID NOT NULL REFERENCES faculty(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  faculty_id TEXT NOT NULL REFERENCES faculty(id) ON DELETE CASCADE,
   anonymous BOOLEAN NOT NULL DEFAULT false,
   research SMALLINT NOT NULL CHECK (research BETWEEN 1 AND 5),
   availability SMALLINT NOT NULL CHECK (availability BETWEEN 1 AND 5),

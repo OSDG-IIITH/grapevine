@@ -4,7 +4,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("database error: {0}")]
-    Sqlx(#[from] sqlx::Error),
+    Sqlx(sqlx::Error),
     #[error("not found")]
     NotFound,
     #[error("unauthorized")]
@@ -15,6 +15,17 @@ pub enum AppError {
     BadRequest(String),
     #[error("internal server error")]
     Internal,
+}
+
+impl From<sqlx::Error> for AppError {
+    fn from(e: sqlx::Error) -> Self {
+        if let sqlx::Error::Database(ref db) = e {
+            if db.code().as_deref() == Some("23505") {
+                return AppError::BadRequest("already exists".into());
+            }
+        }
+        AppError::Sqlx(e)
+    }
 }
 
 impl IntoResponse for AppError {

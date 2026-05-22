@@ -4,8 +4,9 @@ use axum::{
 };
 use serde::Deserialize;
 use tower_sessions::Session;
+use ulid::Ulid;
 use crate::{error::AppError, state::AppState};
-use super::session::USER_ID_KEY;
+use super::session::{IS_ADMIN_KEY, USER_ID_KEY};
 
 #[derive(Deserialize)]
 pub struct TicketQuery {
@@ -13,7 +14,7 @@ pub struct TicketQuery {
 }
 
 pub async fn login(State(s): State<AppState>) -> Redirect {
-    let service = format!("{}/auth/cas/callback", s.cfg.app_url);
+    let service = format!("{}/auth/callback", s.cfg.app_url);
     Redirect::to(&format!("{}/login?service={}", s.cfg.cas_base_url, urlenc(&service)))
 }
 
@@ -22,7 +23,7 @@ pub async fn callback(
     State(s): State<AppState>,
     session: Session,
 ) -> Result<Redirect, AppError> {
-    let service = format!("{}/auth/cas/callback", s.cfg.app_url);
+    let service = format!("{}/auth/callback", s.cfg.app_url);
     let validate_url = format!(
         "{}/serviceValidate?ticket={}&service={}",
         s.cfg.cas_base_url, q.ticket, urlenc(&service)
@@ -36,20 +37,34 @@ pub async fn callback(
         .map_err(|_| AppError::Internal)?;
 
     let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
+    let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
 
-    let user_id: uuid::Uuid = sqlx::query_scalar!(
+    let id = Ulid::new().to_string();
+    let row = sqlx::query!(
         r#"
-        INSERT INTO users (cas_id, display_name)
-        VALUES ($1, $1)
+        INSERT INTO users (id, cas_id, display_name)
+        VALUES ($1, $2, $2)
         ON CONFLICT (cas_id) DO UPDATE SET cas_id = EXCLUDED.cas_id
-        RETURNING id
+        RETURNING id, is_admin
         "#,
-        cas_id
+        id, cas_id
     )
     .fetch_one(&s.pool)
     .await?;
 
-    session.insert(USER_ID_KEY, user_id).await.map_err(|_| AppError::Internal)?;
+    let is_admin = if is_moderator {
+        sqlx::query_scalar!(
+            "UPDATE users SET is_admin = true WHERE id = $1 RETURNING is_admin",
+            row.id
+        )
+        .fetch_one(&s.pool)
+        .await?
+    } else {
+        row.is_admin
+    };
+
+    session.insert(USER_ID_KEY, row.id).await.map_err(|_| AppError::Internal)?;
+    session.insert(IS_ADMIN_KEY, is_admin).await.map_err(|_| AppError::Internal)?;
 
     Ok(Redirect::to(&s.cfg.frontend_url))
 }

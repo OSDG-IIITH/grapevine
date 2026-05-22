@@ -8,17 +8,25 @@ pub struct Config {
     pub frontend_url: String,
     #[allow(dead_code)]
     pub session_secret: String,
+    pub moderator_emails: Vec<String>,
 }
 
 impl Config {
     pub fn load() -> Arc<Self> {
         dotenvy::dotenv().ok();
+        let moderator_emails = std::env::var("MODERATOR_EMAILS")
+            .unwrap_or_default()
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
         Arc::new(Self {
             database_url: var("DATABASE_URL"),
             cas_base_url: var("CAS_BASE_URL"),
             app_url: var("APP_URL"),
             frontend_url: var("FRONTEND_URL"),
             session_secret: var("SESSION_SECRET"),
+            moderator_emails,
         })
     }
 }

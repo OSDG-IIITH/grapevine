@@ -5,7 +5,7 @@ pub mod labs;
 pub mod reviews;
 pub mod admin;
 
-use axum::{routing::get, Router};
+use axum::{routing::{get, post}, Router};
 use axum::http::{HeaderValue, HeaderName, Method};
 use tower_http::cors::CorsLayer;
 use crate::{auth::cas, state::AppState};
@@ -19,9 +19,9 @@ pub fn app(state: AppState) -> Router {
         .allow_credentials(true);
 
     Router::new()
-        .route("/auth/cas/login", get(cas::login))
-        .route("/auth/cas/callback", get(cas::callback))
-        .route("/auth/cas/logout", get(cas::logout))
+        .route("/auth/login", get(cas::login))
+        .route("/auth/callback", get(cas::callback))
+        .route("/auth/logout", post(cas::logout))
         .merge(courses::router())
         .merge(offerings::router())
         .merge(faculty::router())

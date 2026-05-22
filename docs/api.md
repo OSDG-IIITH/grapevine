@@ -1,6 +1,6 @@
 Auth
-  GET  /auth/cas/login
-  GET  /auth/cas/callback
+  GET  /auth/login
+  GET  /auth/callback
   POST /auth/logout
 
 Courses
