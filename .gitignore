@@ -1,3 +1,6 @@
+.env
+data/
+
 # ai slop
 .claude/
 .vscode/
