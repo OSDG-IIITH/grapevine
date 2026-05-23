@@ -6,6 +6,7 @@
 		flagCourseReview, flagAdvisorReview
 	} from '$lib/api';
 	import ReviewModal from './ReviewModal.svelte';
+	import FlagModal from './FlagModal.svelte';
 
 	interface Props {
 		review: CourseReview | AdvisorReview;
@@ -21,6 +22,8 @@
 	// svelte-ignore state_referenced_locally
 	let vote = $state<0 | 1 | -1>((review.user_vote ?? 0) as 0 | 1 | -1);
 	let flagged = $state(false);
+	let flagopen = $state(false);
+	let flagsending = $state(false);
 
 	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
 	const stars = $derived(Math.round(review.overall ?? 0));
@@ -45,14 +48,15 @@
 		if (!ok) vote = prev;
 	}
 
-	async function handleflag() {
-		if (flagged) return;
-		const reason = window.prompt('Reason for flagging:');
-		if (!reason?.trim()) return;
+	async function handleflag(reason: string) {
+		if (flagged || flagsending) return;
+		flagsending = true;
 		const ok = kind === 'course'
 			? await flagCourseReview(review.id, reason)
 			: await flagAdvisorReview(review.id, reason);
+		flagsending = false;
 		if (ok) flagged = true;
+		flagopen = false;
 	}
 </script>
 
@@ -126,10 +130,19 @@
 		<button
 			type="button"
 			aria-label={flagged ? 'Flagged' : 'Flag review'}
-			onclick={(e) => { stop(e); handleflag(); }}
+			onclick={(e) => { stop(e); if (!flagged) flagopen = true; }}
 			class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] {flagged ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--danger)]'}"
 		>
-			<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				width="13"
+				height="13"
+				viewBox="0 0 24 24"
+				fill={flagged ? 'currentColor' : 'none'}
+				stroke="currentColor"
+				stroke-width="1.7"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<path d="M4 21V4h13l-2 4 2 4H4" />
 			</svg>
 		</button>
@@ -146,7 +159,15 @@
 		{vote}
 		{flagged}
 		onvote={(v) => handlevote(v)}
-		onflag={handleflag}
+		onflag={() => { if (!flagged) flagopen = true; }}
 		onclose={() => (open = false)}
+	/>
+{/if}
+
+{#if flagopen}
+	<FlagModal
+		submitting={flagsending}
+		onsubmit={handleflag}
+		onclose={() => (flagopen = false)}
 	/>
 {/if}
