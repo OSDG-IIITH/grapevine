@@ -127,6 +127,7 @@
 							review={r}
 							axisorder={[...ADVISOR_AXIS_ORDER]}
 							axislabels={ADVISOR_AXIS_LABELS}
+							ondelete={(id) => (advisorreviews = advisorreviews.filter((item) => item.id !== id))}
 						/>
 					{/each}
 				</div>
@@ -145,6 +146,7 @@
 							axislabels={COURSE_AXIS_LABELS}
 							showoffering={true}
 							offeringcode={r.offeringcode}
+							ondelete={(id) => (instructorreviews = instructorreviews.filter((item) => item.id !== id))}
 						/>
 					{/each}
 				</div>

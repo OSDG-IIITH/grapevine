@@ -135,6 +135,7 @@
 						axislabels={COURSE_AXIS_LABELS}
 						showoffering={tab === 'all'}
 						offeringcode={offeringmap[r.offering_id]}
+						ondelete={(id) => (reviews = reviews.filter((item) => item.id !== id))}
 					/>
 				{/each}
 			</div>

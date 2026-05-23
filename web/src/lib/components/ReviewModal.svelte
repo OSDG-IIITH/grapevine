@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { CourseReview, AdvisorReview } from '$lib/types';
+	import { IconFlag, IconTrash } from '@tabler/icons-svelte';
 	import SegBar from './SegBar.svelte';
 
 	interface Props {
@@ -10,12 +11,15 @@
 		offeringcode?: string;
 		vote: 0 | 1 | -1;
 		flagged: boolean;
+		canDelete: boolean;
+		deleting: boolean;
 		onvote: (v: 0 | 1 | -1) => void;
 		onflag: () => void;
+		ondelete: () => void;
 		onclose: () => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, vote, flagged, onvote, onflag, onclose }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, vote, flagged, canDelete, deleting, onvote, onflag, ondelete, onclose }: Props = $props();
 
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
@@ -147,18 +151,31 @@
 					<span class="min-w-[14px] text-left">{showndown}</span>
 				</button>
 			</div>
-			<button
-				type="button"
-				onclick={onflag}
-				class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] transition-[color,background] duration-[120ms] {flagged ? 'bg-[var(--danger-bg)] text-[var(--danger)]' : 'text-[var(--fg-3)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]'}"
-				style="font-family: var(--mono);"
-				aria-label={flagged ? 'Flagged' : 'Flag review'}
-			>
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M4 21V4h13l-2 4 2 4H4" />
-				</svg>
-				{flagged ? 'flagged' : 'flag'}
-			</button>
+			<div class="flex items-center gap-2">
+				<button
+					type="button"
+					onclick={onflag}
+					class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] transition-[color,background] duration-[120ms] {flagged ? 'bg-[var(--danger-bg)] text-[var(--danger)]' : 'text-[var(--fg-3)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]'}"
+					style="font-family: var(--mono);"
+					aria-label={flagged ? 'Flagged' : 'Flag review'}
+				>
+					<IconFlag size={13} stroke={1.7} />
+					{flagged ? 'flagged' : 'flag'}
+				</button>
+				{#if canDelete}
+					<button
+						type="button"
+						onclick={ondelete}
+						disabled={deleting}
+						class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] text-[var(--fg-3)] transition-[color,background] duration-[120ms] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]"
+						style="font-family: var(--mono);"
+						aria-label="Delete review"
+					>
+						<IconTrash size={13} stroke={1.7} />
+						{deleting ? 'deleting…' : 'delete'}
+					</button>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>

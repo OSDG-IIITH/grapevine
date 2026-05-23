@@ -3,8 +3,11 @@
 	import {
 		voteCourseReview, unvoteCourseReview,
 		voteAdvisorReview, unvoteAdvisorReview,
-		flagCourseReview, flagAdvisorReview
+		flagCourseReview, flagAdvisorReview,
+		deleteCourseReview, deleteAdvisorReview
 	} from '$lib/api';
+	import { currentUser } from '$lib/stores';
+	import { IconFlag, IconTrash } from '@tabler/icons-svelte';
 	import ReviewModal from './ReviewModal.svelte';
 	import FlagModal from './FlagModal.svelte';
 
@@ -14,9 +17,10 @@
 		axislabels: Record<string, string>;
 		showoffering?: boolean;
 		offeringcode?: string;
+		ondelete?: (id: string) => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, ondelete }: Props = $props();
 
 	let open = $state(false);
 	// svelte-ignore state_referenced_locally
@@ -24,6 +28,7 @@
 	let flagged = $state(false);
 	let flagopen = $state(false);
 	let flagsending = $state(false);
+	let deleting = $state(false);
 
 	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
 	const stars = $derived(Math.round(review.overall ?? 0));
@@ -32,6 +37,7 @@
 	const basedown = $derived(review.downvotes - (initialvote === -1 ? 1 : 0));
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
+	const canDelete = $derived(!!$currentUser && !!review.author && $currentUser.id === review.author.id);
 
 	function fmtdate(iso: string): string {
 		return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -62,6 +68,18 @@
 		flagsending = false;
 		if (ok) flagged = true;
 		flagopen = false;
+	}
+
+	async function handledelete() {
+		if (!canDelete || deleting) return;
+		deleting = true;
+		const ok = kind === 'course'
+			? await deleteCourseReview(review.id)
+			: await deleteAdvisorReview(review.id);
+		deleting = false;
+		if (!ok) return;
+		ondelete?.(review.id);
+		open = false;
 	}
 </script>
 
@@ -139,19 +157,19 @@
 			onclick={(e) => { stop(e); if (!flagged) flagopen = true; }}
 			class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] {flagged ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--danger)]'}"
 		>
-			<svg
-				width="13"
-				height="13"
-				viewBox="0 0 24 24"
-				fill={flagged ? 'currentColor' : 'none'}
-				stroke="currentColor"
-				stroke-width="1.7"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="M4 21V4h13l-2 4 2 4H4" />
-			</svg>
+			<IconFlag size={13} stroke={1.7} fill={flagged ? 'currentColor' : 'none'} />
 		</button>
+		{#if canDelete}
+			<button
+				type="button"
+				aria-label="Delete review"
+				onclick={(e) => { stop(e); handledelete(); }}
+				disabled={deleting}
+				class="relative z-[2] inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--danger)]"
+			>
+				<IconTrash size={13} stroke={1.7} />
+			</button>
+		{/if}
 	</div>
 </div>
 
@@ -164,8 +182,11 @@
 		{offeringcode}
 		{vote}
 		{flagged}
+		{canDelete}
+		{deleting}
 		onvote={(v) => handlevote(v)}
 		onflag={() => { if (!flagged) flagopen = true; }}
+		ondelete={handledelete}
 		onclose={() => (open = false)}
 	/>
 {/if}
