@@ -130,3 +130,33 @@ export interface FlagResponse {
 	offering_code?: string;
 	faculty_name?: string;
 }
+
+export interface AuthUser {
+	id: string;
+	display_name: string;
+	is_admin: boolean;
+}
+
+export interface CreateCourseReview {
+	anonymous: boolean;
+	difficulty: number;
+	teaching: number;
+	grading: number;
+	content: number;
+	workload: number;
+	body: string;
+}
+
+export interface EditCourseReview extends Partial<CreateCourseReview> {}
+
+export interface CreateAdvisorReview {
+	anonymous: boolean;
+	research: number;
+	availability: number;
+	mentorship: number;
+	support: number;
+	workload: number;
+	body: string;
+}
+
+export interface EditAdvisorReview extends Partial<CreateAdvisorReview> {}

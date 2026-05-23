@@ -13,7 +13,7 @@
 	let page = $state(1);
 
 	$effect(() => {
-		getCourses().then((data) => (all = data));
+		getCourses().then((data) => { if (data) all = data; });
 	});
 
 	const filtered = $derived(

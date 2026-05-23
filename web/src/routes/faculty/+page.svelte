@@ -13,8 +13,8 @@
 	let page = $state(1);
 
 	$effect(() => {
-		getFaculty().then((data) => (all = data));
-		getLabs().then((data) => (labs = data));
+		getFaculty().then((data) => { if (data) all = data; });
+		getLabs().then((data) => { if (data) labs = data; });
 	});
 
 	const filtered = $derived(

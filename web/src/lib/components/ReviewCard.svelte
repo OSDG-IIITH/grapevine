@@ -1,5 +1,10 @@
 <script lang="ts">
 	import type { CourseReview, AdvisorReview } from '$lib/types';
+	import {
+		voteCourseReview, unvoteCourseReview,
+		voteAdvisorReview, unvoteAdvisorReview,
+		flagCourseReview, flagAdvisorReview
+	} from '$lib/api';
 	import ReviewModal from './ReviewModal.svelte';
 
 	interface Props {
@@ -14,10 +19,11 @@
 
 	let open = $state(false);
 	// svelte-ignore state_referenced_locally
-	let vote = $state<0 | 1 | -1>(review.user_vote);
+	let vote = $state<0 | 1 | -1>((review.user_vote ?? 0) as 0 | 1 | -1);
 	let flagged = $state(false);
 
-	const stars = $derived(Math.round(review.overall));
+	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
+	const stars = $derived(Math.round(review.overall ?? 0));
 
 	function fmtdate(iso: string): string {
 		return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -25,6 +31,28 @@
 
 	function stop(e: Event) {
 		e.stopPropagation();
+	}
+
+	async function handlevote(newvote: 0 | 1 | -1) {
+		const prev = vote;
+		vote = newvote;
+		let ok: boolean;
+		if (newvote === 0) {
+			ok = kind === 'course' ? await unvoteCourseReview(review.id) : await unvoteAdvisorReview(review.id);
+		} else {
+			ok = kind === 'course' ? await voteCourseReview(review.id, newvote) : await voteAdvisorReview(review.id, newvote);
+		}
+		if (!ok) vote = prev;
+	}
+
+	async function handleflag() {
+		if (flagged) return;
+		const reason = window.prompt('Reason for flagging:');
+		if (!reason?.trim()) return;
+		const ok = kind === 'course'
+			? await flagCourseReview(review.id, reason)
+			: await flagAdvisorReview(review.id, reason);
+		if (ok) flagged = true;
 	}
 </script>
 
@@ -63,7 +91,7 @@
 					<path d="M12 2l2.9 6.3 6.8.7-5.1 4.6 1.4 6.8L12 17l-6 3.4 1.4-6.8L2.3 9l6.8-.7L12 2z" />
 				</svg>
 			{/each}
-			<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{review.overall.toFixed(1)}</span>
+			<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{(review.overall ?? 0).toFixed(1)}</span>
 		</div>
 	</div>
 
@@ -75,7 +103,7 @@
 		<button
 			type="button"
 			aria-label="Upvote"
-			onclick={(e) => { stop(e); vote = vote === 1 ? 0 : 1; }}
+			onclick={(e) => { stop(e); handlevote(vote === 1 ? 0 : 1); }}
 			class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === 1 ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
 			style="font-family: var(--mono);"
 		>
@@ -87,7 +115,7 @@
 		<button
 			type="button"
 			aria-label="Downvote"
-			onclick={(e) => { stop(e); vote = vote === -1 ? 0 : -1; }}
+			onclick={(e) => { stop(e); handlevote(vote === -1 ? 0 : -1); }}
 			class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === -1 ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
 			style="font-family: var(--mono);"
 		>
@@ -98,7 +126,7 @@
 		<button
 			type="button"
 			aria-label={flagged ? 'Flagged' : 'Flag review'}
-			onclick={(e) => { stop(e); flagged = !flagged; }}
+			onclick={(e) => { stop(e); handleflag(); }}
 			class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] {flagged ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--danger)]'}"
 		>
 			<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -117,8 +145,8 @@
 		{offeringcode}
 		{vote}
 		{flagged}
-		onvote={(v) => (vote = v)}
-		onflag={() => (flagged = !flagged)}
+		onvote={(v) => handlevote(v)}
+		onflag={handleflag}
 		onclose={() => (open = false)}
 	/>
 {/if}

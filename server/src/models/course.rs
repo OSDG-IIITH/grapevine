@@ -23,6 +23,7 @@ pub struct CourseLean {
     pub name: String,
     #[serde(rename = "type")]
     pub kind: CourseType,
+    pub overall: f64,
 }
 
 #[derive(Debug, Serialize)]
@@ -35,6 +36,7 @@ pub struct FacultyRef {
 #[derive(Debug, Serialize)]
 pub struct OfferingDetail {
     pub id: String,
+    pub code: String,
     pub season: Season,
     pub year: i16,
     pub faculty: Vec<FacultyRef>,
@@ -45,25 +47,32 @@ pub struct CourseDetail {
     pub id: String,
     pub code: String,
     pub name: String,
-    pub description: Option<String>,
+    pub description: String,
     #[serde(rename = "type")]
     pub kind: CourseType,
+    pub overall: f64,
     pub offerings: Vec<OfferingDetail>,
 }
 
 pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<CourseLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
-        r#"SELECT id, code, name, type as "kind: CourseType"
-           FROM courses
-           WHERE ($1::text IS NULL OR code ILIKE $1 OR name ILIKE $1)
-           ORDER BY name"#,
+        r#"SELECT c.id, c.code, c.name, c.type as "kind: CourseType",
+                  COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+           FROM courses c
+           LEFT JOIN offerings o ON o.course_id = c.id
+           LEFT JOIN course_reviews r ON r.offering_id = o.id
+           WHERE ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
+           GROUP BY c.id, c.code, c.name, c.type
+           ORDER BY c.name"#,
         pattern
     )
     .fetch_all(pool)
     .await?;
 
-    Ok(rows.into_iter().map(|r| CourseLean { id: r.id, code: r.code, name: r.name, kind: r.kind }).collect())
+    Ok(rows.into_iter().map(|r| CourseLean {
+        id: r.id, code: r.code, name: r.name, kind: r.kind, overall: r.overall,
+    }).collect())
 }
 
 pub async fn id_by_code(pool: &PgPool, code: &str) -> Result<String, AppError> {
@@ -75,7 +84,14 @@ pub async fn id_by_code(pool: &PgPool, code: &str) -> Result<String, AppError> {
 
 pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppError> {
     let row = sqlx::query!(
-        r#"SELECT id, code, name, description, type as "kind: CourseType" FROM courses WHERE code = $1"#,
+        r#"SELECT c.id, c.code, c.name, c.description,
+                  c.type as "kind: CourseType",
+                  COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+           FROM courses c
+           LEFT JOIN offerings o ON o.course_id = c.id
+           LEFT JOIN course_reviews r ON r.offering_id = o.id
+           WHERE c.code = $1
+           GROUP BY c.id, c.code, c.name, c.description, c.type"#,
         code
     )
     .fetch_optional(pool)
@@ -97,6 +113,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
 
     let mut offerings: Vec<OfferingDetail> = vec![];
     for r in offering_rows {
+        let code = format!("{}{}", match &r.season { Season::M => "M", Season::S => "S" }, r.year);
         if let Some(o) = offerings.iter_mut().find(|o| o.id == r.oid) {
             if let (Some(fid), Some(fslug), Some(fname)) = (r.fid, r.fslug, r.fname) {
                 o.faculty.push(FacultyRef { id: fid, slug: fslug, name: fname });
@@ -106,9 +123,15 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
             if let (Some(fid), Some(fslug), Some(fname)) = (r.fid, r.fslug, r.fname) {
                 faculty.push(FacultyRef { id: fid, slug: fslug, name: fname });
             }
-            offerings.push(OfferingDetail { id: r.oid, season: r.season, year: r.year, faculty });
+            offerings.push(OfferingDetail {
+                id: r.oid, code, season: r.season, year: r.year, faculty,
+            });
         }
     }
 
-    Ok(CourseDetail { id: row.id, code: row.code, name: row.name, description: row.description, kind: row.kind, offerings })
+    Ok(CourseDetail {
+        id: row.id, code: row.code, name: row.name,
+        description: row.description.unwrap_or_default(),
+        kind: row.kind, overall: row.overall, offerings,
+    })
 }

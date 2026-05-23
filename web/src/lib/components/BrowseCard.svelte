@@ -11,7 +11,7 @@
 
 	const href = $derived(
 		kind === 'course'
-			? `/courses/${item.id}`
+			? `/courses/${(item as CourseLean).code}`
 			: kind === 'faculty'
 				? `/faculty/${(item as FacultyLean).slug}`
 				: `/labs/${(item as LabLean).short}`
@@ -41,8 +41,8 @@
 		<div class="text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[var(--fg)]">{c.name}</div>
 		<div class="mt-auto flex items-center gap-2">
 			<div class="flex flex-1 items-center gap-2">
-				<div class="flex-1"><SegBar score={c.overall} size="sm" /></div>
-				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{c.overall.toFixed(1)}</span>
+				<div class="flex-1"><SegBar score={c.overall ?? 0} size="sm" /></div>
+				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(c.overall ?? 0).toFixed(1)}</span>
 			</div>
 		</div>
 
@@ -58,8 +58,8 @@
 		<div class="text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[var(--fg)]">{f.name}</div>
 		<div class="mt-auto flex items-center gap-2">
 			<div class="flex flex-1 items-center gap-2">
-				<div class="flex-1"><SegBar score={f.overall} size="sm" /></div>
-				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{f.overall.toFixed(1)}</span>
+				<div class="flex-1"><SegBar score={f.overall ?? 0} size="sm" /></div>
+				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(f.overall ?? 0).toFixed(1)}</span>
 			</div>
 		</div>
 
@@ -72,8 +72,8 @@
 		<div class="text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[var(--fg)]">{l.name}</div>
 		<div class="mt-auto flex items-center gap-2">
 			<div class="flex flex-1 items-center gap-2">
-				<div class="flex-1"><SegBar score={l.overall} size="sm" /></div>
-				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{l.overall.toFixed(1)}</span>
+				<div class="flex-1"><SegBar score={l.overall ?? 0} size="sm" /></div>
+				<span class="text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(l.overall ?? 0).toFixed(1)}</span>
 			</div>
 		</div>
 	{/if}

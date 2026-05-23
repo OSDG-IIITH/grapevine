@@ -27,19 +27,19 @@
 
 		getFacultyMember(s)
 			.then((f) => {
+				if (!f) { error = 'Faculty member not found.'; return []; }
 				faculty = f;
 				return Promise.all(
 					f.offerings.map((o) =>
 						getOfferingReviews(o.id).then((reviews) =>
-							reviews.map((r) => ({ ...r, offeringcode: `${o.course.code} · ${o.code}` }))
+							(reviews ?? []).map((r) => ({ ...r, offeringcode: `${o.course.code} · ${o.code}` }))
 						)
 					)
 				);
 			})
-			.then((all) => { instructorreviews = all.flat(); })
-			.catch(() => { error = 'Faculty member not found.'; });
+			.then((all) => { if (all) instructorreviews = all.flat(); });
 
-		getAdvisorReviews(s).then((r) => (advisorreviews = r));
+		getAdvisorReviews(s).then((r) => { if (r) advisorreviews = r; });
 	});
 
 	const axes = $derived((() => {

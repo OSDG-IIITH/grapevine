@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { currentUser } from '$lib/stores';
+	import { env } from '$env/dynamic/public';
 
 	const nav = [
 		{ id: 'courses', label: 'Courses', href: '/courses' },
@@ -11,6 +13,15 @@
 	function isactive(href: string) {
 		return $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
 	}
+
+	const initials = $derived(
+		$currentUser?.display_name
+			.split(' ')
+			.map((n) => n[0])
+			.slice(0, 2)
+			.join('')
+			.toUpperCase() ?? ''
+	);
 </script>
 
 <header
@@ -56,12 +67,21 @@
 			</span>
 		</button>
 
-		<div
-			class="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-[var(--border-2)] text-[11px] font-medium tracking-[0.04em] text-[var(--fg)]"
-			style="background: linear-gradient(135deg, #2f4a33, #1a221d);"
-			title="Account"
-		>
-			AK
-		</div>
+		{#if $currentUser}
+			<div
+				class="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-[var(--border-2)] text-[11px] font-medium tracking-[0.04em] text-[var(--fg)]"
+				style="background: linear-gradient(135deg, #2f4a33, #1a221d);"
+				title={$currentUser.display_name}
+			>
+				{initials}
+			</div>
+		{:else}
+			<a
+				href="{env.PUBLIC_API_URL}/auth/login"
+				class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[6px] text-[13px] text-[var(--fg-2)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+			>
+				Login
+			</a>
+		{/if}
 	</div>
 </header>

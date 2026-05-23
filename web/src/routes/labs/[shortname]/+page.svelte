@@ -17,9 +17,10 @@
 		if (!s) return;
 		lab = null;
 		error = '';
-		getLab(s)
-			.then((data) => (lab = data))
-			.catch(() => { error = 'Lab not found.'; });
+		getLab(s).then((data) => {
+			if (!data) { error = 'Lab not found.'; return; }
+			lab = data;
+		});
 	});
 </script>
 
@@ -85,8 +86,8 @@
 							<div class="text-[14px] text-[var(--fg)]">{m.name}</div>
 							<div class="mt-[2px] text-[12px] text-[var(--fg-3)]">{m.title}</div>
 						</div>
-						<SegBar score={m.overall} size="sm" />
-						<div class="text-right text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{m.overall.toFixed(1)}</div>
+						<SegBar score={m.overall ?? 0} size="sm" />
+						<div class="text-right text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(m.overall ?? 0).toFixed(1)}</div>
 					</a>
 				{/each}
 			</div>

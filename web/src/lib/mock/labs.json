@@ -1,8 +1,0 @@
-[
-  { "id": "l1", "name": "Center for Visual Information Technology",              "short": "CVIT",  "description": "Computer vision, generative models, and medical imaging", "facultycount": 14, "overall": 4.3 },
-  { "id": "l2", "name": "Language Technologies Research Centre",                 "short": "LTRC",  "description": "Natural language processing, computational linguistics, and information retrieval", "facultycount": 11, "overall": 4.5 },
-  { "id": "l3", "name": "Center for Security, Theory & Algorithmic Research",   "short": "CSTAR", "description": "Cryptography, security, and complexity theory", "facultycount": 8, "overall": 4.0 },
-  { "id": "l4", "name": "Software Engineering Research Center",                  "short": "SERC",  "description": "Programming languages, software analysis, and systems", "facultycount": 9, "overall": 4.3 },
-  { "id": "l5", "name": "Robotics Research Center",                              "short": "RRC",   "description": "Mobile robotics, motion planning, and autonomous navigation", "facultycount": 7, "overall": 4.0 },
-  { "id": "l6", "name": "Signal Processing & Communications Research Center",   "short": "SPCRC", "description": "Communications, audio processing, and biomedical signals", "facultycount": 6, "overall": 3.9 }
-]

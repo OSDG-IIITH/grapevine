@@ -17,7 +17,7 @@
 
 	let { review, axisorder, axislabels, showoffering = false, offeringcode, vote, flagged, onvote, onflag, onclose }: Props = $props();
 
-	const stars = $derived(Math.round(review.overall));
+	const stars = $derived(Math.round(review.overall ?? 0));
 
 	function portal(node: HTMLElement) {
 		document.body.appendChild(node);
@@ -78,7 +78,7 @@
 								<path d="M12 2l2.9 6.3 6.8.7-5.1 4.6 1.4 6.8L12 17l-6 3.4 1.4-6.8L2.3 9l6.8-.7L12 2z" />
 							</svg>
 						{/each}
-						<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{review.overall.toFixed(1)}</span>
+						<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{(review.overall ?? 0).toFixed(1)}</span>
 					</div>
 				</div>
 			</div>

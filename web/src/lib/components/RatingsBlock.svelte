@@ -12,7 +12,7 @@
 
 	let { overall, axes, axisorder, axislabels, reviewcount, bar = 'continuous' }: Props = $props();
 
-	const stars = $derived(Math.round(overall));
+	const stars = $derived(Math.round(overall ?? 0));
 </script>
 
 <div
@@ -31,7 +31,7 @@
 			class="flex items-baseline gap-1 text-[64px] leading-none text-[var(--fg)]"
 			style="font-family: var(--serif); text-shadow: 0 0 28px rgba(127, 165, 131, 0.20);"
 		>
-			{overall.toFixed(1)}<span class="text-[18px] text-[var(--fg-3)]">/5</span>
+			{(overall ?? 0).toFixed(1)}<span class="text-[18px] text-[var(--fg-3)]">/5</span>
 		</div>
 		<div class="mt-[6px] inline-flex gap-[2px] text-[13px] text-[var(--accent)]">
 			{#each [1, 2, 3, 4, 5] as i (i)}

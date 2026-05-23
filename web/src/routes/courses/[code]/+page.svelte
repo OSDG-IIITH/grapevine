@@ -25,8 +25,11 @@
 
 		const decoded = decodeURIComponent(c);
 		Promise.all([getCourse(decoded), getCourseReviews(decoded)])
-			.then(([d, r]) => { course = d; reviews = r; })
-			.catch(() => { error = 'Course not found.'; });
+			.then(([d, r]) => {
+				if (!d) { error = 'Course not found.'; return; }
+				course = d;
+				reviews = r ?? [];
+			});
 	});
 
 	const axes = $derived((() => {
