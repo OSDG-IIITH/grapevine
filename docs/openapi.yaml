@@ -272,7 +272,7 @@ components:
 
     CourseReview:
       type: object
-      required: [id, offering_id, anonymous, difficulty, teaching, grading, content, workload, overall, body, score, created_at]
+      required: [id, offering_id, anonymous, difficulty, teaching, grading, content, workload, overall, body, score, upvotes, downvotes, created_at]
       properties:
         id:
           $ref: '#/components/schemas/Ulid'
@@ -305,6 +305,12 @@ components:
         score:
           type: integer
           description: sum of all votes (upvotes minus downvotes)
+        upvotes:
+          type: integer
+          description: count of upvotes
+        downvotes:
+          type: integer
+          description: count of downvotes
         user_vote:
           type: integer
           nullable: true
@@ -319,7 +325,7 @@ components:
 
     AdvisorReview:
       type: object
-      required: [id, faculty_id, anonymous, research, availability, mentorship, support, workload, overall, body, score, created_at]
+      required: [id, faculty_id, anonymous, research, availability, mentorship, support, workload, overall, body, score, upvotes, downvotes, created_at]
       properties:
         id:
           $ref: '#/components/schemas/Ulid'
@@ -351,6 +357,12 @@ components:
           type: string
         score:
           type: integer
+        upvotes:
+          type: integer
+          description: count of upvotes
+        downvotes:
+          type: integer
+          description: count of downvotes
         user_vote:
           type: integer
           nullable: true

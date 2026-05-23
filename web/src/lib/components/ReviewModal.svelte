@@ -18,6 +18,11 @@
 	let { review, axisorder, axislabels, showoffering = false, offeringcode, vote, flagged, onvote, onflag, onclose }: Props = $props();
 
 	const stars = $derived(Math.round(review.overall ?? 0));
+	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
+	const baseup = $derived(review.upvotes - (initialvote === 1 ? 1 : 0));
+	const basedown = $derived(review.downvotes - (initialvote === -1 ? 1 : 0));
+	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
+	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
 
 	function portal(node: HTMLElement) {
 		document.body.appendChild(node);
@@ -127,7 +132,7 @@
 					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 19V5M5 12l7-7 7 7" />
 					</svg>
-					<span class="min-w-[14px] text-left">{review.score + (vote === 1 ? 1 : 0)}</span>
+					<span class="min-w-[14px] text-left">{shownup}</span>
 				</button>
 				<button
 					type="button"
@@ -139,6 +144,7 @@
 					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 5v14M19 12l-7 7-7-7" />
 					</svg>
+					<span class="min-w-[14px] text-left">{showndown}</span>
 				</button>
 			</div>
 			<button

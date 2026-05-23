@@ -16,6 +16,7 @@ Course Reviews
   POST   /reviews/course/:id/vote        body: { value: 1 or -1 }
   DELETE /reviews/course/:id/vote        remove current user's vote
   POST   /reviews/course/:id/flag        flag review
+  review fields include: score (net), upvotes, downvotes, user_vote
 
 Faculty
   GET  /faculty                          list + search
@@ -28,6 +29,7 @@ Advisor Reviews
   POST   /reviews/advisor/:id/vote       body: { value: 1 or -1 }
   DELETE /reviews/advisor/:id/vote       remove current user's vote
   POST   /reviews/advisor/:id/flag       flag review
+  review fields include: score (net), upvotes, downvotes, user_vote
 
 Labs
   GET  /labs                             list + search

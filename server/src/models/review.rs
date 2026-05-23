@@ -24,6 +24,8 @@ pub struct CourseReview {
     pub overall: f32,
     pub body: String,
     pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
     pub user_vote: Option<i16>,
     pub edited_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
@@ -43,6 +45,8 @@ pub struct AdvisorReview {
     pub overall: f32,
     pub body: String,
     pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
     pub user_vote: Option<i16>,
     pub edited_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
@@ -119,6 +123,8 @@ pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
                   u.display_name,
                   COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM course_reviews cr
            JOIN offerings o ON o.id = cr.offering_id
@@ -140,7 +146,7 @@ pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score,
+            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -154,6 +160,8 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
                   u.display_name,
                   COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM course_reviews cr
            JOIN users u ON u.id = cr.user_id
@@ -174,7 +182,7 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score,
+            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -274,6 +282,8 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
                   ar.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
                   u.display_name,
                   COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM advisor_reviews ar
            JOIN users u ON u.id = ar.user_id
@@ -294,7 +304,7 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         AdvisorReview { id: r.id, faculty_id: r.faculty_id, author, anonymous: r.anonymous,
             research: r.research, availability: r.availability, mentorship: r.mentorship, support: r.support,
-            workload: r.workload, overall, body: r.body, score: r.score,
+            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }

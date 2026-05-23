@@ -76,7 +76,9 @@ export interface CourseReview {
 	overall: number;
 	body: string;
 	score: number;
-	user_vote: 1 | -1 | 0;
+	upvotes: number;
+	downvotes: number;
+	user_vote: 1 | -1 | null;
 	edited_at: string | null;
 	created_at: string;
 }
@@ -93,7 +95,9 @@ export interface AdvisorReview {
 	overall: number;
 	body: string;
 	score: number;
-	user_vote: 1 | -1 | 0;
+	upvotes: number;
+	downvotes: number;
+	user_vote: 1 | -1 | null;
 	edited_at: string | null;
 	created_at: string;
 }

@@ -1,0 +1,546 @@
+{
+  "info": {
+    "_postman_id": "2f1d0ac9-1f60-4f5e-b781-3a4b1d7472a1",
+    "name": "grapevine api",
+    "description": "Fast test collection for Grapevine API. Uses {{base_url}} and shared ids captured from responses.\n\nAuth: CAS login is a redirect flow. Log in via the browser at {{base_url}}/auth/login, then copy the session cookie `id` into Postman (Cookies for {{base_url}}).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "start cas login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "cas callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/callback?ticket=ST-EXAMPLE",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "callback"],
+              "query": [
+                {
+                  "key": "ticket",
+                  "value": "ST-EXAMPLE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "courses",
+      "item": [
+        {
+          "name": "list courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses",
+              "host": ["{{base_url}}"],
+              "path": ["courses"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.environment.set('course_code', json[0].code);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "get course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_code}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const offerings = json && json.offerings;",
+                  "if (Array.isArray(offerings) && offerings.length > 0) {",
+                  "  pm.environment.set('offering_id', offerings[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "list course reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_code}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_code}}", "reviews"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "offerings",
+      "item": [
+        {
+          "name": "list offering reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offerings/{{offering_id}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["offerings", "{{offering_id}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "create course review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"anonymous\": true,\n  \"difficulty\": 3,\n  \"teaching\": 4,\n  \"grading\": 3,\n  \"content\": 4,\n  \"workload\": 3,\n  \"body\": \"solid course with fair grading\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offerings/{{offering_id}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["offerings", "{{offering_id}}", "reviews"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "  pm.environment.set('course_review_id', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "faculty",
+      "item": [
+        {
+          "name": "list faculty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/faculty",
+              "host": ["{{base_url}}"],
+              "path": ["faculty"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.environment.set('faculty_slug', json[0].slug);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "get faculty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/faculty/{{faculty_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["faculty", "{{faculty_slug}}"]
+            }
+          }
+        },
+        {
+          "name": "list advisor reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/faculty/{{faculty_slug}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["faculty", "{{faculty_slug}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "create advisor review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"anonymous\": true,\n  \"research\": 4,\n  \"availability\": 3,\n  \"mentorship\": 4,\n  \"support\": 4,\n  \"workload\": 3,\n  \"body\": \"helpful and responsive overall\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/faculty/{{faculty_slug}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["faculty", "{{faculty_slug}}", "reviews"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "  pm.environment.set('advisor_review_id', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "labs",
+      "item": [
+        {
+          "name": "list labs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/labs",
+              "host": ["{{base_url}}"],
+              "path": ["labs"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.environment.set('lab_shortname', json[0].shortname);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "get lab",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/labs/{{lab_shortname}}",
+              "host": ["{{base_url}}"],
+              "path": ["labs", "{{lab_shortname}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "reviews",
+      "item": [
+        {
+          "name": "edit course review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"updated: clearer expectations\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/course/{{course_review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "course", "{{course_review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "delete course review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/course/{{course_review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "course", "{{course_review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "vote course review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/course/{{course_review_id}}/vote",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "course", "{{course_review_id}}", "vote"]
+            }
+          }
+        },
+        {
+          "name": "unvote course review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/course/{{course_review_id}}/vote",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "course", "{{course_review_id}}", "vote"]
+            }
+          }
+        },
+        {
+          "name": "flag course review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"contains personal info\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/course/{{course_review_id}}/flag",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "course", "{{course_review_id}}", "flag"]
+            }
+          }
+        },
+        {
+          "name": "edit advisor review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"updated: helpful feedback style\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/advisor/{{advisor_review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "advisor", "{{advisor_review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "delete advisor review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/advisor/{{advisor_review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "advisor", "{{advisor_review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "vote advisor review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/advisor/{{advisor_review_id}}/vote",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "advisor", "{{advisor_review_id}}", "vote"]
+            }
+          }
+        },
+        {
+          "name": "unvote advisor review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/advisor/{{advisor_review_id}}/vote",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "advisor", "{{advisor_review_id}}", "vote"]
+            }
+          }
+        },
+        {
+          "name": "flag advisor review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"inappropriate language\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/advisor/{{advisor_review_id}}/flag",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "advisor", "{{advisor_review_id}}", "flag"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "item": [
+        {
+          "name": "list flags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/flags",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "flags"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.environment.set('flag_id', json[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "dismiss flag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/flags/{{flag_id}}/dismiss",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "flags", "{{flag_id}}", "dismiss"]
+            }
+          }
+        },
+        {
+          "name": "delete flagged review",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/flags/{{flag_id}}/delete-review",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "flags", "{{flag_id}}", "delete-review"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
