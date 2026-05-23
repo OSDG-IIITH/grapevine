@@ -1,9 +1,13 @@
 <script lang="ts">
-	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import '../app.css';
+	import Header from '$lib/components/Header.svelte';
 
 	let { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
-{@render children()}
+<div class="relative z-[1] flex min-h-screen flex-col">
+	<Header />
+	<main class="flex-1">
+		{@render children()}
+	</main>
+</div>
