@@ -117,3 +117,16 @@ export const ADVISOR_AXIS_LABELS: Record<string, string> = {
 	support: 'Support',
 	workload: 'Workload'
 };
+
+export interface FlagResponse {
+	id: string;
+	reason: string;
+	created_at: string;
+	review_type: 'course' | 'advisor';
+	review_id: string;
+	review_body: string;
+	reporter: { id: string; display_name: string };
+	course_code?: string;
+	offering_code?: string;
+	faculty_name?: string;
+}
