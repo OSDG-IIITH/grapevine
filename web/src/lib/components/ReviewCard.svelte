@@ -105,10 +105,10 @@
 	</div>
 
 	<!-- excerpt -->
-	<div class="line-clamp-3 text-[13px] leading-[1.55] text-[var(--fg-2)]">{review.body}</div>
+	<div class="line-clamp-3 flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]">{review.body}</div>
 
 	<!-- actions -->
-	<div class="mt-[2px] flex items-center gap-[2px]">
+	<div class="mt-auto flex items-center gap-[2px]">
 		<button
 			type="button"
 			aria-label="Upvote"

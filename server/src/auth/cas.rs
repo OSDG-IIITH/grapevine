@@ -37,17 +37,20 @@ pub async fn callback(
         .map_err(|_| AppError::Internal)?;
 
     let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
+    let display_name = parse_cas_display_name(&xml).unwrap_or_else(|| name_from_cas_id(&cas_id));
     let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
 
     let id = Ulid::new().to_string();
     let row = sqlx::query!(
         r#"
         INSERT INTO users (id, cas_id, display_name)
-        VALUES ($1, $2, $2)
-        ON CONFLICT (cas_id) DO UPDATE SET cas_id = EXCLUDED.cas_id
+        VALUES ($1, $2, $3)
+        ON CONFLICT (cas_id) DO UPDATE
+            SET cas_id = EXCLUDED.cas_id,
+                display_name = EXCLUDED.display_name
         RETURNING id, is_admin
         "#,
-        id, cas_id
+        id, cas_id, display_name
     )
     .fetch_one(&s.pool)
     .await?;
@@ -78,6 +81,62 @@ fn parse_cas_user(xml: &str) -> Option<String> {
     let start = xml.find("<cas:user>")?;
     let end = xml.find("</cas:user>")?;
     Some(xml[start + 10..end].trim().to_string())
+}
+
+fn parse_cas_display_name(xml: &str) -> Option<String> {
+    parse_cas_tag(xml, "displayName")
+        .or_else(|| parse_cas_tag(xml, "displayname"))
+        .or_else(|| parse_cas_tag(xml, "cn"))
+        .or_else(|| parse_cas_tag(xml, "fullName"))
+        .or_else(|| {
+            let given = parse_cas_tag(xml, "givenName").or_else(|| parse_cas_tag(xml, "firstname"));
+            let family = parse_cas_tag(xml, "sn").or_else(|| parse_cas_tag(xml, "lastname"));
+            match (given, family) {
+                (Some(g), Some(f)) => Some(format!("{} {}", g, f)),
+                (Some(g), None) => Some(g),
+                (None, Some(f)) => Some(f),
+                _ => None,
+            }
+        })
+}
+
+fn parse_cas_tag(xml: &str, tag: &str) -> Option<String> {
+    parse_tag(xml, &format!("cas:{}", tag)).or_else(|| parse_tag(xml, tag))
+}
+
+fn parse_tag(xml: &str, tag: &str) -> Option<String> {
+    let open = format!("<{}", tag);
+    let start = xml.find(&open)?;
+    let after_open = xml[start..].find('>')? + start;
+    let close = format!("</{}>", tag);
+    let end = xml[after_open + 1..].find(&close)? + after_open + 1;
+    Some(xml[after_open + 1..end].trim().to_string())
+}
+
+fn name_from_cas_id(cas_id: &str) -> String {
+    let local = cas_id.split('@').next().unwrap_or(cas_id);
+    let mut parts = Vec::new();
+    for part in local.split(|c| c == '.' || c == '_' || c == '-') {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        parts.push(titlecase_word(part));
+    }
+    if parts.is_empty() {
+        cas_id.to_string()
+    } else {
+        parts.join(" ")
+    }
+}
+
+fn titlecase_word(word: &str) -> String {
+    let mut chars = word.chars();
+    let Some(first) = chars.next() else { return String::new(); };
+    let mut out = String::new();
+    out.extend(first.to_uppercase());
+    out.push_str(&chars.as_str().to_lowercase());
+    out
 }
 
 fn urlenc(s: &str) -> String {
