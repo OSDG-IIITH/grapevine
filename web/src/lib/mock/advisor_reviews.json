@@ -1,0 +1,162 @@
+{
+  "karthik-vaidhyanathan": [
+    {
+      "id": "ar-f1-1", "author": { "id": "u_a1", "display_name": "Sneha R." }, "anonymous": false,
+      "research": 5, "availability": 5, "mentorship": 5, "support": 4, "workload": 4, "overall": 4.6,
+      "body": "Joined SERC for an honours thesis on self-adaptive ML systems and Karthik sir was everything I had hoped for. Weekly 1:1s without fail, never cancelled. He pushed me to submit a position paper to an ICSE workshop in my first semester — I wasn't ready but the process of trying taught me more than a year of coursework. Reads drafts carefully and gives targeted feedback rather than vague notes. Very hands-off on day-to-day execution but clear on direction and expectations.",
+      "score": 14, "user_vote": 0, "edited_at": null, "created_at": "2024-09-15T10:00:00Z"
+    },
+    {
+      "id": "ar-f1-2", "author": null, "anonymous": true,
+      "research": 4, "availability": 5, "mentorship": 5, "support": 5, "workload": 3, "overall": 4.4,
+      "body": "Best part: responds to messages within a few hours, even on weekends, but never expects the same from students. He is very explicit about this — early on he said 'I work weekends, you should not feel obligated to'. Workload is reasonable if you communicate scope upfront and don't let ambiguity pile up. Research taste is excellent — he steered me away from an incremental idea toward something genuinely interesting.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2024-03-20T14:00:00Z"
+    },
+    {
+      "id": "ar-f1-3", "author": { "id": "u_a3", "display_name": "Devansh P." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Strong research taste and willing to say 'this problem isn't interesting enough' clearly and early. Be ready to defend your framing — he'll push back on the problem statement before he lets you build solutions. Once you have a direction he agrees with, support is excellent. He connected me with collaborators at IITB which led to a co-first-authorship. Workload is proportional to what you commit to — no surprise deadlines.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-01-10T09:00:00Z"
+    }
+  ],
+  "manish-shrivastava": [
+    {
+      "id": "ar-f2-1", "author": { "id": "u_b1", "display_name": "Priya S." }, "anonymous": false,
+      "research": 5, "availability": 5, "mentorship": 5, "support": 5, "workload": 4, "overall": 4.8,
+      "body": "Working with Manish sir on my thesis on code-switching in social media text was remarkable. He has deep expertise in Indian language NLP and could immediately identify which papers were foundational vs. derivative. Meeting frequency is excellent — bi-weekly at minimum, more when a deadline was approaching. He genuinely cares whether students get papers out at good venues, not just any venues.",
+      "score": 18, "user_vote": 0, "edited_at": null, "created_at": "2024-10-05T11:00:00Z"
+    },
+    {
+      "id": "ar-f2-2", "author": null, "anonymous": true,
+      "research": 5, "availability": 4, "mentorship": 5, "support": 5, "workload": 4, "overall": 4.6,
+      "body": "The breadth of Manish sir's reading is outstanding — he suggested relevant papers I would never have found through standard searches. He has a strong network in the ACL and EMNLP communities which translated to useful reviewer feedback on my submissions. One thing to note: he runs a large lab and managing your own schedule matters. Students who are self-directed thrive; those who need frequent check-ins should set up a recurring slot explicitly.",
+      "score": 12, "user_vote": 0, "edited_at": null, "created_at": "2024-05-18T15:00:00Z"
+    },
+    {
+      "id": "ar-f2-3", "author": { "id": "u_b3", "display_name": "Arjun T." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "My experience was very positive overall. He gave me genuine ownership of my research direction from month two, which felt both exciting and daunting. The support when things weren't working was strong — he didn't pressure me to produce results on a fixed timeline. His feedback on writing is excellent and he's willing to iterate many times on a paper draft before submission.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2023-12-01T10:00:00Z"
+    }
+  ],
+  "cv-jawahar": [
+    {
+      "id": "ar-f3-1", "author": { "id": "u_c1", "display_name": "Rahul M." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Jawahar sir's advice is worth waiting for — he's busy and availability is limited, but when you do get his attention it is very high quality. He has strong opinions about what constitutes interesting research and won't let you pursue something incremental. My PhD is in document analysis and the lab infrastructure — datasets, GPU clusters, connections to industry — is unmatched. You need to be independently motivated because he is not a hand-holding advisor.",
+      "score": 16, "user_vote": 0, "edited_at": null, "created_at": "2024-11-02T10:00:00Z"
+    },
+    {
+      "id": "ar-f3-2", "author": null, "anonymous": true,
+      "research": 5, "availability": 3, "mentorship": 5, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Three years in, I appreciate CVIT's infrastructure more than I did at the start — access to large compute, real annotated datasets, and visiting researchers is hard to replicate elsewhere. Jawahar sir's feedback on results is sharp: he focuses on whether the story is convincing, not just whether numbers are high. Availability is the honest weakness — try to get time at lab reading groups, that's often the most productive interaction.",
+      "score": 10, "user_vote": 0, "edited_at": null, "created_at": "2024-07-14T13:00:00Z"
+    },
+    {
+      "id": "ar-f3-3", "author": { "id": "u_c3", "display_name": "Supriya K." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 5, "workload": 5, "overall": 4.6,
+      "body": "My experience at CVIT under Jawahar sir has been one of steep learning, good pressure, and eventual satisfaction. He does not micromanage; if that sounds like your preferred style this is the right fit. The lab culture of publishing at top venues means mediocre results won't get support for submission, which is both a constraint and a quality filter. He was instrumental in getting me an internship at a top research lab which changed my trajectory.",
+      "score": 13, "user_vote": 0, "edited_at": null, "created_at": "2024-02-28T09:30:00Z"
+    }
+  ],
+  "avinash-sharma": [
+    {
+      "id": "ar-f4-1", "author": null, "anonymous": true,
+      "research": 4, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.0,
+      "body": "Avinash sir is a hands-on advisor for 3D vision work — he stays current with the latest papers and our weekly meetings involve detailed discussion of both experiments and related work. Availability is reasonable for a junior faculty member running a growing lab. Workload expectations are high but predictable; no surprises. He is direct about what results are publishable and what still needs work.",
+      "score": 7, "user_vote": 0, "edited_at": null, "created_at": "2024-08-20T11:00:00Z"
+    },
+    {
+      "id": "ar-f4-2", "author": { "id": "u_d2", "display_name": "Nidhi P." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Working on human shape reconstruction under Avinash sir has been engaging. His research taste in 3D computer vision is excellent and he has a clear sense for which venues are worth targeting. He takes mentorship seriously — spent multiple sessions helping me understand reviewer feedback from a rejection, which improved both the paper and my understanding of the field's norms.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2024-04-10T14:00:00Z"
+    },
+    {
+      "id": "ar-f4-3", "author": null, "anonymous": true,
+      "research": 4, "availability": 4, "mentorship": 5, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Avinash sir is accessible and willing to debate research ideas in detail, which I appreciate — he doesn't just direct, he engages. The lab is at an early growth stage so you do get more individual attention than in the larger CVIT labs. He could improve on support for non-technical career development, but for research mentorship it is strong.",
+      "score": 6, "user_vote": 0, "edited_at": null, "created_at": "2023-11-15T10:00:00Z"
+    }
+  ],
+  "vasudeva-varma": [
+    {
+      "id": "ar-f5-1", "author": { "id": "u_e1", "display_name": "Sindhu R." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Vasudeva sir runs a large group and expects students to have initiative. He is very well-connected in the IR and NLP community, and that translated to paper introductions and internship recommendations I wouldn't have gotten otherwise. Research taste is refined — he knows what problems matter and why. Availability requires effort: you need to schedule explicitly and follow through. He's not going to track you down.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2024-09-22T10:00:00Z"
+    },
+    {
+      "id": "ar-f5-2", "author": null, "anonymous": true,
+      "research": 4, "availability": 4, "mentorship": 5, "support": 5, "workload": 4, "overall": 4.4,
+      "body": "The depth of Vasudeva sir's network in industry and academia is a tangible research asset. He has good judgment about which problems are interesting to the community vs. locally interesting, which helped me avoid spending six months on a dead-end direction. Feedback on writing is excellent and he engages seriously with student ideas rather than just providing top-down direction.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-03-05T15:00:00Z"
+    },
+    {
+      "id": "ar-f5-3", "author": { "id": "u_e3", "display_name": "Varun S." }, "anonymous": false,
+      "research": 5, "availability": 5, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.4,
+      "body": "My experience has been very positive. He is realistic about the academic job market and research pace, which some students find deflating but I found genuinely helpful for calibrating expectations. His involvement in SIGIR, CIKM, and ACL communities means reviewer pools and submission deadlines are very clearly understood. Good lab culture and supportive peers.",
+      "score": 10, "user_vote": 0, "edited_at": null, "created_at": "2023-10-18T11:00:00Z"
+    }
+  ],
+  "madhava-krishna": [
+    {
+      "id": "ar-f6-1", "author": { "id": "u_f1", "display_name": "Tanvi A." }, "anonymous": false,
+      "research": 5, "availability": 3, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.0,
+      "body": "Madhava sir is a leading figure in Indian robotics and the research ambition at RRC shows. For students doing outdoor mobile robotics the infrastructure is exceptional — actual platforms, outdoor test sites, and the whole stack. Availability is limited partly due to his leadership responsibilities, but he makes up for it by being fully engaged in lab meetings and design reviews. Expect a high workload on systems projects.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2024-10-10T10:00:00Z"
+    },
+    {
+      "id": "ar-f6-2", "author": null, "anonymous": true,
+      "research": 5, "availability": 4, "mentorship": 4, "support": 4, "workload": 5, "overall": 4.4,
+      "body": "RRC is well-funded and the resources for robotics work are excellent. Madhava sir has a very high bar for publication — he won't submit work that doesn't have a clear technical contribution and strong evaluation. That means you may spend longer on a paper, but the end result holds up to scrutiny. I found his directness about what wasn't working to be genuinely useful even when it was hard to hear.",
+      "score": 7, "user_vote": 0, "edited_at": null, "created_at": "2024-05-28T13:00:00Z"
+    },
+    {
+      "id": "ar-f6-3", "author": { "id": "u_f3", "display_name": "Nikhil D." }, "anonymous": false,
+      "research": 5, "availability": 3, "mentorship": 4, "support": 4, "workload": 5, "overall": 4.2,
+      "body": "Strong research instincts and very deep technical knowledge of robotics, especially planning and perception. He is not always available for unplanned questions — you need to be patient and use lab meetings effectively. Workload is real: fieldwork, long training runs, and debugging on hardware takes time. If you are excited about autonomous vehicles or field robotics this is the best lab in India to do it.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2024-01-22T10:00:00Z"
+    }
+  ],
+  "suresh-purini": [
+    {
+      "id": "ar-f7-1", "author": { "id": "u_g1", "display_name": "Rohan M." }, "anonymous": false,
+      "research": 4, "availability": 4, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.0,
+      "body": "Suresh sir has a very clean research taste in compilers and parallel systems — he focuses on problems where the solution can be evaluated rigorously. Our weekly meetings are productive and he gives detailed feedback on experimental setup and analysis. He thinks through problems clearly and the way he reasons about them is easy to observe. Workload is high but he doesn't add scope mid-project without discussion.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-09-05T10:00:00Z"
+    },
+    {
+      "id": "ar-f7-2", "author": null, "anonymous": true,
+      "research": 4, "availability": 5, "mentorship": 4, "support": 4, "workload": 4, "overall": 4.2,
+      "body": "Very available and responds quickly. His expertise in parallelism and program analysis is deep and he brings a practical angle — asks 'what system does this run on, what benchmark should we use' early rather than only worrying about theory. Good support network in the lab with older PhD students who are generous with their time.",
+      "score": 6, "user_vote": 0, "edited_at": null, "created_at": "2024-04-15T14:30:00Z"
+    },
+    {
+      "id": "ar-f7-3", "author": { "id": "u_g3", "display_name": "Ananya K." }, "anonymous": false,
+      "research": 5, "availability": 4, "mentorship": 5, "support": 4, "workload": 4, "overall": 4.4,
+      "body": "I did my honours project under Suresh sir and it was one of the better academic decisions of my undergrad. He has high standards for evaluation methodology which initially felt restrictive but made the eventual paper much stronger. He connected me with collaborators at IIT Madras which led to a journal extension. Straight-talking about results — if your numbers don't hold up he will say so immediately.",
+      "score": 12, "user_vote": 0, "edited_at": null, "created_at": "2024-01-08T09:00:00Z"
+    }
+  ],
+  "kavita-vemuri": [
+    {
+      "id": "ar-f8-1", "author": { "id": "u_h1", "display_name": "Siddharth V." }, "anonymous": false,
+      "research": 5, "availability": 5, "mentorship": 5, "support": 5, "workload": 4, "overall": 4.8,
+      "body": "Kavita ma'am is the best advisor I have had in any academic setting. She is deeply invested in student growth beyond research — proactively connected me with industry researchers, provided career advice, and gave me genuine leadership responsibilities in the lab. The research on neuroaesthetics is genuinely interdisciplinary and requires reading across cognitive science, neuroscience, and HCI. She models careful thinking across all three.",
+      "score": 19, "user_vote": 0, "edited_at": null, "created_at": "2024-10-20T11:00:00Z"
+    },
+    {
+      "id": "ar-f8-2", "author": null, "anonymous": true,
+      "research": 4, "availability": 5, "mentorship": 4, "support": 4, "workload": 3, "overall": 4.0,
+      "body": "Workload expectations are very reasonable — she distinguishes between research work and busywork and actively protects student time from the latter. Availability is excellent, meetings are never rushed. The only note is that the lab is smaller and less infrastructure-heavy than the large CS labs, so if you need large-scale compute you may need to arrange it independently or collaborate with CVIT.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-06-12T14:00:00Z"
+    },
+    {
+      "id": "ar-f8-3", "author": { "id": "u_h3", "display_name": "Meera J." }, "anonymous": false,
+      "research": 4, "availability": 5, "mentorship": 5, "support": 5, "workload": 4, "overall": 4.6,
+      "body": "My experience has been outstanding. Kavita ma'am has a gift for connecting ideas across fields — she regularly introduces cognitive science literature that reframes how I think about HCI problems I am working on. The mentorship is holistic: she thinks about the student as a researcher and a person. She wrote a very strong recommendation letter for my PhD applications abroad and was very thoughtful in tailoring it.",
+      "score": 15, "user_vote": 0, "edited_at": null, "created_at": "2024-02-14T10:00:00Z"
+    }
+  ]
+}

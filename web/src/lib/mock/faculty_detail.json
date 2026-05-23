@@ -1,0 +1,91 @@
+{
+  "karthik-vaidhyanathan": {
+    "id": "f1", "name": "Karthik Vaidhyanathan", "slug": "karthik-vaidhyanathan",
+    "title": "Assistant Professor", "overall": 4.4,
+    "bio": "Software architecture, self-adaptive systems, and ML for software engineering. Teaches operating systems and software engineering at IIIT Hyderabad.",
+    "lab": { "id": "l4", "name": "Software Engineering Research Center", "short": "SERC" },
+    "offerings": [
+      { "id": "cs3301-m24", "code": "M24", "season": "Monsoon", "year": 2024, "course": { "id": "cs3301", "code": "CS3.301", "name": "Operating Systems" } },
+      { "id": "cs3301-s24", "code": "S24", "season": "Spring",  "year": 2024, "course": { "id": "cs3301", "code": "CS3.301", "name": "Operating Systems" } },
+      { "id": "cs1201-m24", "code": "M24", "season": "Monsoon", "year": 2024, "course": { "id": "cs1201", "code": "CS1.201", "name": "Data Structures" } },
+      { "id": "cs1201-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "cs1201", "code": "CS1.201", "name": "Data Structures" } },
+      { "id": "cs6301-m22", "code": "M22", "season": "Monsoon", "year": 2022, "course": { "id": "cs6301", "code": "CS6.301", "name": "Distributed Systems" } }
+    ]
+  },
+  "manish-shrivastava": {
+    "id": "f2", "name": "Manish Shrivastava", "slug": "manish-shrivastava",
+    "title": "Associate Professor", "overall": 4.6,
+    "bio": "NLP, machine translation, and low-resource Indian languages. Director of the Language Technologies Research Centre.",
+    "lab": { "id": "l2", "name": "Language Technologies Research Centre", "short": "LTRC" },
+    "offerings": [
+      { "id": "cs7401-m24", "code": "M24", "season": "Monsoon", "year": 2024, "course": { "id": "cs7401", "code": "CS7.401", "name": "Introduction to NLP" } },
+      { "id": "cs7401-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "cs7401", "code": "CS7.401", "name": "Introduction to NLP" } },
+      { "id": "cs7401-m22", "code": "M22", "season": "Monsoon", "year": 2022, "course": { "id": "cs7401", "code": "CS7.401", "name": "Introduction to NLP" } }
+    ]
+  },
+  "cv-jawahar": {
+    "id": "f3", "name": "C.V. Jawahar", "slug": "cv-jawahar",
+    "title": "Professor", "overall": 4.2,
+    "bio": "Computer vision, document image analysis, and multimodal learning. Leads CVIT and has supervised over 30 doctoral students.",
+    "lab": { "id": "l1", "name": "Center for Visual Information Technology", "short": "CVIT" },
+    "offerings": [
+      { "id": "cs5604-s25", "code": "S25", "season": "Spring", "year": 2025, "course": { "id": "cs5604", "code": "CS5.604", "name": "Computer Vision" } },
+      { "id": "cs5604-s24", "code": "S24", "season": "Spring", "year": 2024, "course": { "id": "cs5604", "code": "CS5.604", "name": "Computer Vision" } },
+      { "id": "cs5604-s23", "code": "S23", "season": "Spring", "year": 2023, "course": { "id": "cs5604", "code": "CS5.604", "name": "Computer Vision" } }
+    ]
+  },
+  "avinash-sharma": {
+    "id": "f4", "name": "Avinash Sharma", "slug": "avinash-sharma",
+    "title": "Associate Professor", "overall": 4.1,
+    "bio": "3D vision, geometry processing, and human shape reconstruction. Focuses on learning-based methods for 3D scene understanding.",
+    "lab": { "id": "l1", "name": "Center for Visual Information Technology", "short": "CVIT" },
+    "offerings": [
+      { "id": "cs5604-s24", "code": "S24", "season": "Spring", "year": 2024, "course": { "id": "cs5604", "code": "CS5.604", "name": "Computer Vision" } }
+    ]
+  },
+  "vasudeva-varma": {
+    "id": "f5", "name": "Vasudeva Varma", "slug": "vasudeva-varma",
+    "title": "Professor", "overall": 4.3,
+    "bio": "Information retrieval, text summarization, and social computing. His group works on large-scale text analytics and NLP for Indian languages.",
+    "lab": { "id": "l2", "name": "Language Technologies Research Centre", "short": "LTRC" },
+    "offerings": [
+      { "id": "cs7401-m22", "code": "M22", "season": "Monsoon", "year": 2022, "course": { "id": "cs7401", "code": "CS7.401", "name": "Introduction to NLP" } }
+    ]
+  },
+  "madhava-krishna": {
+    "id": "f6", "name": "Madhava Krishna", "slug": "madhava-krishna",
+    "title": "Professor", "overall": 4.0,
+    "bio": "Mobile robotics, autonomous driving, and motion planning. Leads the Robotics Research Center and has pioneered outdoor robot navigation in unstructured terrain.",
+    "lab": { "id": "l5", "name": "Robotics Research Center", "short": "RRC" },
+    "offerings": []
+  },
+  "suresh-purini": {
+    "id": "f7", "name": "Suresh Purini", "slug": "suresh-purini",
+    "title": "Associate Professor", "overall": 4.2,
+    "bio": "Compilers, parallel computing, and high-performance systems. Known for board-based lectures that reward careful note-taking.",
+    "lab": { "id": "l4", "name": "Software Engineering Research Center", "short": "SERC" },
+    "offerings": [
+      { "id": "cs3301-s24", "code": "S24", "season": "Spring",  "year": 2024, "course": { "id": "cs3301", "code": "CS3.301", "name": "Operating Systems" } },
+      { "id": "cs3301-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "cs3301", "code": "CS3.301", "name": "Operating Systems" } },
+      { "id": "cs1201-s24", "code": "S24", "season": "Spring",  "year": 2024, "course": { "id": "cs1201", "code": "CS1.201", "name": "Data Structures" } },
+      { "id": "cs1201-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "cs1201", "code": "CS1.201", "name": "Data Structures" } },
+      { "id": "cs6301-m24", "code": "M24", "season": "Monsoon", "year": 2024, "course": { "id": "cs6301", "code": "CS6.301", "name": "Distributed Systems" } },
+      { "id": "cs6301-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "cs6301", "code": "CS6.301", "name": "Distributed Systems" } },
+      { "id": "cs6301-m22", "code": "M22", "season": "Monsoon", "year": 2022, "course": { "id": "cs6301", "code": "CS6.301", "name": "Distributed Systems" } },
+      { "id": "cs4301-s25", "code": "S25", "season": "Spring",  "year": 2025, "course": { "id": "cs4301", "code": "CS4.301", "name": "Compilers" } },
+      { "id": "cs4301-s24", "code": "S24", "season": "Spring",  "year": 2024, "course": { "id": "cs4301", "code": "CS4.301", "name": "Compilers" } },
+      { "id": "cs4301-s23", "code": "S23", "season": "Spring",  "year": 2023, "course": { "id": "cs4301", "code": "CS4.301", "name": "Compilers" } }
+    ]
+  },
+  "kavita-vemuri": {
+    "id": "f8", "name": "Kavita Vemuri", "slug": "kavita-vemuri",
+    "title": "Associate Professor", "overall": 4.5,
+    "bio": "Cognitive science, neuroaesthetics, and human-computer interaction. Runs an interdisciplinary lab exploring the relationship between perception, emotion, and design.",
+    "lab": null,
+    "offerings": [
+      { "id": "op3102-m24", "code": "M24", "season": "Monsoon", "year": 2024, "course": { "id": "op3102", "code": "OP3.102", "name": "Cognitive Science" } },
+      { "id": "op3102-s24", "code": "S24", "season": "Spring",  "year": 2024, "course": { "id": "op3102", "code": "OP3.102", "name": "Cognitive Science" } },
+      { "id": "op3102-m23", "code": "M23", "season": "Monsoon", "year": 2023, "course": { "id": "op3102", "code": "OP3.102", "name": "Cognitive Science" } }
+    ]
+  }
+}

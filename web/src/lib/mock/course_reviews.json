@@ -1,0 +1,388 @@
+{
+  "CS3.301": [
+    {
+      "id": "r-cs3301-1", "offering_id": "cs3301-m24",
+      "author": {"id": "u1", "display_name": "Ananya K."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 3, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "Probably the single most demanding course in the CSE core, and worth every hour. The xv6 projects start gentle but project 4 (virtual memory) will eat your weekend if you don't start early. Vaidhyanathan sir runs office hours generously and the TAs are excellent. Grading on the final project felt strict — partial credit was minimal — but the lectures are tightly scripted and the slides are usable as standalone notes.",
+      "score": 28, "user_vote": 0, "edited_at": null, "created_at": "2024-11-15T10:00:00Z"
+    },
+    {
+      "id": "r-cs3301-2", "offering_id": "cs3301-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 5, "teaching": 4, "grading": 3, "content": 5, "workload": 5, "overall": 4.4,
+      "body": "If you have not written C in a while, brush up before week 1. The course assumes serious comfort with pointers and gdb. The file system project at the end was the highlight of my semester — got to design layout, journaling, and crash recovery from scratch.",
+      "score": 14, "user_vote": 0, "edited_at": null, "created_at": "2024-10-28T14:30:00Z"
+    },
+    {
+      "id": "r-cs3301-3", "offering_id": "cs3301-s24",
+      "author": {"id": "u2", "display_name": "Rohan M."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 4, "workload": 4, "overall": 4.2,
+      "body": "Purini sir's lectures are the clearest exposition of OS concepts I've seen. He works through case studies on the board rather than slides, which takes some getting used to but rewards careful note-taking. Workload is heavy but predictable — five projects, each two weeks.",
+      "score": 19, "user_vote": 0, "edited_at": null, "created_at": "2024-05-10T09:00:00Z"
+    },
+    {
+      "id": "r-cs3301-4", "offering_id": "cs3301-s24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 3, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "Good course but the autograder for the scheduler project was finicky — multiple students lost marks to timing tolerances that weren't documented. Worth raising with the instructors if it happens again.",
+      "score": 7, "user_vote": 0, "edited_at": null, "created_at": "2024-04-20T16:00:00Z"
+    },
+    {
+      "id": "r-cs3301-5", "offering_id": "cs3301-m23",
+      "author": {"id": "u3", "display_name": "Priya S."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "Take this even if it's not in your stream. The mental model you build for how a kernel actually boots, schedules, and protects memory is hard to acquire any other way. Pair with a friend for projects — debugging concurrency bugs alone at 3am is rough.",
+      "score": 22, "user_vote": 0, "edited_at": null, "created_at": "2023-12-01T11:00:00Z"
+    },
+    {
+      "id": "r-cs3301-6", "offering_id": "cs3301-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "The reading list (mostly OSTEP and selected papers) is genuinely useful long after the course ends. Don't skip the optional papers on Linux schedulers — they came up in the final exam.",
+      "score": 5, "user_vote": 0, "edited_at": null, "created_at": "2023-11-18T08:00:00Z"
+    }
+  ],
+  "CS7.401": [
+    {
+      "id": "r-cs7401-1", "offering_id": "cs7401-m24",
+      "author": {"id": "u4", "display_name": "Devika R."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 5, "workload": 4, "overall": 4.4,
+      "body": "Best elective I've taken at IIIT-H. Shrivastava sir covers both classical and neural NLP without rushing either. The weekly PyTorch assignments build intuition incrementally — you don't feel lost unless you skip sessions. Final project is open-ended, which is both exciting and stressful.",
+      "score": 31, "user_vote": 0, "edited_at": null, "created_at": "2024-12-05T10:00:00Z"
+    },
+    {
+      "id": "r-cs7401-2", "offering_id": "cs7401-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 3, "teaching": 5, "grading": 4, "content": 5, "workload": 3, "overall": 4.0,
+      "body": "Compared to most ML courses here, this one actually explains the math behind transformers clearly. Assignments are graded fairly and feedback is quick. Highly recommend if you're even mildly interested in language models.",
+      "score": 18, "user_vote": 0, "edited_at": null, "created_at": "2024-11-22T13:00:00Z"
+    },
+    {
+      "id": "r-cs7401-3", "offering_id": "cs7401-m23",
+      "author": {"id": "u5", "display_name": "Arjun P."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 5, "content": 5, "workload": 4, "overall": 4.6,
+      "body": "Took this in my 7th semester and wish I had taken it earlier. The section on low-resource languages and transliteration is something you won't find in online courses. Grading is generous if your approach is reasonable.",
+      "score": 24, "user_vote": 0, "edited_at": null, "created_at": "2023-12-08T09:00:00Z"
+    },
+    {
+      "id": "r-cs7401-4", "offering_id": "cs7401-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 4.0,
+      "body": "The paper reading components are genuinely challenging but rewarding. One suggestion: the project timeline is tight around midsem — start early and scope down aggressively.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2023-11-30T15:00:00Z"
+    },
+    {
+      "id": "r-cs7401-5", "offering_id": "cs7401-m22",
+      "author": {"id": "u6", "display_name": "Nalini T."}, "anonymous": false,
+      "difficulty": 3, "teaching": 5, "grading": 4, "content": 5, "workload": 3, "overall": 4.0,
+      "body": "One of the few courses where the professor's research directly informs the curriculum. The section on morphologically rich languages is unique to this class. Prerequisites are light — intro ML is sufficient.",
+      "score": 15, "user_vote": 0, "edited_at": null, "created_at": "2022-12-10T12:00:00Z"
+    }
+  ],
+  "CS5.604": [
+    {
+      "id": "r-cs5604-1", "offering_id": "cs5604-s25",
+      "author": {"id": "u7", "display_name": "Siddharth K."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "Jawahar sir brings decades of actual CV research into the lectures — you get a perspective that no textbook can replicate. The CNN project in week 8 is where it all clicks. Start assignments the day they're released, not the day before deadline.",
+      "score": 19, "user_vote": 0, "edited_at": null, "created_at": "2025-05-12T10:00:00Z"
+    },
+    {
+      "id": "r-cs5604-2", "offering_id": "cs5604-s25",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 5, "grading": 3, "content": 4, "workload": 4, "overall": 4.0,
+      "body": "The classical part (Harris corners, SIFT, epipolar geometry) is taught rigorously and tests well. The grading rubric on the deep learning project was unclear — some excellent work got lower marks than expected.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2025-04-28T14:00:00Z"
+    },
+    {
+      "id": "r-cs5604-3", "offering_id": "cs5604-s24",
+      "author": {"id": "u8", "display_name": "Meera V."}, "anonymous": false,
+      "difficulty": 5, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 4.2,
+      "body": "Avinash sir's lectures on 3D geometry are exceptional. The stereo reconstruction project was the most satisfying assignment of my undergrad. Expect to spend serious time debugging matrix operations.",
+      "score": 16, "user_vote": 0, "edited_at": null, "created_at": "2024-05-20T11:00:00Z"
+    },
+    {
+      "id": "r-cs5604-4", "offering_id": "cs5604-s24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 4.0,
+      "body": "Good balance of theory and implementation. PyTorch experience will save you hours. The final project timeline was reasonable and the TAs were responsive on the course channel.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-05-10T09:00:00Z"
+    },
+    {
+      "id": "r-cs5604-5", "offering_id": "cs5604-s23",
+      "author": {"id": "u9", "display_name": "Harsh B."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "The breadth is impressive — from image formation to segmentation to deep learning in one semester. Exams are fair and based directly on lecture material. The document image analysis component is especially unique.",
+      "score": 13, "user_vote": 0, "edited_at": null, "created_at": "2023-05-15T08:00:00Z"
+    }
+  ],
+  "CS1.201": [
+    {
+      "id": "r-cs1201-1", "offering_id": "cs1201-m24",
+      "author": {"id": "u10", "display_name": "Preethi R."}, "anonymous": false,
+      "difficulty": 3, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "Solid foundation course. The C++ implementation requirement forces you to understand what's happening under the hood. Labs are well-structured and the TAs are helpful. Nothing groundbreaking but a necessary building block.",
+      "score": 12, "user_vote": 0, "edited_at": null, "created_at": "2024-11-28T10:00:00Z"
+    },
+    {
+      "id": "r-cs1201-2", "offering_id": "cs1201-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 3, "grading": 4, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "Some lecture sections felt rushed — red-black trees and AVL trees were covered in too little time. The assignments compensate though; implementing a self-balancing BST from scratch forces real understanding.",
+      "score": 6, "user_vote": 0, "edited_at": null, "created_at": "2024-11-15T13:00:00Z"
+    },
+    {
+      "id": "r-cs1201-3", "offering_id": "cs1201-s24",
+      "author": {"id": "u11", "display_name": "Kiran A."}, "anonymous": false,
+      "difficulty": 3, "teaching": 5, "grading": 4, "content": 4, "workload": 3, "overall": 3.8,
+      "body": "Purini sir makes even the driest topics engaging. The graph algorithms section was handled with elegance I hadn't seen before. Pacing is good and office hours are never crowded.",
+      "score": 17, "user_vote": 0, "edited_at": null, "created_at": "2024-05-05T14:00:00Z"
+    },
+    {
+      "id": "r-cs1201-4", "offering_id": "cs1201-s24",
+      "author": null, "anonymous": true,
+      "difficulty": 3, "teaching": 4, "grading": 5, "content": 4, "workload": 3, "overall": 3.8,
+      "body": "Grading was transparent and generous — partial credit was actually given, unlike some other core courses. Problem sets are from standard texts (Cormen) which makes self-study easy.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2024-04-18T11:00:00Z"
+    },
+    {
+      "id": "r-cs1201-5", "offering_id": "cs1201-m23",
+      "author": {"id": "u12", "display_name": "Vivek N."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 4.0,
+      "body": "The hash table collision resolution section was the most practical part. Both professors brought different problem-solving styles which actually enriched the course. Recommend pairing with CLRS for deeper understanding.",
+      "score": 10, "user_vote": 0, "edited_at": null, "created_at": "2023-12-02T09:00:00Z"
+    }
+  ],
+  "EC2.202": [
+    {
+      "id": "r-ec2202-1", "offering_id": "ec2202-m24",
+      "author": {"id": "u13", "display_name": "Tanvi S."}, "anonymous": false,
+      "difficulty": 4, "teaching": 3, "grading": 3, "content": 4, "workload": 5, "overall": 3.8,
+      "body": "The hardware labs are genuinely fun but the grading is brutal — one wiring mistake and you lose the whole lab mark. Theory lectures are dense and assume prior ECE background that CSE students often lack.",
+      "score": 14, "user_vote": 0, "edited_at": null, "created_at": "2024-11-20T10:00:00Z"
+    },
+    {
+      "id": "r-ec2202-2", "offering_id": "ec2202-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 5, "teaching": 2, "grading": 3, "content": 3, "workload": 5, "overall": 3.6,
+      "body": "The STM32 microcontroller labs are interesting but the setup documentation is outdated. Spent three hours troubleshooting a toolchain issue that wasn't in any handout. Course content is relevant but delivery needs work.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2024-11-08T15:00:00Z"
+    },
+    {
+      "id": "r-ec2202-3", "offering_id": "ec2202-s24",
+      "author": {"id": "u14", "display_name": "Ishaan M."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 4, "overall": 4.0,
+      "body": "The FSM unit was the most well-taught part — clear progression from theory to implementation. Spring offering felt better organized than what I heard about Monsoon. The Cortex-M programming section is genuinely useful for embedded internships.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2024-05-14T12:00:00Z"
+    },
+    {
+      "id": "r-ec2202-4", "offering_id": "ec2202-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 3, "grading": 3, "content": 4, "workload": 4, "overall": 3.6,
+      "body": "If you're from CSE and haven't touched hardware before, budget extra time. The combinational logic section is manageable but the memory-mapped I/O in week 9 assumes understanding of bus protocols that was never explicitly covered.",
+      "score": 5, "user_vote": 0, "edited_at": null, "created_at": "2023-12-10T09:00:00Z"
+    }
+  ],
+  "HS2.103": [
+    {
+      "id": "r-hs2103-1", "offering_id": "hs2103-m24",
+      "author": {"id": "u15", "display_name": "Shruti P."}, "anonymous": false,
+      "difficulty": 2, "teaching": 5, "grading": 5, "content": 5, "workload": 2, "overall": 3.8,
+      "body": "Genuinely changed how I think about scientific knowledge. The session on Kuhn's paradigm shifts applied to software engineering was something I didn't expect from an HS course. Bapna sir's Socratic teaching style makes every class feel like a conversation.",
+      "score": 26, "user_vote": 0, "edited_at": null, "created_at": "2024-12-01T10:00:00Z"
+    },
+    {
+      "id": "r-hs2103-2", "offering_id": "hs2103-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 2, "teaching": 5, "grading": 5, "content": 4, "workload": 2, "overall": 3.6,
+      "body": "Easiest A on campus but also surprisingly intellectually nourishing. The reading list (Popper, Lakatos, Kuhn, Feyerabend) covers the real philosophical debates, not pop-science summaries. Two essay assignments — both graded generously.",
+      "score": 19, "user_vote": 0, "edited_at": null, "created_at": "2024-11-25T14:00:00Z"
+    },
+    {
+      "id": "r-hs2103-3", "offering_id": "hs2103-s24",
+      "author": {"id": "u16", "display_name": "Aditya C."}, "anonymous": false,
+      "difficulty": 3, "teaching": 5, "grading": 4, "content": 5, "workload": 3, "overall": 4.0,
+      "body": "The philosophy of physics section (quantum mechanics epistemology) was the highlight. Spring offering adds a guest lecture from a physics faculty member which is excellent. Attendance matters — participation is part of the grade.",
+      "score": 22, "user_vote": 0, "edited_at": null, "created_at": "2024-05-08T11:00:00Z"
+    },
+    {
+      "id": "r-hs2103-4", "offering_id": "hs2103-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 2, "teaching": 5, "grading": 5, "content": 5, "workload": 2, "overall": 3.8,
+      "body": "The best HS elective available. If you've ever wondered how scientific consensus actually forms — beyond the textbook narrative of linear progress — this course answers that. The Feyerabend session alone is worth registering for.",
+      "score": 18, "user_vote": 0, "edited_at": null, "created_at": "2023-12-05T09:00:00Z"
+    }
+  ],
+  "MA3.102": [
+    {
+      "id": "r-ma3102-1", "offering_id": "ma3102-m24",
+      "author": {"id": "u17", "display_name": "Shreya G."}, "anonymous": false,
+      "difficulty": 5, "teaching": 3, "grading": 3, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "The material is essential for ML and systems work but the teaching style is abstract to a fault. Heavy emphasis on proofs with minimal worked examples in class. You'll need to supplement with MIT OCW 6.041 or similar. Convergence theorems felt rushed at the end.",
+      "score": 16, "user_vote": 0, "edited_at": null, "created_at": "2024-11-30T10:00:00Z"
+    },
+    {
+      "id": "r-ma3102-2", "offering_id": "ma3102-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 5, "teaching": 2, "grading": 3, "content": 4, "workload": 4, "overall": 3.6,
+      "body": "If you're planning to do ML research, take this. If you're not, reconsider. The course assumes real analysis fluency that isn't explicitly listed as a prerequisite. Homework solutions are not released — this is frustrating when you're stuck on problem sets.",
+      "score": 12, "user_vote": 0, "edited_at": null, "created_at": "2024-11-10T14:00:00Z"
+    },
+    {
+      "id": "r-ma3102-3", "offering_id": "ma3102-s24",
+      "author": {"id": "u18", "display_name": "Rishi K."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 3, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "Spring offering is better structured — the Markov chain section is expanded and the examples come from actual CS applications. The mid-semester exam is the hardest I've encountered here; practice old papers religiously.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2024-05-18T09:00:00Z"
+    },
+    {
+      "id": "r-ma3102-4", "offering_id": "ma3102-s24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 3, "grading": 3, "content": 4, "workload": 4, "overall": 3.6,
+      "body": "Decent course that suffers from unclear grading criteria. The Poisson process section is the most applicable to real problems. Form study groups early — the problem sets are designed for collaboration even when they don't say so.",
+      "score": 7, "user_vote": 0, "edited_at": null, "created_at": "2024-04-28T13:00:00Z"
+    },
+    {
+      "id": "r-ma3102-5", "offering_id": "ma3102-m23",
+      "author": {"id": "u19", "display_name": "Divya N."}, "anonymous": false,
+      "difficulty": 5, "teaching": 3, "grading": 3, "content": 4, "workload": 4, "overall": 3.8,
+      "body": "Two professors brings variety but also inconsistency in notation. The convergence in distribution material was the hardest but Balaji sir's examples from queueing theory made it concrete. Watch the Poisson process section on NPTEL as supplement.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2023-12-03T10:00:00Z"
+    }
+  ],
+  "CS6.301": [
+    {
+      "id": "r-cs6301-1", "offering_id": "cs6301-m24",
+      "author": {"id": "u20", "display_name": "Aditi B."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 5, "workload": 5, "overall": 4.6,
+      "body": "The most intellectually stimulating course in my time here. Implementing Raft from scratch in Go is genuinely hard and genuinely worthwhile. Purini sir walks through the Lamport papers with the kind of care that makes complex ideas feel obvious in retrospect. Budget two weekends per project.",
+      "score": 27, "user_vote": 0, "edited_at": null, "created_at": "2024-12-10T10:00:00Z"
+    },
+    {
+      "id": "r-cs6301-2", "offering_id": "cs6301-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 5, "teaching": 4, "grading": 4, "content": 5, "workload": 5, "overall": 4.6,
+      "body": "The paper reading component is non-negotiable — papers are assigned weekly and you're expected to discuss them. The Dynamo and Spanner papers changed how I think about tradeoffs in system design. Not a course for passive learners.",
+      "score": 20, "user_vote": 0, "edited_at": null, "created_at": "2024-11-28T13:00:00Z"
+    },
+    {
+      "id": "r-cs6301-3", "offering_id": "cs6301-m23",
+      "author": {"id": "u21", "display_name": "Sagar M."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 5, "workload": 4, "overall": 4.4,
+      "body": "The Go project was my first time writing Go and the learning curve added to the workload. Still the most practically relevant course I've taken — every distributed system concept here comes up in interviews. Start project 2 (leader election) immediately.",
+      "score": 22, "user_vote": 0, "edited_at": null, "created_at": "2023-12-12T11:00:00Z"
+    },
+    {
+      "id": "r-cs6301-4", "offering_id": "cs6301-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 3, "content": 5, "workload": 5, "overall": 4.2,
+      "body": "Grading is the one weak point — the project rubric is vague and correctness testing is partial. The material and teaching quality are excellent though. Kafka and stream processing section in week 11 is worth the semester alone.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2023-11-20T09:00:00Z"
+    },
+    {
+      "id": "r-cs6301-5", "offering_id": "cs6301-m22",
+      "author": {"id": "u22", "display_name": "Nandini V."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 5, "workload": 5, "overall": 4.6,
+      "body": "The joint teaching by Purini and Vaidhyanathan was excellent — complementary perspectives on the same problems. The vector clocks and consistent snapshots section had me rethinking assumptions I had about time. Heavy workload but every hour is worth it.",
+      "score": 16, "user_vote": 0, "edited_at": null, "created_at": "2022-12-15T10:00:00Z"
+    }
+  ],
+  "CS4.301": [
+    {
+      "id": "r-cs4301-1", "offering_id": "cs4301-s25",
+      "author": {"id": "u23", "display_name": "Rohit A."}, "anonymous": false,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 5, "overall": 4.4,
+      "body": "Writing a working compiler is one of the most satisfying engineering experiences you can have in undergrad. The recursive descent parser project in week 4 is where it all comes together. Purini sir's debugging style — teaching you to reason about the grammar before touching code — is something you carry forward.",
+      "score": 21, "user_vote": 0, "edited_at": null, "created_at": "2025-05-18T10:00:00Z"
+    },
+    {
+      "id": "r-cs4301-2", "offering_id": "cs4301-s25",
+      "author": null, "anonymous": true,
+      "difficulty": 5, "teaching": 4, "grading": 4, "content": 5, "workload": 5, "overall": 4.6,
+      "body": "The optimization passes project is where people either fall in love with the course or hit a wall. Data flow analysis is genuinely subtle. Don't underestimate the IR design phase — decisions you make in project 2 will haunt or help you in project 4.",
+      "score": 14, "user_vote": 0, "edited_at": null, "created_at": "2025-04-30T14:00:00Z"
+    },
+    {
+      "id": "r-cs4301-3", "offering_id": "cs4301-s24",
+      "author": {"id": "u24", "display_name": "Simran J."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 4, "workload": 4, "overall": 4.2,
+      "body": "Clearer teaching than any PL course I've taken online. The lecture on SSA form was a revelation. The C++ codebase you build is messy by the end but looking back at project 1 from project 4 shows you how much you've learned.",
+      "score": 17, "user_vote": 0, "edited_at": null, "created_at": "2024-05-22T11:00:00Z"
+    },
+    {
+      "id": "r-cs4301-4", "offering_id": "cs4301-s24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 5, "overall": 4.2,
+      "body": "Workload is genuinely high — each project takes a full weekend minimum. The register allocation project is brutal if you've never thought about graph coloring. Worth it if you care about how computers actually work.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2024-05-08T09:00:00Z"
+    },
+    {
+      "id": "r-cs4301-5", "offering_id": "cs4301-s23",
+      "author": {"id": "u25", "display_name": "Pooja D."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 3, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "The final exam was the hardest I've written — not because the material was obscure but because it requires combining four different concepts simultaneously. Prepare by writing out the full compilation pipeline from memory. Grading on project 3 felt inconsistent between groups.",
+      "score": 13, "user_vote": 0, "edited_at": null, "created_at": "2023-05-20T10:00:00Z"
+    }
+  ],
+  "OP3.102": [
+    {
+      "id": "r-op3102-1", "offering_id": "op3102-m24",
+      "author": {"id": "u26", "display_name": "Kavya S."}, "anonymous": false,
+      "difficulty": 2, "teaching": 5, "grading": 4, "content": 5, "workload": 3, "overall": 3.8,
+      "body": "The perfect elective if you're a CSE student curious about how intelligence works. Vemuri ma'am bridges the gap between AI and cognitive psychology in a way that's actually actionable. The memory and attention modules will change how you think about your own learning.",
+      "score": 18, "user_vote": 0, "edited_at": null, "created_at": "2024-12-02T10:00:00Z"
+    },
+    {
+      "id": "r-op3102-2", "offering_id": "op3102-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 2, "teaching": 4, "grading": 4, "content": 5, "workload": 2, "overall": 3.4,
+      "body": "Light workload but substantive content. The classic experiments (Stroop, Sperling, Chomsky) are presented with enough depth to actually understand what was surprising about them. Good option if you need an open elective without a heavy time commitment.",
+      "score": 11, "user_vote": 0, "edited_at": null, "created_at": "2024-11-20T13:00:00Z"
+    },
+    {
+      "id": "r-op3102-3", "offering_id": "op3102-s24",
+      "author": {"id": "u27", "display_name": "Aryan B."}, "anonymous": false,
+      "difficulty": 3, "teaching": 5, "grading": 5, "content": 4, "workload": 3, "overall": 4.0,
+      "body": "Spring offering includes an extra module on HCI and embodied cognition that made the course even more relevant. The final essay was the most thought I'd put into a non-CS assignment all year. Grading is among the most fair I've experienced.",
+      "score": 14, "user_vote": 0, "edited_at": null, "created_at": "2024-05-12T11:00:00Z"
+    },
+    {
+      "id": "r-op3102-4", "offering_id": "op3102-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 2, "teaching": 5, "grading": 4, "content": 4, "workload": 2, "overall": 3.4,
+      "body": "Best open elective I've taken. Don't take it expecting an easy grade trap — the content requires genuine engagement. But if you're curious about the science of mind, it's a remarkable 3 credits.",
+      "score": 9, "user_vote": 0, "edited_at": null, "created_at": "2023-12-08T09:00:00Z"
+    }
+  ],
+  "BQ5.102": [
+    {
+      "id": "r-bq5102-1", "offering_id": "bq5102-m24",
+      "author": {"id": "u28", "display_name": "Anil K."}, "anonymous": false,
+      "difficulty": 4, "teaching": 5, "grading": 4, "content": 5, "workload": 3, "overall": 4.2,
+      "body": "A genuinely unique course at IIIT-H. The auction theory section and its connection to ad markets is something you'll find immediately applicable if you work in tech. Kothapalli sir presents proofs clearly and makes the math feel inevitable rather than arbitrary.",
+      "score": 16, "user_vote": 0, "edited_at": null, "created_at": "2024-12-08T10:00:00Z"
+    },
+    {
+      "id": "r-bq5102-2", "offering_id": "bq5102-m24",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 4, "workload": 3, "overall": 3.8,
+      "body": "The social choice section (Arrow's impossibility theorem) was mind-bending. Nash equilibria and mixed strategies take time to internalize — the problem sets are well designed to build that intuition gradually. Lighter workload than most 4-credit courses.",
+      "score": 10, "user_vote": 0, "edited_at": null, "created_at": "2024-11-25T14:00:00Z"
+    },
+    {
+      "id": "r-bq5102-3", "offering_id": "bq5102-s24",
+      "author": {"id": "u29", "display_name": "Meghna T."}, "anonymous": false,
+      "difficulty": 3, "teaching": 5, "grading": 5, "content": 5, "workload": 3, "overall": 4.2,
+      "body": "If you've done any algorithmic competitive programming, the mechanism design section feels like a natural extension. The VCG mechanism proof is the most elegant argument I've seen in a course here. Grading is fair with detailed written feedback.",
+      "score": 12, "user_vote": 0, "edited_at": null, "created_at": "2024-05-16T11:00:00Z"
+    },
+    {
+      "id": "r-bq5102-4", "offering_id": "bq5102-m23",
+      "author": null, "anonymous": true,
+      "difficulty": 4, "teaching": 4, "grading": 4, "content": 5, "workload": 4, "overall": 4.2,
+      "body": "The connection between game theory and CS — approximation algorithms, online algorithms, protocol design — is explored seriously here, not just mentioned in passing. Recommended for anyone interested in theory.",
+      "score": 8, "user_vote": 0, "edited_at": null, "created_at": "2023-12-11T09:00:00Z"
+    }
+  ]
+}

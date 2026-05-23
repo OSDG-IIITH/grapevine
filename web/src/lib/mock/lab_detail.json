@@ -1,0 +1,55 @@
+{
+  "CVIT": {
+    "id": "l1", "name": "Center for Visual Information Technology", "short": "CVIT",
+    "description": "CVIT is one of India's premier computer vision research centers, working on visual recognition, generative models, document analysis, and medical imaging. The lab has produced over 50 doctoral graduates and maintains active collaborations with international universities and industry partners including Microsoft Research and Google.",
+    "facultycount": 14, "overall": 4.3,
+    "axes": { "research": 4.6, "availability": 3.9, "mentorship": 4.2, "support": 4.2, "workload": 4.1 },
+    "faculty": [
+      { "id": "f3", "name": "C.V. Jawahar",   "slug": "cv-jawahar",    "title": "Professor",            "overall": 4.2 },
+      { "id": "f4", "name": "Avinash Sharma", "slug": "avinash-sharma", "title": "Associate Professor", "overall": 4.1 }
+    ]
+  },
+  "LTRC": {
+    "id": "l2", "name": "Language Technologies Research Centre", "short": "LTRC",
+    "description": "LTRC focuses on natural language processing for Indian languages, computational linguistics, and information retrieval. The center has built foundational resources for Hindi, Telugu, and other Indian languages and regularly publishes at ACL, EMNLP, and NAACL.",
+    "facultycount": 11, "overall": 4.5,
+    "axes": { "research": 4.6, "availability": 4.4, "mentorship": 4.5, "support": 4.5, "workload": 3.8 },
+    "faculty": [
+      { "id": "f2", "name": "Manish Shrivastava", "slug": "manish-shrivastava", "title": "Associate Professor", "overall": 4.6 },
+      { "id": "f5", "name": "Vasudeva Varma",     "slug": "vasudeva-varma",     "title": "Professor",            "overall": 4.3 }
+    ]
+  },
+  "CSTAR": {
+    "id": "l3", "name": "Center for Security, Theory & Algorithmic Research", "short": "CSTAR",
+    "description": "CSTAR works on foundations of cryptography, computational complexity, and security. The center hosts an active theory seminar and has collaborations with research groups at MIT and CMU. Students develop strong mathematical foundations alongside practical security knowledge.",
+    "facultycount": 8, "overall": 4.0,
+    "axes": { "research": 4.2, "availability": 3.8, "mentorship": 4.0, "support": 4.0, "workload": 4.0 },
+    "faculty": []
+  },
+  "SERC": {
+    "id": "l4", "name": "Software Engineering Research Center", "short": "SERC",
+    "description": "SERC focuses on programming languages, program analysis, compiler technology, and software systems. The center has strong industry connections with compiler teams at Intel and AMD and publishes at PLDI, OOPSLA, and ISSTA.",
+    "facultycount": 9, "overall": 4.3,
+    "axes": { "research": 4.4, "availability": 4.5, "mentorship": 4.4, "support": 4.2, "workload": 3.9 },
+    "faculty": [
+      { "id": "f1", "name": "Karthik Vaidhyanathan", "slug": "karthik-vaidhyanathan", "title": "Assistant Professor",  "overall": 4.4 },
+      { "id": "f7", "name": "Suresh Purini",         "slug": "suresh-purini",         "title": "Associate Professor", "overall": 4.2 }
+    ]
+  },
+  "RRC": {
+    "id": "l5", "name": "Robotics Research Center", "short": "RRC",
+    "description": "RRC is India's leading academic robotics lab, working on outdoor mobile robots, autonomous driving, and aerial platforms. The center has extensive hardware infrastructure including wheeled and legged robots, drone fleets, and a dedicated outdoor test facility.",
+    "facultycount": 7, "overall": 4.0,
+    "axes": { "research": 4.6, "availability": 3.6, "mentorship": 4.0, "support": 4.0, "workload": 4.4 },
+    "faculty": [
+      { "id": "f6", "name": "Madhava Krishna", "slug": "madhava-krishna", "title": "Professor", "overall": 4.0 }
+    ]
+  },
+  "SPCRC": {
+    "id": "l6", "name": "Signal Processing & Communications Research Center", "short": "SPCRC",
+    "description": "SPCRC works on digital communications, audio signal processing, and biomedical signal analysis. The center has collaborations with ISRO and DRDO and runs an active research program in channel coding and wireless communications.",
+    "facultycount": 6, "overall": 3.9,
+    "axes": { "research": 4.1, "availability": 3.8, "mentorship": 3.8, "support": 3.9, "workload": 4.0 },
+    "faculty": []
+  }
+}

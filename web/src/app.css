@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "./**/*.{svelte,ts,js}";
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 
