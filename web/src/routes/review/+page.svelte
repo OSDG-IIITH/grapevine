@@ -138,11 +138,6 @@
 		<h1 class="mb-2 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: 44px; line-height: 1.05; letter-spacing: -0.015em;">
 			Write a review
 		</h1>
-		<div class="mb-8 flex items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
-			<span>Honest, specific, civil.</span>
-			<span class="text-[var(--fg-4)]">·</span>
-			<span>Your name is hidden by default.</span>
-		</div>
 
 		{#if loading}
 			<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
@@ -151,9 +146,6 @@
 			<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Reviewing
-					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						Choose what kind of review you're writing.
-					</span>
 				</div>
 				<div class="min-w-0">
 					<div class="inline-flex overflow-hidden rounded-[7px] border border-[var(--border)] bg-[var(--bg-2)]">
@@ -176,9 +168,6 @@
 				<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
 					<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 						Course & offering
-						<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-							Which class in which semester.
-						</span>
 					</div>
 					<div class="min-w-0" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
 						<div class="relative">
@@ -217,9 +206,6 @@
 				<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
 					<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 						Faculty
-						<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-							The advisor you worked with.
-						</span>
 					</div>
 					<div class="min-w-0">
 						<div class="relative">
@@ -246,7 +232,7 @@
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Ratings
 					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						Click a segment to set each axis (1 – 5).
+						1 is bad. 5 is good.
 					</span>
 				</div>
 				<div class="min-w-0" style="display: grid; grid-template-columns: 110px 1fr 30px; gap: 16px 18px; align-items: center;">
@@ -264,15 +250,12 @@
 			<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Your review
-					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						Be specific. Future you would have wanted this.
-					</span>
 				</div>
 				<div class="min-w-0">
 					<textarea
 						class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[16px] py-[14px] text-[14px] leading-[1.65] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
 						style="min-height: 180px;"
-						placeholder="What was the workload like? What kinds of assignments? What surprised you?"
+						placeholder="Share your experience."
 						bind:value={body}
 					></textarea>
 					<div
@@ -288,26 +271,31 @@
 			<div class="items-center py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
 				<div class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Visibility
-					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						Your name is hidden by default.
-					</span>
 				</div>
 				<div class="flex min-w-0 items-center justify-between gap-4">
-					<button
-						type="button"
-						class="inline-flex cursor-pointer items-center gap-[10px] text-[13px] text-[var(--fg-2)]"
-						onclick={() => (anon = !anon)}
-						aria-label="Toggle anonymous posting"
-					>
+					<label class="inline-flex cursor-pointer items-center gap-[10px] text-[13px] text-[var(--fg-2)]">
+						<input type="checkbox" class="peer sr-only" bind:checked={anon} />
 						<span
-							class="relative h-[18px] w-8 rounded-full border transition-[background,border-color] duration-[120ms] {anon ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)]' : 'border-[var(--border)] bg-[var(--bg-inset)]'}"
+							class="relative flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-[background,border-color,box-shadow] duration-[120ms] {anon ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : 'border-[var(--border)] bg-[var(--bg-inset)]'}"
+							style="{anon ? 'box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08)' : ''}"
 						>
-							<span
-								class="absolute top-[2px] h-3 w-3 rounded-full transition-[transform,background] duration-[140ms] {anon ? 'translate-x-[14px] bg-[var(--accent)]' : 'translate-x-[2px] bg-[var(--fg-3)]'}"
-							></span>
+							<svg
+								viewBox="0 0 16 16"
+								class="h-[11px] w-[11px] transition-[opacity,transform] duration-[120ms] {anon ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}"
+								fill="none"
+								aria-hidden="true"
+							>
+								<path
+									d="M3.5 8.5l2.6 2.6L12.5 4.9"
+									stroke="var(--accent)"
+									stroke-width="1.8"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
 						</span>
-						Post anonymously
-					</button>
+						<span>Post anonymously</span>
+					</label>
 					<div class="flex gap-2">
 						<button
 							type="button"
