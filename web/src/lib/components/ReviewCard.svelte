@@ -17,10 +17,11 @@
 		axislabels: Record<string, string>;
 		showoffering?: boolean;
 		offeringcode?: string;
+		coursecode?: string;
 		ondelete?: (id: string) => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, ondelete }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, ondelete }: Props = $props();
 
 	let open = $state(false);
 	// svelte-ignore state_referenced_locally
@@ -105,9 +106,22 @@
 			{:else}
 				<span class="text-[13px] font-medium text-[var(--fg-2)]">{review.author.display_name}</span>
 			{/if}
-			{#if showoffering && offeringcode}
+			{#if showoffering && (coursecode || offeringcode)}
 				<span class="text-[var(--fg-4)]">·</span>
-				<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+				{#if coursecode}
+					<a
+						href={`/courses/${encodeURIComponent(coursecode)}`}
+						onclick={stop}
+						class="text-[11px] tracking-[0.04em] text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]"
+						style="font-family: var(--mono);"
+					>{coursecode}</a>
+				{:else}
+					<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+				{/if}
+				{#if coursecode && offeringcode}
+					<span class="text-[var(--fg-4)]">·</span>
+					<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+				{/if}
 			{/if}
 			<span class="text-[var(--fg-4)]">·</span>
 			<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{fmtdate(review.created_at)}</span>
@@ -180,6 +194,7 @@
 		{axislabels}
 		{showoffering}
 		{offeringcode}
+		{coursecode}
 		{vote}
 		{flagged}
 		{canDelete}

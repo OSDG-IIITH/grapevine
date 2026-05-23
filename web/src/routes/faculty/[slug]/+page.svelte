@@ -12,7 +12,7 @@
 
 	let faculty = $state<FacultyDetail | null>(null);
 	let advisorreviews = $state<AdvisorReview[]>([]);
-	let instructorreviews = $state<(CourseReview & { offeringcode: string })[]>([]);
+	let instructorreviews = $state<(CourseReview & { offeringcode: string; coursecode: string })[]>([]);
 	let tab = $state('advisor');
 	let error = $state('');
 
@@ -32,7 +32,7 @@
 				return Promise.all(
 					f.offerings.map((o) =>
 						getOfferingReviews(o.id).then((reviews) =>
-							(reviews ?? []).map((r) => ({ ...r, offeringcode: `${o.course.code} · ${o.code}` }))
+							(reviews ?? []).map((r) => ({ ...r, offeringcode: o.code, coursecode: o.course.code }))
 						)
 					)
 				);
@@ -57,6 +57,15 @@
 		{ id: 'advisor', label: 'As Advisor', count: advisorreviews.length },
 		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length }
 	]);
+
+	const taughtcourses = $derived((() => {
+		if (!faculty) return [];
+		const seen = new Map<string, { code: string; name: string }>();
+		for (const o of faculty.offerings) {
+			if (!seen.has(o.course.id)) seen.set(o.course.id, { code: o.course.code, name: o.course.name });
+		}
+		return Array.from(seen.values());
+	})());
 </script>
 
 <div class="mx-auto w-full max-w-[1180px] px-8 pb-[120px] pt-10" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
@@ -133,6 +142,22 @@
 				</div>
 			{/if}
 		{:else}
+			{#if taughtcourses.length}
+				<div class="mb-[18px] flex flex-wrap items-center gap-[14px_18px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
+					<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Teaches</span>
+					<div class="flex flex-wrap items-center gap-[10px_16px]">
+						{#each taughtcourses as c (`${c.code}-${c.name}`)}
+							<a
+								href={`/courses/${encodeURIComponent(c.code)}`}
+								class="flex items-center gap-[8px] text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]"
+							>
+								<span class="rounded-[5px] border border-[var(--border-strong)] px-[7px] py-[2px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{c.code}</span>
+								<span class="text-[var(--fg-2)]">{c.name}</span>
+							</a>
+						{/each}
+					</div>
+				</div>
+			{/if}
 			{#if instructorreviews.length === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
 					No instructor reviews yet.
@@ -146,6 +171,7 @@
 							axislabels={COURSE_AXIS_LABELS}
 							showoffering={true}
 							offeringcode={r.offeringcode}
+							coursecode={r.coursecode}
 							ondelete={(id) => (instructorreviews = instructorreviews.filter((item) => item.id !== id))}
 						/>
 					{/each}

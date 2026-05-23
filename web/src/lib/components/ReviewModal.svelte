@@ -9,6 +9,7 @@
 		axislabels: Record<string, string>;
 		showoffering?: boolean;
 		offeringcode?: string;
+		coursecode?: string;
 		vote: 0 | 1 | -1;
 		flagged: boolean;
 		canDelete: boolean;
@@ -19,7 +20,7 @@
 		onclose: () => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, vote, flagged, canDelete, deleting, onvote, onflag, ondelete, onclose }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, onvote, onflag, ondelete, onclose }: Props = $props();
 
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
@@ -76,9 +77,21 @@
 						{/if}
 						<span class="text-[var(--fg-4)]">·</span>
 						<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{fmtdate(review.created_at)}</span>
-						{#if showoffering && offeringcode}
+						{#if showoffering && (coursecode || offeringcode)}
 							<span class="text-[var(--fg-4)]">·</span>
-							<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+							{#if coursecode}
+								<a
+									href={`/courses/${encodeURIComponent(coursecode)}`}
+									class="text-[11px] tracking-[0.04em] text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]"
+									style="font-family: var(--mono);"
+								>{coursecode}</a>
+							{:else}
+								<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+							{/if}
+							{#if coursecode && offeringcode}
+								<span class="text-[var(--fg-4)]">·</span>
+								<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{offeringcode}</span>
+							{/if}
 						{/if}
 					</div>
 					<div class="inline-flex shrink-0 items-center gap-[2px] text-[var(--accent)]">
