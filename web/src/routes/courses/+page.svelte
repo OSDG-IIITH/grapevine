@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getCourses } from '$lib/api';
-	import type { CourseLean } from '$lib/types';
+	import { getCourses, getFaculty } from '$lib/api';
+	import type { CourseLean, FacultyLean } from '$lib/types';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 
@@ -8,17 +8,28 @@
 	const PER_PAGE = 9;
 
 	let all = $state<CourseLean[]>([]);
-	let filters = $state(new Set<string>());
+	let allfaculty = $state<FacultyLean[]>([]);
+	let typefilter = $state('');
+	let instructor = $state('');
+	let sort = $state<'' | 'rating_asc' | 'rating_desc'>('');
 	let q = $state('');
 	let page = $state(1);
 
 	$effect(() => {
-		getCourses().then((data) => { if (data) all = data; });
+		getFaculty().then((data) => { if (data) allfaculty = data; });
+	});
+
+	$effect(() => {
+		const params: { instructor?: string; sort?: 'rating_asc' | 'rating_desc' } = {};
+		if (instructor) params.instructor = instructor;
+		if (sort) params.sort = sort;
+		page = 1;
+		getCourses(params).then((data) => { if (data) all = data; });
 	});
 
 	const filtered = $derived(
 		all.filter((c) => {
-			if (filters.size && !filters.has(c.type)) return false;
+			if (typefilter && c.type !== typefilter) return false;
 			if (q.trim()) {
 				const s = q.toLowerCase();
 				if (!c.name.toLowerCase().includes(s) && !c.code.toLowerCase().includes(s)) return false;
@@ -30,11 +41,15 @@
 	const totalpages = $derived(Math.max(1, Math.ceil(filtered.length / PER_PAGE)));
 	const visible = $derived(filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE));
 
-	function toggle(type: string) {
-		const n = new Set(filters);
-		n.has(type) ? n.delete(type) : n.add(type);
-		filters = n;
+	function settype(t: string) {
+		typefilter = typefilter === t ? '' : t;
 		page = 1;
+	}
+
+	function nextsort() {
+		if (sort === '') sort = 'rating_desc';
+		else if (sort === 'rating_desc') sort = 'rating_asc';
+		else sort = '';
 	}
 </script>
 
@@ -72,33 +87,54 @@
 	</div>
 
 	<!-- toolbar -->
-	<div class="mb-[22px] mt-[18px] flex items-center justify-between gap-4">
-		<div class="flex flex-wrap gap-[6px]">
+	<div class="mb-[22px] mt-[18px] flex flex-wrap items-center justify-between gap-3">
+		<div class="flex flex-wrap items-center gap-[6px]">
 			<button
 				type="button"
-				onclick={() => { filters = new Set(); page = 1; }}
-				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {filters.size === 0 ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
+				onclick={() => { typefilter = ''; page = 1; }}
+				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {typefilter === '' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
 				style="font-family: var(--mono);"
 			>all</button>
 			{#each TYPES as t (t)}
 				<button
 					type="button"
-					onclick={() => toggle(t)}
-					class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {filters.has(t) ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
+					onclick={() => settype(t)}
+					class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {typefilter === t ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
 					style="font-family: var(--mono);"
 				>{t}</button>
 			{/each}
+			<select
+				bind:value={instructor}
+				onchange={() => (page = 1)}
+				class="rounded-[5px] border border-[var(--border)] bg-[var(--bg-inset)] px-[10px] py-[5px] text-[11px] tracking-[0.04em] text-[var(--fg-3)] outline-none transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg)] {instructor ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : ''}"
+				style="font-family: var(--mono);"
+			>
+				<option value="">any instructor</option>
+				{#each allfaculty as f (f.id)}
+					<option value={f.slug}>{f.name}</option>
+				{/each}
+			</select>
 		</div>
-		<div class="flex w-[260px] items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px]">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--fg-4)]" aria-hidden="true">
-				<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
-			</svg>
-			<input
-				class="w-full bg-transparent text-[13px] outline-none placeholder:text-[var(--fg-4)]"
-				placeholder="Search course or code…"
-				bind:value={q}
-				oninput={() => (page = 1)}
-			/>
+		<div class="flex items-center gap-2 shrink-0">
+			<button
+				type="button"
+				onclick={nextsort}
+				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {sort ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
+				style="font-family: var(--mono);"
+			>
+				{sort === 'rating_desc' ? 'rating ↓' : sort === 'rating_asc' ? 'rating ↑' : 'sort'}
+			</button>
+			<div class="flex w-[260px] items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px]">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--fg-4)]" aria-hidden="true">
+					<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+				</svg>
+				<input
+					class="w-full bg-transparent text-[13px] outline-none placeholder:text-[var(--fg-4)]"
+					placeholder="Search course or code…"
+					bind:value={q}
+					oninput={() => (page = 1)}
+				/>
+			</div>
 		</div>
 	</div>
 

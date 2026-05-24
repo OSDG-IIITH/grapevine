@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { currentUser } from '$lib/stores';
+	import { currentUser, searchOpen } from '$lib/stores';
 	import { env } from '$env/dynamic/public';
 
 	const nav = [
@@ -53,6 +53,7 @@
 		<button
 			type="button"
 			aria-label="Search"
+			onclick={() => searchOpen.set(true)}
 			class="flex w-[320px] items-center gap-[10px] whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg-3)] transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg-2)]"
 		>
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">

@@ -42,8 +42,12 @@ function json(body: unknown, method = 'POST'): RequestInit {
 	return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
 
-export async function getCourses(q?: string): Promise<CourseLean[] | null> {
-	const qs = q?.trim() ? `?q=${encodeURIComponent(q)}` : '';
+export async function getCourses(params?: { q?: string; instructor?: string; sort?: 'rating_asc' | 'rating_desc' }): Promise<CourseLean[] | null> {
+	const p = new URLSearchParams();
+	if (params?.q?.trim()) p.set('q', params.q.trim());
+	if (params?.instructor) p.set('instructor', params.instructor);
+	if (params?.sort) p.set('sort', params.sort);
+	const qs = p.size ? `?${p}` : '';
 	return apifetch<CourseLean[]>(`/courses${qs}`);
 }
 
@@ -55,8 +59,11 @@ export async function getCourseReviews(code: string): Promise<CourseReview[] | n
 	return apifetch<CourseReview[]>(`/courses/${encodeURIComponent(code)}/reviews`);
 }
 
-export async function getFaculty(q?: string): Promise<FacultyLean[] | null> {
-	const qs = q?.trim() ? `?q=${encodeURIComponent(q)}` : '';
+export async function getFaculty(params?: { q?: string; sort?: 'rating_asc' | 'rating_desc' }): Promise<FacultyLean[] | null> {
+	const p = new URLSearchParams();
+	if (params?.q?.trim()) p.set('q', params.q.trim());
+	if (params?.sort) p.set('sort', params.sort);
+	const qs = p.size ? `?${p}` : '';
 	return apifetch<FacultyLean[]>(`/faculty${qs}`);
 }
 
@@ -68,8 +75,18 @@ export async function getAdvisorReviews(slug: string): Promise<AdvisorReview[] |
 	return apifetch<AdvisorReview[]>(`/faculty/${slug}/reviews`);
 }
 
-export async function getLabs(): Promise<LabLean[] | null> {
-	return apifetch<LabLean[]>('/labs');
+export async function getLabs(q?: string): Promise<LabLean[] | null> {
+	const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+	return apifetch<LabLean[]>(`/labs${qs}`);
+}
+
+export async function searchAll(q: string): Promise<{ courses: CourseLean[]; faculty: FacultyLean[]; labs: LabLean[] }> {
+	const [courses, faculty, labs] = await Promise.all([
+		getCourses({ q }),
+		getFaculty({ q }),
+		getLabs(q),
+	]);
+	return { courses: courses ?? [], faculty: faculty ?? [], labs: labs ?? [] };
 }
 
 export async function getLab(shortname: string): Promise<LabDetail | null> {

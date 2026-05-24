@@ -1,13 +1,20 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
+use serde::Deserialize;
 use crate::{error::AppError, models::lab, state::AppState};
+
+#[derive(Deserialize)]
+pub struct SearchQuery {
+    q: Option<String>,
+}
 
 pub async fn list(
     State(s): State<AppState>,
+    Query(q): Query<SearchQuery>,
 ) -> Result<Json<Vec<lab::LabLean>>, AppError> {
-    Ok(Json(lab::list(&s.pool).await?))
+    Ok(Json(lab::list(&s.pool, q.q.as_deref()).await?))
 }
 
 pub async fn get(

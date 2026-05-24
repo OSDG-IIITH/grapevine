@@ -42,7 +42,8 @@ pub struct LabDetail {
     pub faculty: Vec<FacultyRef>,
 }
 
-pub async fn list(pool: &PgPool) -> Result<Vec<LabLean>, AppError> {
+pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<LabLean>, AppError> {
+    let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT l.id, l.shortname, l.name, l.description,
                   COUNT(DISTINCT f.id)::int8 as "facultycount!: i64",
@@ -50,8 +51,10 @@ pub async fn list(pool: &PgPool) -> Result<Vec<LabLean>, AppError> {
            FROM labs l
            LEFT JOIN faculty f ON f.lab_id = l.id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
+           WHERE ($1::text IS NULL OR l.shortname ILIKE $1 OR l.name ILIKE $1)
            GROUP BY l.id, l.shortname, l.name, l.description
-           ORDER BY l.name"#
+           ORDER BY l.name"#,
+        pattern
     )
     .fetch_all(pool)
     .await?;

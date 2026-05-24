@@ -8,13 +8,15 @@ use crate::{auth::session::MaybeAuth, error::AppError, models::{course, review},
 #[derive(Deserialize)]
 pub struct SearchQuery {
     q: Option<String>,
+    instructor: Option<String>,
+    sort: Option<String>,
 }
 
 pub async fn list(
     State(s): State<AppState>,
     Query(q): Query<SearchQuery>,
 ) -> Result<Json<Vec<course::CourseLean>>, AppError> {
-    Ok(Json(course::list(&s.pool, q.q.as_deref()).await?))
+    Ok(Json(course::list(&s.pool, q.q.as_deref(), q.instructor.as_deref(), q.sort.as_deref()).await?))
 }
 
 pub async fn get(

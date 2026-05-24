@@ -54,7 +54,7 @@ pub struct CourseDetail {
     pub offerings: Vec<OfferingDetail>,
 }
 
-pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<CourseLean>, AppError> {
+pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort: Option<&str>) -> Result<Vec<CourseLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT c.id, c.code, c.name, c.type as "kind: CourseType",
@@ -63,16 +63,43 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<CourseLean>, App
            LEFT JOIN offerings o ON o.course_id = c.id
            LEFT JOIN course_reviews r ON r.offering_id = o.id
            WHERE ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
+             AND ($2::text IS NULL OR EXISTS (
+               SELECT 1 FROM offerings oi
+               JOIN offering_faculty ofac ON ofac.offering_id = oi.id
+               JOIN faculty f ON f.id = ofac.faculty_id
+               WHERE oi.course_id = c.id AND f.slug = $2
+             ))
            GROUP BY c.id, c.code, c.name, c.type
            ORDER BY c.name"#,
-        pattern
+        pattern,
+        instructor
     )
     .fetch_all(pool)
     .await?;
 
-    Ok(rows.into_iter().map(|r| CourseLean {
+    let mut results: Vec<CourseLean> = rows.into_iter().map(|r| CourseLean {
         id: r.id, code: r.code, name: r.name, kind: r.kind, overall: r.overall,
-    }).collect())
+    }).collect();
+
+    match sort {
+        Some("rating_desc") => results.sort_by(|a, b| {
+            match (a.overall == 0.0, b.overall == 0.0) {
+                (true, false) => std::cmp::Ordering::Greater,
+                (false, true) => std::cmp::Ordering::Less,
+                _ => b.overall.partial_cmp(&a.overall).unwrap_or(std::cmp::Ordering::Equal),
+            }
+        }),
+        Some("rating_asc") => results.sort_by(|a, b| {
+            match (a.overall == 0.0, b.overall == 0.0) {
+                (true, false) => std::cmp::Ordering::Greater,
+                (false, true) => std::cmp::Ordering::Less,
+                _ => a.overall.partial_cmp(&b.overall).unwrap_or(std::cmp::Ordering::Equal),
+            }
+        }),
+        _ => {}
+    }
+
+    Ok(results)
 }
 
 pub async fn id_by_code(pool: &PgPool, code: &str) -> Result<String, AppError> {

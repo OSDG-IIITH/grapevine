@@ -9,12 +9,19 @@
 	let all = $state<FacultyLean[]>([]);
 	let labs = $state<LabLean[]>([]);
 	let labfilter = $state('all');
+	let sort = $state<'' | 'rating_asc' | 'rating_desc'>('');
 	let q = $state('');
 	let page = $state(1);
 
 	$effect(() => {
-		getFaculty().then((data) => { if (data) all = data; });
 		getLabs().then((data) => { if (data) labs = data; });
+	});
+
+	$effect(() => {
+		const params: { sort?: 'rating_asc' | 'rating_desc' } = {};
+		if (sort) params.sort = sort;
+		page = 1;
+		getFaculty(params).then((data) => { if (data) all = data; });
 	});
 
 	const filtered = $derived(
@@ -30,6 +37,12 @@
 
 	const totalpages = $derived(Math.max(1, Math.ceil(filtered.length / PER_PAGE)));
 	const visible = $derived(filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE));
+
+	function nextsort() {
+		if (sort === '') sort = 'rating_desc';
+		else if (sort === 'rating_desc') sort = 'rating_asc';
+		else sort = '';
+	}
 </script>
 
 <div class="mx-auto w-full max-w-[1180px] px-8 pb-[120px] pt-10" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
@@ -89,16 +102,26 @@
 				style="font-family: var(--mono);"
 			>independent</button>
 		</div>
-		<div class="flex w-[260px] items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px]">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--fg-4)]" aria-hidden="true">
-				<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
-			</svg>
-			<input
-				class="w-full bg-transparent text-[13px] outline-none placeholder:text-[var(--fg-4)]"
-				placeholder="Search faculty…"
-				bind:value={q}
-				oninput={() => (page = 1)}
-			/>
+		<div class="flex items-center gap-2 shrink-0">
+			<button
+				type="button"
+				onclick={nextsort}
+				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {sort ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
+				style="font-family: var(--mono);"
+			>
+				{sort === 'rating_desc' ? 'rating ↓' : sort === 'rating_asc' ? 'rating ↑' : 'sort'}
+			</button>
+			<div class="flex w-[260px] items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px]">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--fg-4)]" aria-hidden="true">
+					<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+				</svg>
+				<input
+					class="w-full bg-transparent text-[13px] outline-none placeholder:text-[var(--fg-4)]"
+					placeholder="Search faculty…"
+					bind:value={q}
+					oninput={() => (page = 1)}
+				/>
+			</div>
 		</div>
 	</div>
 

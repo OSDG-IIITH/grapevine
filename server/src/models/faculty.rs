@@ -47,7 +47,7 @@ pub struct FacultyDetail {
     pub offerings: Vec<OfferingWithCourse>,
 }
 
-pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<FacultyLean>, AppError> {
+pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<Vec<FacultyLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name, l.shortname as "lab?",
@@ -63,9 +63,29 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<FacultyLean>, Ap
     .fetch_all(pool)
     .await?;
 
-    Ok(rows.into_iter().map(|r| FacultyLean {
+    let mut results: Vec<FacultyLean> = rows.into_iter().map(|r| FacultyLean {
         id: r.id, slug: r.slug, name: r.name, lab: r.lab, overall: r.overall,
-    }).collect())
+    }).collect();
+
+    match sort {
+        Some("rating_desc") => results.sort_by(|a, b| {
+            match (a.overall == 0.0, b.overall == 0.0) {
+                (true, false) => std::cmp::Ordering::Greater,
+                (false, true) => std::cmp::Ordering::Less,
+                _ => b.overall.partial_cmp(&a.overall).unwrap_or(std::cmp::Ordering::Equal),
+            }
+        }),
+        Some("rating_asc") => results.sort_by(|a, b| {
+            match (a.overall == 0.0, b.overall == 0.0) {
+                (true, false) => std::cmp::Ordering::Greater,
+                (false, true) => std::cmp::Ordering::Less,
+                _ => a.overall.partial_cmp(&b.overall).unwrap_or(std::cmp::Ordering::Equal),
+            }
+        }),
+        _ => {}
+    }
+
+    Ok(results)
 }
 
 pub async fn id_by_slug(pool: &PgPool, slug: &str) -> Result<String, AppError> {
