@@ -135,6 +135,14 @@ export interface FlagResponse {
 	faculty_name?: string;
 }
 
+export interface SearchResult {
+	type: 'course' | 'faculty' | 'lab';
+	name: string;
+	code?: string;
+	slug?: string;
+	shortname?: string;
+}
+
 export interface AuthUser {
 	id: string;
 	display_name: string;

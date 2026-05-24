@@ -23,6 +23,7 @@ pub fn app(state: AppState) -> Router {
         .route("/auth/callback", get(cas::callback))
         .route("/auth/logout", post(cas::logout))
         .route("/me", get(handlers::auth::me))
+        .route("/search", get(handlers::search::search))
         .merge(courses::router())
         .merge(offerings::router())
         .merge(faculty::router())

@@ -2,38 +2,29 @@
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { searchOpen } from '$lib/stores';
-	import { getCourses, getFaculty, getLabs } from '$lib/api';
-	import type { CourseLean, FacultyLean, LabLean } from '$lib/types';
+	import { search } from '$lib/api';
+	import type { SearchResult } from '$lib/types';
 	import { IconBook, IconUser, IconFlask } from '@tabler/icons-svelte';
-
-	type ResultItem =
-		| { kind: 'course'; data: CourseLean; href: string }
-		| { kind: 'faculty'; data: FacultyLean; href: string }
-		| { kind: 'lab'; data: LabLean; href: string };
 
 	let q = $state('');
 	let loading = $state(false);
-	let courses = $state<CourseLean[]>([]);
-	let faculty = $state<FacultyLean[]>([]);
-	let labs = $state<LabLean[]>([]);
+	let results = $state<SearchResult[]>([]);
 	let active = $state(-1);
 	let timer: ReturnType<typeof setTimeout>;
 	let inputel: HTMLInputElement | undefined = $state();
 
-	const results = $derived<ResultItem[]>([
-		...courses.map((d) => ({ kind: 'course' as const, data: d, href: `/courses/${d.code}` })),
-		...faculty.map((d) => ({ kind: 'faculty' as const, data: d, href: `/faculty/${d.slug}` })),
-		...labs.map((d) => ({ kind: 'lab' as const, data: d, href: `/labs/${d.short}` })),
-	]);
+	function href(r: SearchResult) {
+		if (r.type === 'course') return `/courses/${r.code}`;
+		if (r.type === 'faculty') return `/faculty/${r.slug}`;
+		return `/labs/${r.shortname}`;
+	}
 
 	$effect(() => {
 		if ($searchOpen) {
 			tick().then(() => inputel?.focus());
 		} else {
 			q = '';
-			courses = [];
-			faculty = [];
-			labs = [];
+			results = [];
 			active = -1;
 		}
 	});
@@ -42,29 +33,20 @@
 		active = -1;
 		clearTimeout(timer);
 		if (!q.trim()) {
-			courses = [];
-			faculty = [];
-			labs = [];
+			results = [];
 			loading = false;
 			return;
 		}
 		loading = true;
 		timer = setTimeout(async () => {
-			const [c, f, l] = await Promise.all([
-				getCourses({ q }),
-				getFaculty({ q }),
-				getLabs(q),
-			]);
-			courses = c ?? [];
-			faculty = f ?? [];
-			labs = l ?? [];
+			results = await search(q);
 			loading = false;
 		}, 200);
 	}
 
-	function navigate(href: string) {
+	function navigate(r: SearchResult) {
 		searchOpen.set(false);
-		goto(href);
+		goto(href(r));
 	}
 
 	function onkeydown(e: KeyboardEvent) {
@@ -75,7 +57,7 @@
 			e.preventDefault();
 			active = Math.max(active - 1, -1);
 		} else if (e.key === 'Enter') {
-			if (active >= 0 && results[active]) navigate(results[active].href);
+			if (active >= 0 && results[active]) navigate(results[active]);
 		} else if (e.key === 'Escape') {
 			searchOpen.set(false);
 		}
@@ -85,12 +67,6 @@
 		document.body.appendChild(node);
 		return { destroy() { node.remove(); } };
 	}
-
-	const sections: { label: string; kind: ResultItem['kind'] }[] = [
-		{ label: 'Courses', kind: 'course' },
-		{ label: 'Faculty', kind: 'faculty' },
-		{ label: 'Labs', kind: 'lab' },
-	];
 </script>
 
 {#if $searchOpen}
@@ -137,41 +113,29 @@
 					</div>
 				{:else if results.length > 0}
 					<div class="max-h-[420px] overflow-y-auto py-2">
-						{#each sections as sec (sec.kind)}
-							{@const items = results.filter((r) => r.kind === sec.kind)}
-							{#if items.length > 0}
-								<div
-									class="px-4 pb-[6px] pt-3 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--fg-4)]"
-									style="font-family: var(--mono);"
-								>
-									{sec.label}
-								</div>
-								{#each items as item (item.data.id)}
-									{@const idx = results.indexOf(item)}
-									<button
-										type="button"
-										class="flex w-full items-center gap-3 px-4 py-[9px] text-left transition-colors duration-[80ms] {idx === active ? 'bg-[var(--bg-3)]' : 'hover:bg-[var(--bg-3)]'}"
-										onclick={() => navigate(item.href)}
-										onmouseenter={() => (active = idx)}
-									>
-										<span class="shrink-0 text-[var(--fg-3)]">
-											{#if item.kind === 'course'}
-												<IconBook size={14} />
-											{:else if item.kind === 'faculty'}
-												<IconUser size={14} />
-											{:else}
-												<IconFlask size={14} />
-											{/if}
-										</span>
-										<span class="flex-1 truncate text-[13px] text-[var(--fg)]">{item.data.name}</span>
-										{#if item.kind === 'course'}
-											<span class="shrink-0 text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{item.data.code}</span>
-										{:else if item.kind === 'lab'}
-											<span class="shrink-0 text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{item.data.short}</span>
-										{/if}
-									</button>
-								{/each}
-							{/if}
+						{#each results as r, i (i)}
+							<button
+								type="button"
+								class="flex w-full items-center gap-3 px-4 py-[9px] text-left transition-colors duration-[80ms] {i === active ? 'bg-[var(--bg-3)]' : 'hover:bg-[var(--bg-3)]'}"
+								onclick={() => navigate(r)}
+								onmouseenter={() => (active = i)}
+							>
+								<span class="shrink-0 text-[var(--fg-3)]">
+									{#if r.type === 'course'}
+										<IconBook size={14} />
+									{:else if r.type === 'faculty'}
+										<IconUser size={14} />
+									{:else}
+										<IconFlask size={14} />
+									{/if}
+								</span>
+								<span class="flex-1 truncate text-[13px] text-[var(--fg)]">{r.name}</span>
+								{#if r.type === 'course' && r.code}
+									<span class="shrink-0 text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.code}</span>
+								{:else if r.type === 'lab' && r.shortname}
+									<span class="shrink-0 text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.shortname}</span>
+								{/if}
+							</button>
 						{/each}
 					</div>
 				{/if}

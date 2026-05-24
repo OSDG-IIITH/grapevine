@@ -5,3 +5,5 @@ CREATE TABLE faculty (
   bio TEXT,
   lab_id TEXT REFERENCES labs(id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_faculty_name_trgm ON faculty USING GIN (name gin_trgm_ops);

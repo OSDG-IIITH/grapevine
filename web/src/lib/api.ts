@@ -4,6 +4,7 @@ import type {
 	CourseLean, CourseDetail, CourseReview,
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, AuthUser,
+	SearchResult,
 	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview
 } from './types';
@@ -80,13 +81,15 @@ export async function getLabs(q?: string): Promise<LabLean[] | null> {
 	return apifetch<LabLean[]>(`/labs${qs}`);
 }
 
-export async function searchAll(q: string): Promise<{ courses: CourseLean[]; faculty: FacultyLean[]; labs: LabLean[] }> {
-	const [courses, faculty, labs] = await Promise.all([
-		getCourses({ q }),
-		getFaculty({ q }),
-		getLabs(q),
-	]);
-	return { courses: courses ?? [], faculty: faculty ?? [], labs: labs ?? [] };
+export async function search(q: string): Promise<SearchResult[]> {
+	if (!q.trim()) return [];
+	try {
+		const res = await fetch(`${BASE}/search?q=${encodeURIComponent(q.trim())}`, { credentials: 'include' });
+		if (!res.ok) return [];
+		return res.json();
+	} catch {
+		return [];
+	}
 }
 
 export async function getLab(shortname: string): Promise<LabDetail | null> {

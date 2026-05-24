@@ -4,3 +4,4 @@ pub mod faculty;
 pub mod labs;
 pub mod reviews;
 pub mod admin;
+pub mod search;
