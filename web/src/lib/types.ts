@@ -172,3 +172,8 @@ export interface CreateAdvisorReview {
 }
 
 export interface EditAdvisorReview extends Partial<CreateAdvisorReview> {}
+
+export interface MyReviews {
+	course: CourseReview[];
+	advisor: AdvisorReview[];
+}

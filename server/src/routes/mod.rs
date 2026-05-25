@@ -14,7 +14,7 @@ pub fn app(state: AppState) -> Router {
     let origin: HeaderValue = state.cfg.frontend_url.parse().expect("invalid FRONTEND_URL");
     let cors = CorsLayer::new()
         .allow_origin(origin)
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH, Method::DELETE, Method::OPTIONS])
         .allow_headers([HeaderName::from_static("content-type"), HeaderName::from_static("authorization")])
         .allow_credentials(true);
 
@@ -22,7 +22,8 @@ pub fn app(state: AppState) -> Router {
         .route("/auth/login", get(cas::login))
         .route("/auth/callback", get(cas::callback))
         .route("/auth/logout", post(cas::logout))
-        .route("/me", get(handlers::auth::me))
+        .route("/me", get(handlers::auth::me).patch(handlers::auth::update_me))
+        .route("/me/reviews", get(handlers::auth::my_reviews))
         .route("/search", get(handlers::search::search))
         .merge(courses::router())
         .merge(offerings::router())

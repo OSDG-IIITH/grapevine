@@ -4,7 +4,7 @@ import type {
 	CourseLean, CourseDetail, CourseReview,
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, AuthUser,
-	SearchResult,
+	SearchResult, MyReviews,
 	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview
 } from './types';
@@ -102,6 +102,14 @@ export async function getOfferingReviews(offeringId: string): Promise<CourseRevi
 
 export async function getMe(): Promise<AuthUser | null> {
 	return apifetch<AuthUser>('/me');
+}
+
+export async function updateMe(display_name: string): Promise<AuthUser | null> {
+	return apifetch<AuthUser>('/me', json({ display_name }, 'PATCH'));
+}
+
+export async function getMyReviews(): Promise<MyReviews | null> {
+	return apifetch<MyReviews>('/me/reviews');
 }
 
 export async function createCourseReview(offeringId: string, body: CreateCourseReview): Promise<CourseReview | null> {

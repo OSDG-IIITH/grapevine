@@ -394,3 +394,75 @@ pub async fn flag_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
     .await?;
     Ok(())
 }
+
+pub async fn my_course_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<CourseReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
+                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.body,
+                  cr.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
+                  cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
+                  u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?"
+           FROM course_reviews cr
+           JOIN users u ON u.id = cr.user_id
+           LEFT JOIN course_review_votes v ON v.review_id = cr.id
+           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $1
+           WHERE cr.user_id = $1
+           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
+                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
+           ORDER BY cr.created_at DESC"#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| {
+        let overall = course_overall(r.difficulty, r.teaching, r.grading, r.content, r.workload);
+        let author = Some(AuthorRef { id: r.user_id, display_name: r.display_name });
+        CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
+            difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
+            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
+    }).collect())
+}
+
+pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<AdvisorReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
+                  ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
+                  ar.body,
+                  ar.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
+                  ar.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
+                  u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?"
+           FROM advisor_reviews ar
+           JOIN users u ON u.id = ar.user_id
+           LEFT JOIN advisor_review_votes v ON v.review_id = ar.id
+           LEFT JOIN advisor_review_votes uv ON uv.review_id = ar.id AND uv.user_id = $1
+           WHERE ar.user_id = $1
+           GROUP BY ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
+                    ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
+                    ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
+           ORDER BY ar.created_at DESC"#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| {
+        let overall = advisor_overall(r.research, r.availability, r.mentorship, r.support, r.workload);
+        let author = Some(AuthorRef { id: r.user_id, display_name: r.display_name });
+        AdvisorReview { id: r.id, faculty_id: r.faculty_id, author, anonymous: r.anonymous,
+            research: r.research, availability: r.availability, mentorship: r.mentorship, support: r.support,
+            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
+    }).collect())
+}

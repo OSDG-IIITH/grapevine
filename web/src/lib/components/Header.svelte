@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { currentUser, searchOpen } from '$lib/stores';
 	import { env } from '$env/dynamic/public';
 	import { IconSearch } from '@tabler/icons-svelte';
@@ -25,6 +26,24 @@
 	);
 
 	const ishome = $derived($page.url.pathname === '/');
+
+	let dropopen = $state(false);
+	let dropref = $state<HTMLDivElement | null>(null);
+
+	$effect(() => {
+		if (!dropopen) return;
+		function handle(e: MouseEvent) {
+			if (!dropref?.contains(e.target as Node)) dropopen = false;
+		}
+		document.addEventListener('click', handle);
+		return () => document.removeEventListener('click', handle);
+	});
+
+	async function logout() {
+		await fetch(`${env.PUBLIC_API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
+		currentUser.set(null);
+		goto('/');
+	}
 </script>
 
 <header
@@ -83,12 +102,40 @@
 		{/if}
 
 		{#if $currentUser}
-			<div
-				class="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-[var(--border-2)] text-[11px] font-medium tracking-[0.04em] text-[var(--fg)]"
-				style="background: linear-gradient(135deg, #2f4a33, #1a221d);"
-				title={$currentUser.display_name}
-			>
-				{initials}
+			<div class="relative" bind:this={dropref}>
+				<button
+					type="button"
+					aria-label="User menu"
+					onclick={() => (dropopen = !dropopen)}
+					class="inline-flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[var(--border-2)] text-[11px] font-medium tracking-[0.04em] text-[var(--fg)]"
+					style="background: linear-gradient(135deg, #2f4a33, #1a221d);"
+					title={$currentUser.display_name}
+				>
+					{initials}
+				</button>
+
+				{#if dropopen}
+					<div
+						class="absolute right-0 top-[calc(100%+8px)] z-[100] min-w-[180px] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-2)] shadow-lg"
+					>
+						<div class="px-3 py-[9px] text-[12px] text-[var(--fg-3)]">{$currentUser.display_name}</div>
+						<div class="border-t border-[var(--border)]"></div>
+						<a
+							href="/profile"
+							onclick={() => (dropopen = false)}
+							class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+						>
+							Profile
+						</a>
+						<button
+							type="button"
+							onclick={logout}
+							class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--danger)]"
+						>
+							Logout
+						</button>
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<a
