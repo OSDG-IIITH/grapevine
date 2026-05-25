@@ -40,8 +40,9 @@
 	}
 </script>
 
+
 <div
-	style="display: grid; grid-template-columns: repeat(5, 1fr); gap: {size === 'sm' ? '3px' : '4px'}; height: {size === 'sm' ? '5px' : '8px'};"
+	style="display: grid; grid-template-columns: repeat(5, 1fr); gap: {size === 'sm' ? '3px' : '4px'}; height: {size === 'sm' ? '5px' : '10px'};"
 	role={interactive ? 'group' : undefined}
 >
 	{#each [1, 2, 3, 4, 5] as i (i)}

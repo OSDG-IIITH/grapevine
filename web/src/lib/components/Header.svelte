@@ -22,6 +22,8 @@
 			.join('')
 			.toUpperCase() ?? ''
 	);
+
+	const ishome = $derived($page.url.pathname === '/');
 </script>
 
 <header
@@ -53,8 +55,10 @@
 		<button
 			type="button"
 			aria-label="Search"
+			aria-hidden={ishome}
+			disabled={ishome}
 			onclick={() => searchOpen.set(true)}
-			class="flex w-[320px] items-center gap-[10px] whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg-3)] transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg-2)]"
+			class="flex w-[320px] items-center gap-[10px] whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg-3)] transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg-2)] {ishome ? 'invisible pointer-events-none' : ''}"
 		>
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
 				<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />

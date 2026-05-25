@@ -27,7 +27,7 @@
 <SearchModal />
 <div class="relative z-[1] flex min-h-screen flex-col">
 	<Header />
-	<main class="flex-1">
+	<main class="flex flex-1 min-h-0 flex-col">
 		{@render children()}
 	</main>
 </div>

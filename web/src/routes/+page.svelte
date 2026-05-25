@@ -9,7 +9,10 @@
 	];
 </script>
 
-<div class="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-8 text-center">
+<div
+	class="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-8 text-center"
+	style="transform: translateY(-54px);"
+>
 	<h1
 		class="m-0 mb-4 text-[92px] font-normal leading-[0.95] tracking-[-0.02em] text-[var(--fg)]"
 		style="font-family: var(--serif);"
