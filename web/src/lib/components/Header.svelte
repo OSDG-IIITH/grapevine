@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { currentUser, searchOpen } from '$lib/stores';
 	import { env } from '$env/dynamic/public';
+	import { IconSearch } from '@tabler/icons-svelte';
 
 	const nav = [
 		{ id: 'courses', label: 'Courses', href: '/courses' },
@@ -27,8 +28,8 @@
 </script>
 
 <header
-	class="sticky top-0 z-50 grid items-center border-b border-[var(--border)] px-7 py-[14px] backdrop-blur-[14px]"
-	style="grid-template-columns: 1fr auto 1fr; background: rgba(18,24,20,0.78); backdrop-filter: blur(14px) saturate(120%);"
+	class="sticky top-0 z-50 flex items-center border-b border-[var(--border)] px-7 py-[14px]"
+	style="background: rgba(18,24,20,0.78); backdrop-filter: blur(14px) saturate(120%);"
 >
 	<div>
 		<a
@@ -40,7 +41,7 @@
 		</a>
 	</div>
 
-	<nav class="flex gap-1">
+	<nav class="absolute left-1/2 hidden -translate-x-1/2 gap-1 md:flex">
 		{#each nav as n (n.id)}
 			<a
 				href={n.href}
@@ -51,18 +52,16 @@
 		{/each}
 	</nav>
 
-	<div class="flex items-center justify-end gap-3">
+	<div class="ml-auto flex items-center gap-3">
 		<button
 			type="button"
 			aria-label="Search"
 			aria-hidden={ishome}
 			disabled={ishome}
 			onclick={() => searchOpen.set(true)}
-			class="flex w-[320px] items-center gap-[10px] whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg-3)] transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg-2)] {ishome ? 'invisible pointer-events-none' : ''}"
+			class="hidden w-[320px] items-center gap-[10px] whitespace-nowrap rounded-lg border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg-3)] transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg-2)] md:flex {ishome ? 'invisible pointer-events-none' : ''}"
 		>
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
-				<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
-			</svg>
+			<IconSearch size={14} stroke={2} class="shrink-0" aria-hidden />
 			<span class="overflow-hidden text-ellipsis whitespace-nowrap">Search courses, labs, faculty…</span>
 			<span
 				class="ml-auto shrink-0 whitespace-nowrap rounded border border-[var(--border-2)] bg-[var(--bg-3)] px-[6px] py-[2px] text-[11px] text-[var(--fg-3)]"
@@ -71,6 +70,17 @@
 				Ctrl K
 			</span>
 		</button>
+
+		{#if !ishome}
+			<button
+				type="button"
+				aria-label="Search"
+				onclick={() => searchOpen.set(true)}
+				class="flex h-[30px] w-[30px] items-center justify-center rounded-lg border border-[var(--border)] text-[var(--fg-3)] transition-colors duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg)] md:hidden"
+			>
+				<IconSearch size={15} stroke={1.8} aria-hidden />
+			</button>
+		{/if}
 
 		{#if $currentUser}
 			<div

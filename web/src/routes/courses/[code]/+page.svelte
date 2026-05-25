@@ -62,7 +62,7 @@
 	const selectedoffering = $derived(course && tab !== 'all' ? course.offerings.find((o) => o.id === tab) : null);
 </script>
 
-<div class="mx-auto w-full max-w-[1180px] px-8 pb-[120px] pt-10" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
+<div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 
 	{#if error}
 		<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">{error}</div>
@@ -73,7 +73,7 @@
 		<!-- page head -->
 		<div class="flex flex-wrap items-start justify-between gap-6">
 			<div>
-				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: 56px; line-height: 1.05; letter-spacing: -0.015em;">
+				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
 					{course.name}
 				</h1>
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
@@ -127,7 +127,7 @@
 				No reviews for this offering yet.
 			</div>
 		{:else}
-			<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+			<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
 				{#each shown as r (r.id)}
 					<ReviewCard
 						review={r}

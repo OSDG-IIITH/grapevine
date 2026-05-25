@@ -16,11 +16,11 @@
 </script>
 
 <div
-	class="mb-8 grid overflow-hidden rounded-[10px] border border-[var(--border)]"
-	style="grid-template-columns: 280px 1fr; background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107, 143, 111, 0.035), transparent 42%);"
+	class="mb-8 grid grid-cols-[auto_1fr] overflow-hidden rounded-[10px] border border-[var(--border)] sm:grid-cols-[280px_1fr]"
+	style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107, 143, 111, 0.035), transparent 42%);"
 >
 	<!-- overall score -->
-	<div class="flex flex-col justify-center gap-[6px] border-r border-[var(--border)] p-[26px_28px]">
+	<div class="flex flex-col justify-center gap-[6px] border-r border-[var(--border)] p-[20px_24px] sm:p-[26px_28px]">
 		<div
 			class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]"
 			style="font-family: var(--mono);"
@@ -46,17 +46,14 @@
 	</div>
 
 	<!-- axes -->
-	<div
-		class="grid items-center gap-[12px_18px] p-[22px_28px]"
-		style="grid-template-columns: 110px 1fr 40px;"
-	>
+	<div class="grid grid-cols-2 items-center gap-[12px_18px] p-[22px_28px] sm:grid-cols-[110px_1fr_40px]">
 		{#each axisorder as k (k)}
 			<div class="text-[13px] text-[var(--fg-2)]">{axislabels[k] ?? k}</div>
 			{#if bar === 'segmented'}
-				<SegBar score={axes[k] ?? 0} />
+				<div class="hidden sm:block"><SegBar score={axes[k] ?? 0} /></div>
 			{:else}
 				<div
-					class="relative h-2 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--bg-inset)]"
+					class="relative hidden h-2 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--bg-inset)] sm:block"
 					aria-label="{axes[k]?.toFixed(1)} of 5"
 				>
 					<div

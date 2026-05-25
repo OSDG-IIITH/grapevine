@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
 	import Header from '$lib/components/Header.svelte';
+	import BottomNav from '$lib/components/BottomNav.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { getMe } from '$lib/api';
 	import { currentUser, searchOpen } from '$lib/stores';
@@ -25,6 +26,7 @@
 
 <Toaster richColors />
 <SearchModal />
+<BottomNav />
 <div class="relative z-[1] flex min-h-screen flex-col">
 	<Header />
 	<main class="flex flex-1 min-h-0 flex-col">

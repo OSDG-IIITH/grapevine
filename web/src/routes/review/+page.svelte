@@ -115,7 +115,7 @@
 </script>
 
 {#if submitted}
-	<div class="mx-auto w-full px-8 pb-[120px] pt-10" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
+	<div class="mx-auto w-full px-6 pb-[120px] pt-10 sm:px-8" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 		<div
 			class="mx-auto mt-[60px] max-w-[560px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[40px] py-[60px] text-center"
 			style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
@@ -132,7 +132,7 @@
 		</div>
 	</div>
 {:else}
-	<div class="mx-auto w-full px-8 pb-[120px] pt-10" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
+	<div class="mx-auto w-full px-6 pb-[120px] pt-10 sm:px-8" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 		<Crumbs items={[{ label: 'grapevine', href: '/' }, { label: 'write a review' }]} />
 
 		<h1 class="mb-2 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: 44px; line-height: 1.05; letter-spacing: -0.015em;">
@@ -143,7 +143,7 @@
 			<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 		{:else}
 			<!-- Kind row -->
-			<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+			<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Reviewing
 				</div>
@@ -165,7 +165,7 @@
 
 			<!-- Course & offering / Faculty row -->
 			{#if kind === 'course'}
-				<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+				<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 					<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 						Course & offering
 					</div>
@@ -203,7 +203,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+				<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 					<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 						Faculty
 					</div>
@@ -228,7 +228,7 @@
 			{/if}
 
 			<!-- Ratings row -->
-			<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+			<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Ratings
 					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
@@ -247,7 +247,7 @@
 			</div>
 
 			<!-- Review text row -->
-			<div class="items-start border-b border-[var(--border)] py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+			<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Your review
 				</div>
@@ -268,7 +268,7 @@
 			</div>
 
 			<!-- Visibility + actions row -->
-			<div class="items-center py-6" style="display: grid; grid-template-columns: 200px 1fr; gap: 32px;">
+			<div class="grid grid-cols-1 gap-4 py-6 sm:grid-cols-[200px_1fr] sm:items-center sm:gap-[32px]">
 				<div class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Visibility
 				</div>

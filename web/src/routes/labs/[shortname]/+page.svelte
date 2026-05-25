@@ -24,7 +24,7 @@
 	});
 </script>
 
-<div class="mx-auto w-full max-w-[1180px] px-8 pb-[120px] pt-10" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
+<div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 
 	{#if error}
 		<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">{error}</div>
@@ -39,7 +39,7 @@
 		<!-- page head -->
 		<div class="flex flex-wrap items-start justify-between gap-6">
 			<div>
-				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: 56px; line-height: 1.05; letter-spacing: -0.015em;">
+				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
 					{lab.name}
 				</h1>
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
@@ -79,15 +79,16 @@
 				{#each lab.faculty as m (m.id)}
 					<a
 						href="/faculty/{m.slug}"
-						class="grid items-center gap-5 border-b border-[var(--border)] px-5 py-4 transition-colors duration-[120ms] last:border-b-0 hover:bg-[var(--bg-3)]"
-						style="grid-template-columns: 1fr 200px 60px;"
+						class="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-[var(--border)] px-5 py-4 transition-colors duration-[120ms] last:border-b-0 hover:bg-[var(--bg-3)]"
 					>
-						<div>
+						<div class="min-w-[140px] flex-1">
 							<div class="text-[14px] text-[var(--fg)]">{m.name}</div>
 							<div class="mt-[2px] text-[12px] text-[var(--fg-3)]">{m.title}</div>
 						</div>
-						<SegBar score={m.overall ?? 0} size="sm" />
-						<div class="text-right text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(m.overall ?? 0).toFixed(1)}</div>
+						<div class="flex min-w-[120px] flex-1 items-center gap-3">
+							<div class="flex-1"><SegBar score={m.overall ?? 0} size="sm" /></div>
+							<span class="shrink-0 text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">{(m.overall ?? 0).toFixed(1)}</span>
+						</div>
 					</a>
 				{/each}
 			</div>
