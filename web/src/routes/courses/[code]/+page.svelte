@@ -136,6 +136,7 @@
 						showoffering={tab === 'all'}
 						offeringcode={offeringmap[r.offering_id]}
 						ondelete={(id) => (reviews = reviews.filter((item) => item.id !== id))}
+						onedit={(updated) => (reviews = reviews.map((item) => item.id === updated.id ? updated : item))}
 					/>
 				{/each}
 			</div>

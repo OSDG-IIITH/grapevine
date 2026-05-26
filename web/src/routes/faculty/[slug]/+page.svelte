@@ -137,6 +137,7 @@
 							axisorder={[...ADVISOR_AXIS_ORDER]}
 							axislabels={ADVISOR_AXIS_LABELS}
 							ondelete={(id) => (advisorreviews = advisorreviews.filter((item) => item.id !== id))}
+							onedit={(updated) => (advisorreviews = advisorreviews.map((item) => item.id === updated.id ? updated : item))}
 						/>
 					{/each}
 				</div>
@@ -173,6 +174,7 @@
 							offeringcode={r.offeringcode}
 							coursecode={r.coursecode}
 							ondelete={(id) => (instructorreviews = instructorreviews.filter((item) => item.id !== id))}
+							onedit={(updated) => (instructorreviews = instructorreviews.map((item) => item.id === updated.id ? { ...item, ...updated } : item))}
 						/>
 					{/each}
 				</div>

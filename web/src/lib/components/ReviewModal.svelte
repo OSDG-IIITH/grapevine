@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CourseReview, AdvisorReview } from '$lib/types';
-	import { IconFlag, IconTrash } from '@tabler/icons-svelte';
+	import { IconFlag, IconTrash, IconPencil, IconCheck } from '@tabler/icons-svelte';
 	import SegBar from './SegBar.svelte';
 
 	interface Props {
@@ -14,13 +14,21 @@
 		flagged: boolean;
 		canDelete: boolean;
 		deleting: boolean;
+		editing: boolean;
+		saving: boolean;
+		editbody: string;
+		editvalues: Record<string, number>;
 		onvote: (v: 0 | 1 | -1) => void;
 		onflag: () => void;
+		oneditstart: () => void;
+		oneditvalue: (k: string, v: number) => void;
+		oneditbody: (v: string) => void;
+		onsaved: () => void;
 		ondelete: () => void;
 		onclose: () => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, onvote, onflag, ondelete, onclose }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, editing, saving, editbody, editvalues, onvote, onflag, oneditstart, oneditvalue, oneditbody, onsaved, ondelete, onclose }: Props = $props();
 
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
@@ -28,6 +36,8 @@
 	const basedown = $derived(review.downvotes - (initialvote === -1 ? 1 : 0));
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
+	const canflag = $derived(!canDelete);
+	const cansave = $derived(editing && !saving && editbody.trim().length > 20);
 
 	function portal(node: HTMLElement) {
 		document.body.appendChild(node);
@@ -123,8 +133,13 @@
 		>
 			{#each axisorder as k (k)}
 				<span class="text-[12px] text-[var(--fg-3)]">{axislabels[k] ?? k}</span>
-				<SegBar score={axisval(k)} size="sm" />
-				<span class="text-right text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{axisval(k).toFixed(1)}</span>
+				{#if editing}
+					<SegBar score={editvalues[k] ?? axisval(k)} size="md" interactive onchange={(v) => oneditvalue(k, v)} />
+					<span class="text-right text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{(editvalues[k] ?? axisval(k)).toFixed(1)}</span>
+				{:else}
+					<SegBar score={axisval(k)} size="sm" />
+					<span class="text-right text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{axisval(k).toFixed(1)}</span>
+				{/if}
 			{/each}
 		</div>
 
@@ -133,7 +148,17 @@
 			class="flex-1 overflow-y-auto p-[18px_22px] text-[14px] leading-[1.7] text-[var(--fg)]"
 			style="white-space: pre-wrap; text-wrap: pretty;"
 		>
-			{review.body}
+			{#if editing}
+				<textarea
+					class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[12px] text-[14px] leading-[1.6] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
+					style="min-height: 140px;"
+					placeholder="Share your experience."
+					value={editbody}
+					oninput={(e) => oneditbody((e.target as HTMLTextAreaElement).value)}
+				></textarea>
+			{:else}
+				{review.body}
+			{/if}
 		</div>
 
 		<!-- footer -->
@@ -165,17 +190,43 @@
 				</button>
 			</div>
 			<div class="flex items-center gap-2">
-				<button
-					type="button"
-					onclick={onflag}
-					class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] transition-[color,background] duration-[120ms] {flagged ? 'bg-[var(--danger-bg)] text-[var(--danger)]' : 'text-[var(--fg-3)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]'}"
-					style="font-family: var(--mono);"
-					aria-label={flagged ? 'Flagged' : 'Flag review'}
-				>
-					<IconFlag size={13} stroke={1.7} />
-					{flagged ? 'flagged' : 'flag'}
-				</button>
+				{#if canflag}
+					<button
+						type="button"
+						onclick={onflag}
+						class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] transition-[color,background] duration-[120ms] {flagged ? 'bg-[var(--danger-bg)] text-[var(--danger)]' : 'text-[var(--fg-3)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]'}"
+						style="font-family: var(--mono);"
+						aria-label={flagged ? 'Flagged' : 'Flag review'}
+					>
+						<IconFlag size={13} stroke={1.7} />
+						{flagged ? 'flagged' : 'flag'}
+					</button>
+				{/if}
 				{#if canDelete}
+					{#if editing}
+						<button
+							type="button"
+							onclick={onsaved}
+							disabled={!cansave}
+							class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] transition-[color,background] duration-[120ms] {cansave ? 'text-[var(--fg-2)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]' : 'text-[var(--fg-4)]'}"
+							style="font-family: var(--mono);"
+							aria-label="Save review"
+						>
+							<IconCheck size={13} stroke={1.7} />
+							{saving ? 'saving…' : 'save'}
+						</button>
+					{:else}
+						<button
+							type="button"
+							onclick={oneditstart}
+							class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] text-[var(--fg-3)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+							style="font-family: var(--mono);"
+							aria-label="Edit review"
+						>
+							<IconPencil size={13} stroke={1.7} />
+							edit
+						</button>
+					{/if}
 					<button
 						type="button"
 						onclick={ondelete}

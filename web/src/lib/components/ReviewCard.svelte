@@ -1,13 +1,14 @@
 <script lang="ts">
-	import type { CourseReview, AdvisorReview } from '$lib/types';
+	import type { CourseReview, AdvisorReview, EditCourseReview, EditAdvisorReview } from '$lib/types';
 	import {
 		voteCourseReview, unvoteCourseReview,
 		voteAdvisorReview, unvoteAdvisorReview,
 		flagCourseReview, flagAdvisorReview,
-		deleteCourseReview, deleteAdvisorReview
+		deleteCourseReview, deleteAdvisorReview,
+		editCourseReview, editAdvisorReview
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
-	import { IconFlag, IconTrash } from '@tabler/icons-svelte';
+	import { IconFlag, IconTrash, IconPencil } from '@tabler/icons-svelte';
 	import ReviewModal from './ReviewModal.svelte';
 	import FlagModal from './FlagModal.svelte';
 
@@ -19,9 +20,10 @@
 		offeringcode?: string;
 		coursecode?: string;
 		ondelete?: (id: string) => void;
+		onedit?: (updated: CourseReview | AdvisorReview) => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, ondelete }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, ondelete, onedit }: Props = $props();
 
 	let open = $state(false);
 	// svelte-ignore state_referenced_locally
@@ -30,6 +32,10 @@
 	let flagopen = $state(false);
 	let flagsending = $state(false);
 	let deleting = $state(false);
+	let editmode = $state(false);
+	let saving = $state(false);
+	let editbody = $state('');
+	let editvalues = $state<Record<string, number>>({});
 
 	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
 	const stars = $derived(Math.round(review.overall ?? 0));
@@ -39,6 +45,8 @@
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
 	const canDelete = $derived(!!$currentUser && !!review.author && $currentUser.id === review.author.id);
+	const canflag = $derived(!canDelete);
+	const cansave = $derived(editmode && !saving && editbody.trim().length > 20);
 
 	function fmtdate(iso: string): string {
 		return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -46,6 +54,12 @@
 
 	function stop(e: Event) {
 		e.stopPropagation();
+	}
+
+	function axisfromreview(): Record<string, number> {
+		const out: Record<string, number> = {};
+		for (const k of axisorder) out[k] = ((review as unknown) as Record<string, number>)[k] ?? 0;
+		return out;
 	}
 
 	async function handlevote(newvote: 0 | 1 | -1) {
@@ -71,6 +85,36 @@
 		flagopen = false;
 	}
 
+	function startedit(e?: Event) {
+		if (e) stop(e);
+		if (!canDelete) return;
+		editmode = true;
+		editbody = review.body;
+		editvalues = axisfromreview();
+		open = true;
+	}
+
+	function seteditvalue(k: string, v: number) {
+		editvalues = { ...editvalues, [k]: v };
+	}
+
+	async function handlesave() {
+		if (!canDelete || !cansave) return;
+		saving = true;
+		const payload = { body: editbody.trim() } as EditCourseReview | EditAdvisorReview;
+		const base = axisfromreview();
+		for (const k of axisorder) (payload as Record<string, number>)[k] = editvalues[k] ?? base[k];
+		const updated = kind === 'course'
+			? await editCourseReview(review.id, payload as EditCourseReview)
+			: await editAdvisorReview(review.id, payload as EditAdvisorReview);
+		saving = false;
+		if (!updated) return;
+		review = updated;
+		vote = (updated.user_vote ?? 0) as 0 | 1 | -1;
+		onedit?.(updated);
+		editmode = false;
+	}
+
 	async function handledelete() {
 		if (!canDelete || deleting) return;
 		deleting = true;
@@ -80,6 +124,8 @@
 		deleting = false;
 		if (!ok) return;
 		ondelete?.(review.id);
+		editmode = false;
+		saving = false;
 		open = false;
 	}
 </script>
@@ -165,14 +211,25 @@
 			</svg>
 			<span class="min-w-[14px] text-left">{showndown}</span>
 		</button>
-		<button
-			type="button"
-			aria-label={flagged ? 'Flagged' : 'Flag review'}
-			onclick={(e) => { stop(e); if (!flagged) flagopen = true; }}
-			class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] {flagged ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--danger)]'}"
-		>
-			<IconFlag size={13} stroke={1.7} fill={flagged ? 'currentColor' : 'none'} />
-		</button>
+		{#if canflag}
+			<button
+				type="button"
+				aria-label={flagged ? 'Flagged' : 'Flag review'}
+				onclick={(e) => { stop(e); if (!flagged) flagopen = true; }}
+				class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] {flagged ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--danger)]'}"
+			>
+				<IconFlag size={13} stroke={1.7} fill={flagged ? 'currentColor' : 'none'} />
+			</button>
+		{:else}
+			<button
+				type="button"
+				aria-label="Edit review"
+				onclick={startedit}
+				class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--fg)]"
+			>
+				<IconPencil size={13} stroke={1.7} />
+			</button>
+		{/if}
 		{#if canDelete}
 			<button
 				type="button"
@@ -199,10 +256,18 @@
 		{flagged}
 		{canDelete}
 		{deleting}
+		editing={editmode}
+		saving={saving}
+		editbody={editbody}
+		editvalues={editvalues}
 		onvote={(v) => handlevote(v)}
-		onflag={() => { if (!flagged) flagopen = true; }}
+		onflag={() => { if (canflag && !flagged) flagopen = true; }}
+		oneditstart={startedit}
+		oneditvalue={seteditvalue}
+		oneditbody={(v) => (editbody = v)}
+		onsaved={handlesave}
 		ondelete={handledelete}
-		onclose={() => (open = false)}
+		onclose={() => { open = false; editmode = false; saving = false; }}
 	/>
 {/if}
 
