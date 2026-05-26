@@ -4,6 +4,7 @@ use crate::error::AppError;
 use super::offering::Season;
 
 #[derive(Debug, Serialize, Deserialize, sqlx::Type)]
+#[serde(rename_all = "lowercase")]
 #[sqlx(type_name = "course_type", rename_all = "lowercase")]
 pub enum CourseType {
     Core,
