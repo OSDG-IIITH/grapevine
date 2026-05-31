@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO course_review_flags (id, user_id, review_id, reason)\n           VALUES ($1, $2, $3, $4)\n           ON CONFLICT (user_id, review_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "641798baa82a87d69a3c870bb84186eb5af4dd69ac442002aae4c0c304c6e3bb"
+}

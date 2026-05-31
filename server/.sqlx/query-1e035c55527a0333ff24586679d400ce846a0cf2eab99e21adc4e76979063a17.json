@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO course_review_votes (id, user_id, review_id, vote)\n           VALUES ($1, $2, $3, $4)\n           ON CONFLICT (user_id, review_id) DO UPDATE SET vote = EXCLUDED.vote",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1e035c55527a0333ff24586679d400ce846a0cf2eab99e21adc4e76979063a17"
+}

@@ -1,0 +1,119 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.body,\n                  cr.edited_at as \"edited_at?: chrono::DateTime<chrono::Utc>\",\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name,\n                  COALESCE(SUM(v.vote), 0)::bigint as \"score!\",\n                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as \"upvotes!\",\n                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as \"downvotes!\",\n                  uv.vote as \"user_vote?\"\n           FROM course_reviews cr\n           JOIN users u ON u.id = cr.user_id\n           LEFT JOIN course_review_votes v ON v.review_id = cr.id\n           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2\n           WHERE cr.offering_id = $1\n           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote\n           ORDER BY \"score!\" DESC, cr.created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "offering_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "anonymous",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "difficulty",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 5,
+        "name": "teaching",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 6,
+        "name": "grading",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 7,
+        "name": "content",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 8,
+        "name": "workload",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 9,
+        "name": "body",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "edited_at?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "display_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "score!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 14,
+        "name": "upvotes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 15,
+        "name": "downvotes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 16,
+        "name": "user_vote?",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      null,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "b7515bc4708e5a43cd7c6dd4c0798b0c76b248cfdc7a1a773291ff9a40582dad"
+}

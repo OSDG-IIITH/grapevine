@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM advisor_review_votes WHERE user_id = $1 AND review_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c84d80c640d0034566fc3defd0e28d74f8b3697268eba29920e3bf220c51d4fe"
+}

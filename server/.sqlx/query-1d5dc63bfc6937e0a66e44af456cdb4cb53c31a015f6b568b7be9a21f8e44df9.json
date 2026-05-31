@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM course_review_votes WHERE user_id = $1 AND review_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1d5dc63bfc6937e0a66e44af456cdb4cb53c31a015f6b568b7be9a21f8e44df9"
+}

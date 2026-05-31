@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.id, f.slug, f.name, l.shortname as \"lab?\",\n                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as \"overall!: f64\"\n           FROM faculty f\n           LEFT JOIN labs l ON l.id = f.lab_id\n           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id\n           WHERE ($1::text IS NULL OR f.name ILIKE $1)\n           GROUP BY f.id, f.slug, f.name, l.shortname\n           ORDER BY f.name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "lab?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "overall!: f64",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "c1ee125bcf4022f97031c409233684a2519d5f6227261f2ef2ff1dbd18e5cf20"
+}

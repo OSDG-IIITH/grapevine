@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users (id, cas_id, display_name)\n        VALUES ($1, $2, $3)\n        ON CONFLICT (cas_id) DO UPDATE\n            SET cas_id = EXCLUDED.cas_id,\n                display_name = EXCLUDED.display_name\n        RETURNING id, is_admin\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "is_admin",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "c0146aaab1e82762ddf691c80d2f2c2ac7f96d746fff71cb88863c20c2e394e5"
+}
