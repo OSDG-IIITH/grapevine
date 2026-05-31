@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO faculty (id, name, slug, bio, lab_id)\n             VALUES ($1, $2, $3, $4, $5)\n             ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, bio = EXCLUDED.bio, lab_id = EXCLUDED.lab_id\n             RETURNING id, slug",
+  "query": "INSERT INTO faculty (id, name, slug, bio)\n             VALUES ($1, $2, $3, $4)\n             ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, bio = EXCLUDED.bio\n             RETURNING id, slug",
   "describe": {
     "columns": [
       {
@@ -19,7 +19,6 @@
         "Text",
         "Text",
         "Text",
-        "Text",
         "Text"
       ]
     },
@@ -28,5 +27,5 @@
       false
     ]
   },
-  "hash": "bc8ec1eabfe2a657bfd5bc38ba40a8ce93bf919c9f439180b5696261b83b0041"
+  "hash": "9f8e9c1741a3de2979b7d353a0781ffcaf730669a7bd6edb1f59490c49081988"
 }

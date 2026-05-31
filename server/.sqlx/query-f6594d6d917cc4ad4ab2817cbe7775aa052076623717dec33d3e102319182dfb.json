@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT fl.faculty_id, l.id, l.shortname, l.name\n           FROM faculty_labs fl\n           JOIN labs l ON l.id = fl.lab_id\n           WHERE fl.faculty_id = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "faculty_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "shortname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f6594d6d917cc4ad4ab2817cbe7775aa052076623717dec33d3e102319182dfb"
+}
