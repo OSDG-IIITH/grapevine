@@ -79,7 +79,7 @@
 	async function submit() {
 		if (!cansubmit) return;
 		if (!get(currentUser)) {
-			window.location.href = `${PUBLIC_API_URL || '/api'}/auth/login`;
+			window.location.href = `${PUBLIC_API_URL || '/grapevine/api'}/auth/login`;
 			return;
 		}
 		submitting = true;

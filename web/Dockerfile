@@ -5,7 +5,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 ARG BASE_PATH=""
 ENV BASE_PATH=$BASE_PATH
-ARG PUBLIC_API_URL="/api"
+ARG PUBLIC_API_URL="/grapevine/api"
 ENV PUBLIC_API_URL=$PUBLIC_API_URL
 RUN bun run build
 

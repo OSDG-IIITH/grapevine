@@ -9,7 +9,7 @@ import type {
 	CreateAdvisorReview, EditAdvisorReview
 } from './types';
 
-const BASE = PUBLIC_API_URL || '/api';
+const BASE = PUBLIC_API_URL || '/grapevine/api';
 
 async function apifetch<T>(path: string, options?: RequestInit): Promise<T | null> {
 	try {

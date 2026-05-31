@@ -41,7 +41,7 @@
 	});
 
 	async function logout() {
-		await fetch(`${PUBLIC_API_URL || '/api'}/auth/logout`, { method: 'POST', credentials: 'include' });
+		await fetch(`${PUBLIC_API_URL || '/grapevine/api'}/auth/logout`, { method: 'POST', credentials: 'include' });
 		currentUser.set(null);
 		goto(base + '/');
 	}
@@ -140,7 +140,7 @@
 			</div>
 		{:else}
 			<a
-				href="{PUBLIC_API_URL || '/api'}/auth/login"
+				href="{PUBLIC_API_URL || '/grapevine/api'}/auth/login"
 				class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[6px] text-[13px] text-[var(--fg-2)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
 			>
 				Login
