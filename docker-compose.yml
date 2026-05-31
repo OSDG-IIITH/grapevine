@@ -1,8 +1,43 @@
 services:
   postgres:
     image: postgres:15-alpine
-    ports:
-      - "5433:5432"
+    restart: unless-stopped
     env_file: .env
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - grapevine-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - grapevine-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        BASE_PATH: /grapevine
+    restart: unless-stopped
+    ports:
+      - "4001:80"
+    networks:
+      - grapevine-network
+    depends_on:
+      - backend
+
+networks:
+  grapevine-network:
