@@ -19,6 +19,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file: .env
+    environment:
+      - DATABASE_URL=postgres://student:iiith@postgres:5432/grapevine
     networks:
       - grapevine-network
     depends_on:
