@@ -17,5 +17,5 @@ RUN cargo build --release --locked
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
-COPY --from=builder /app/target/release/grapevine /app/grapevine
+COPY --from=builder /app/target/release/server /app/grapevine
 ENTRYPOINT ["/app/grapevine"]
