@@ -49,7 +49,8 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<LabLean>, AppErr
                   COUNT(DISTINCT f.id)::int8 as "facultycount!: i64",
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM labs l
-           LEFT JOIN faculty f ON f.lab_id = l.id
+           LEFT JOIN faculty_labs fl ON fl.lab_id = l.id
+           LEFT JOIN faculty f ON f.id = fl.faculty_id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
            WHERE ($1::text IS NULL OR l.shortname ILIKE $1 OR l.name ILIKE $1)
            GROUP BY l.id, l.shortname, l.name, l.description
@@ -85,7 +86,8 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
                 COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM advisor_reviews r
            JOIN faculty f ON f.id = r.faculty_id
-           WHERE f.lab_id = $1"#,
+           JOIN faculty_labs fl ON fl.faculty_id = f.id
+           WHERE fl.lab_id = $1"#,
         row.id
     )
     .fetch_one(pool)
@@ -95,8 +97,9 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
         r#"SELECT f.id, f.slug, f.name,
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
+           JOIN faculty_labs fl ON fl.faculty_id = f.id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
-           WHERE f.lab_id = $1
+           WHERE fl.lab_id = $1
            GROUP BY f.id, f.slug, f.name
            ORDER BY f.name"#,
         row.id

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::Serialize;
 use sqlx::PgPool;
 use crate::error::AppError;
@@ -8,7 +9,7 @@ pub struct FacultyLean {
     pub id: String,
     pub slug: String,
     pub name: String,
-    pub lab: Option<String>,
+    pub labs: Vec<LabRef>,
     pub overall: f64,
 }
 
@@ -43,28 +44,44 @@ pub struct FacultyDetail {
     pub bio: String,
     pub title: String,
     pub overall: f64,
-    pub lab: Option<LabRef>,
+    pub labs: Vec<LabRef>,
     pub offerings: Vec<OfferingWithCourse>,
 }
 
 pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<Vec<FacultyLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
-        r#"SELECT f.id, f.slug, f.name, l.shortname as "lab?",
+        r#"SELECT f.id, f.slug, f.name,
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
-           LEFT JOIN labs l ON l.id = f.lab_id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
            WHERE ($1::text IS NULL OR f.name ILIKE $1)
-           GROUP BY f.id, f.slug, f.name, l.shortname
+           GROUP BY f.id, f.slug, f.name
            ORDER BY f.name"#,
         pattern
     )
     .fetch_all(pool)
     .await?;
 
+    let ids: Vec<String> = rows.iter().map(|r| r.id.clone()).collect();
+    let lab_rows = sqlx::query!(
+        r#"SELECT fl.faculty_id, l.id, l.shortname, l.name
+           FROM faculty_labs fl
+           JOIN labs l ON l.id = fl.lab_id
+           WHERE fl.faculty_id = ANY($1)"#,
+        &ids as &[String]
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let mut labs_map: HashMap<String, Vec<LabRef>> = HashMap::new();
+    for lr in lab_rows {
+        labs_map.entry(lr.faculty_id).or_default().push(LabRef { id: lr.id, short: lr.shortname, name: lr.name });
+    }
+
     let mut results: Vec<FacultyLean> = rows.into_iter().map(|r| FacultyLean {
-        id: r.id, slug: r.slug, name: r.name, lab: r.lab, overall: r.overall,
+        labs: labs_map.remove(&r.id).unwrap_or_default(),
+        id: r.id, slug: r.slug, name: r.name, overall: r.overall,
     }).collect();
 
     match sort {
@@ -98,23 +115,28 @@ pub async fn id_by_slug(pool: &PgPool, slug: &str) -> Result<String, AppError> {
 pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, AppError> {
     let row = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name, f.bio,
-                  l.id as "lid?", l.shortname as "lshort?", l.name as "lname?",
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
-           LEFT JOIN labs l ON l.id = f.lab_id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
            WHERE f.slug = $1
-           GROUP BY f.id, f.slug, f.name, f.bio, l.id, l.shortname, l.name"#,
+           GROUP BY f.id, f.slug, f.name, f.bio"#,
         slug
     )
     .fetch_optional(pool)
     .await?
     .ok_or(AppError::NotFound)?;
 
-    let lab = match (row.lid, row.lshort, row.lname) {
-        (Some(id), Some(short), Some(name)) => Some(LabRef { id, short, name }),
-        _ => None,
-    };
+    let lab_rows = sqlx::query!(
+        r#"SELECT l.id, l.shortname, l.name
+           FROM faculty_labs fl
+           JOIN labs l ON l.id = fl.lab_id
+           WHERE fl.faculty_id = $1"#,
+        row.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let labs: Vec<LabRef> = lab_rows.into_iter().map(|r| LabRef { id: r.id, short: r.shortname, name: r.name }).collect();
 
     let offering_rows = sqlx::query!(
         r#"SELECT o.id as oid, o.season as "season: Season", o.year,
@@ -142,6 +164,6 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
         bio: row.bio.unwrap_or_default(),
         title: String::new(),
         overall: row.overall,
-        lab, offerings,
+        labs, offerings,
     })
 }

@@ -10,7 +10,7 @@ export interface FacultyLean {
 	id: string;
 	name: string;
 	slug: string;
-	lab: string | null;
+	labs: { id: string; name: string; short: string }[];
 	overall: number;
 }
 
@@ -21,7 +21,7 @@ export interface FacultyDetail {
 	bio: string;
 	title: string;
 	overall: number;
-	lab: { id: string; name: string; short: string } | null;
+	labs: { id: string; name: string; short: string }[];
 	offerings: { id: string; code: string; season: string; year: number; course: { id: string; code: string; name: string } }[];
 }
 

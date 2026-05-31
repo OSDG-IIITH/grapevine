@@ -50,8 +50,8 @@
 	{:else if kind === 'faculty'}
 		{@const f = item as FacultyLean}
 		<div class="flex items-center justify-between gap-[10px]">
-			{#if f.lab}
-				<span class="text-[11px] tracking-[0.04em] text-[var(--fg-3)]" style="font-family: var(--mono);">{f.lab}</span>
+			{#if f.labs.length > 0}
+				<span class="text-[11px] tracking-[0.04em] text-[var(--fg-3)]" style="font-family: var(--mono);">{f.labs.map((l) => l.short).join(' · ')}</span>
 			{:else}
 				<span></span>
 			{/if}

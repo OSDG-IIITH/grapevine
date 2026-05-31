@@ -89,10 +89,12 @@
 				</h1>
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
 					<span class="text-[11px] tracking-[0.04em] text-[var(--fg-4)]" style="font-family: var(--mono);">{faculty.title.toLowerCase()}</span>
-					{#if faculty.lab}
-						<a href="{base}/labs/{faculty.lab.short}" class="text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]">{faculty.lab.name}</a>
-						<span class="text-[var(--fg-4)]">·</span>
-						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{faculty.lab.short}</span>
+					{#if faculty.labs.length > 0}
+						{#each faculty.labs as lab, i (lab.id)}
+							{#if i > 0}<span class="text-[var(--fg-4)]">·</span>{/if}
+							<a href="{base}/labs/{lab.short}" class="text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]">{lab.name}</a>
+							<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{lab.short}</span>
+						{/each}
 					{:else}
 						<span class="text-[var(--fg-3)]">Independent</span>
 					{/if}

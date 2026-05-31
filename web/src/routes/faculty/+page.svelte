@@ -28,8 +28,8 @@
 	const filtered = $derived(
 		all.filter((f) => {
 			if (labfilter !== 'all') {
-				if (labfilter === 'independent' && f.lab) return false;
-				if (labfilter !== 'independent' && f.lab !== labfilter) return false;
+				if (labfilter === 'independent' && f.labs.length > 0) return false;
+				if (labfilter !== 'independent' && !f.labs.some((l) => l.short === labfilter)) return false;
 			}
 			if (q.trim() && !f.name.toLowerCase().includes(q.toLowerCase())) return false;
 			return true;

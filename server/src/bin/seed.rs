@@ -14,7 +14,8 @@ struct Lab {
 struct Faculty {
     name: String,
     slug: String,
-    lab: Option<String>,
+    #[serde(default)]
+    labs: Vec<String>,
     bio: Option<String>,
 }
 
@@ -75,21 +76,31 @@ async fn main() {
     println!("[seed] inserting {} faculty...", faculty.len());
     let mut faculty_ids: HashMap<String, String> = HashMap::new();
     for f in &faculty {
-        let lab_id = f.lab.as_deref().map(|s| {
-            lab_ids.get(s).unwrap_or_else(|| panic!("[seed] ERROR: lab shortname \"{s}\" in faculty.json not found in labs.json")).clone()
-        });
         let id = Ulid::new().to_string();
         let row = sqlx::query!(
-            "INSERT INTO faculty (id, name, slug, bio, lab_id)
-             VALUES ($1, $2, $3, $4, $5)
-             ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, bio = EXCLUDED.bio, lab_id = EXCLUDED.lab_id
+            "INSERT INTO faculty (id, name, slug, bio)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, bio = EXCLUDED.bio
              RETURNING id, slug",
-            id, f.name, f.slug, f.bio, lab_id
+            id, f.name, f.slug, f.bio
         )
         .fetch_one(&pool)
         .await
         .unwrap_or_else(|e| panic!("[seed] failed inserting faculty {}: {e}", f.slug));
-        faculty_ids.insert(row.slug, row.id);
+        faculty_ids.insert(row.slug.clone(), row.id.clone());
+
+        for lab_short in &f.labs {
+            let lab_id = lab_ids.get(lab_short)
+                .unwrap_or_else(|| panic!("[seed] ERROR: lab shortname \"{lab_short}\" in faculty.json not found in labs.json"))
+                .clone();
+            sqlx::query!(
+                "INSERT INTO faculty_labs (faculty_id, lab_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                row.id, lab_id
+            )
+            .execute(&pool)
+            .await
+            .unwrap_or_else(|e| panic!("[seed] failed inserting faculty_labs for {}: {e}", f.slug));
+        }
     }
 
     // courses
