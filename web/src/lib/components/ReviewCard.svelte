@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { CourseReview, AdvisorReview, EditCourseReview, EditAdvisorReview } from '$lib/types';
 	import {
 		voteCourseReview, unvoteCourseReview,
@@ -156,7 +157,7 @@
 				<span class="text-[var(--fg-4)]">·</span>
 				{#if coursecode}
 					<a
-						href={`/courses/${encodeURIComponent(coursecode)}`}
+						href={`${base}/courses/${encodeURIComponent(coursecode)}`}
 						onclick={stop}
 						class="text-[11px] tracking-[0.04em] text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]"
 						style="font-family: var(--mono);"

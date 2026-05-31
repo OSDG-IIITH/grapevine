@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { base } from '$app/paths';
 	import { getLab } from '$lib/api';
 	import type { LabDetail } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
@@ -78,7 +79,7 @@
 			>
 				{#each lab.faculty as m (m.id)}
 					<a
-						href="/faculty/{m.slug}"
+						href="{base}/faculty/{m.slug}"
 						class="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-[var(--border)] px-5 py-4 transition-colors duration-[120ms] last:border-b-0 hover:bg-[var(--bg-3)]"
 					>
 						<div class="min-w-[140px] flex-1">

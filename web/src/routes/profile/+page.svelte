@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { currentUser } from '$lib/stores';
 	import { getMe, updateMe, getMyReviews } from '$lib/api';
@@ -22,7 +23,7 @@
 			user = await getMe();
 			if (user) currentUser.set(user);
 		}
-		if (!user) { goto('/'); return; }
+		if (!user) { goto(base + '/'); return; }
 		const data = await getMyReviews();
 		if (data) reviews = data;
 	});

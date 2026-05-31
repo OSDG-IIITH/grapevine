@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { CourseLean, FacultyLean, LabLean } from '$lib/types';
 	import SegBar from './SegBar.svelte';
 
@@ -11,10 +12,10 @@
 
 	const href = $derived(
 		kind === 'course'
-			? `/courses/${(item as CourseLean).code}`
+			? `${base}/courses/${(item as CourseLean).code}`
 			: kind === 'faculty'
-				? `/faculty/${(item as FacultyLean).slug}`
-				: `/labs/${(item as LabLean).short}`
+				? `${base}/faculty/${(item as FacultyLean).slug}`
+				: `${base}/labs/${(item as LabLean).short}`
 	);
 </script>
 

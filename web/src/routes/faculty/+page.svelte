@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getFaculty, getLabs } from '$lib/api';
 	import type { FacultyLean, LabLean } from '$lib/types';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
@@ -49,7 +50,7 @@
 
 	<!-- breadcrumbs -->
 	<div class="mb-[18px] flex items-center gap-2 text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">
-		<a href="/" class="transition-colors duration-[120ms] hover:text-[var(--fg)]">grapevine</a>
+		<a href="{base}/" class="transition-colors duration-[120ms] hover:text-[var(--fg)]">grapevine</a>
 		<span class="text-[var(--fg-4)]">/</span>
 		<span class="text-[var(--fg-2)]">faculty</span>
 	</div>
@@ -67,7 +68,7 @@
 			</div>
 		</div>
 		<a
-			href="/review"
+			href="{base}/review"
 			class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
 			style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 		>

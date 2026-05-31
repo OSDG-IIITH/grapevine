@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { base } from '$app/paths';
 	import { getCourse, getCourseReviews } from '$lib/api';
 	import type { CourseDetail, CourseReview } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
@@ -83,7 +84,7 @@
 				</div>
 			</div>
 			<a
-				href="/review?course={course.code}"
+				href="{base}/review?course={course.code}"
 				class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
 				style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 			>
@@ -114,7 +115,7 @@
 			<div class="mb-[18px] flex items-center gap-[14px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
 				<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Taught by</span>
 				{#each selectedoffering.faculty as f, i (f.id)}
-					<a href="/faculty/{f.slug ?? f.id}" class="text-[var(--fg)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]">
+					<a href="{base}/faculty/{f.slug ?? f.id}" class="text-[var(--fg)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]">
 						{f.name}{i < selectedoffering.faculty.length - 1 ? ',' : ''}
 					</a>
 				{/each}

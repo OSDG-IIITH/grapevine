@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview } from '$lib/api';
@@ -123,7 +124,7 @@
 			<div class="mb-2 text-[var(--fg)]" style="font-family: var(--serif); font-size: 44px;">Thank you.</div>
 			<div class="mb-7 text-[13px] text-[var(--fg-3)]">Your review has been submitted. It will appear here in a moment.</div>
 			<a
-				href={kind === 'course' ? `/courses/${selectedcourse?.code ?? ''}` : `/faculty/${selectedfaculty?.slug ?? ''}`}
+				href={kind === 'course' ? `${base}/courses/${selectedcourse?.code ?? ''}` : `${base}/faculty/${selectedfaculty?.slug ?? ''}`}
 				class="inline-flex items-center gap-2 rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
 				style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 			>

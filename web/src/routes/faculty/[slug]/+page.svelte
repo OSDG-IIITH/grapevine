@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { base } from '$app/paths';
 	import { getFacultyMember, getAdvisorReviews, getOfferingReviews } from '$lib/api';
 	import type { FacultyDetail, AdvisorReview, CourseReview } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS, COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
@@ -89,7 +90,7 @@
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
 					<span class="text-[11px] tracking-[0.04em] text-[var(--fg-4)]" style="font-family: var(--mono);">{faculty.title.toLowerCase()}</span>
 					{#if faculty.lab}
-						<a href="/labs/{faculty.lab.short}" class="text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]">{faculty.lab.name}</a>
+						<a href="{base}/labs/{faculty.lab.short}" class="text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--fg)]">{faculty.lab.name}</a>
 						<span class="text-[var(--fg-4)]">·</span>
 						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{faculty.lab.short}</span>
 					{:else}
@@ -98,7 +99,7 @@
 				</div>
 			</div>
 			<a
-				href="/review?faculty={faculty.slug}"
+				href="{base}/review?faculty={faculty.slug}"
 				class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
 				style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 			>
@@ -149,7 +150,7 @@
 					<div class="flex flex-wrap items-center gap-[10px_16px]">
 						{#each taughtcourses as c (`${c.code}-${c.name}`)}
 							<a
-								href={`/courses/${encodeURIComponent(c.code)}`}
+								href={`${base}/courses/${encodeURIComponent(c.code)}`}
 								class="flex items-center gap-[8px] text-[var(--fg-2)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]"
 							>
 								<span class="rounded-[5px] border border-[var(--border-strong)] px-[7px] py-[2px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{c.code}</span>

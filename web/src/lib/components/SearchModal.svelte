@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { searchOpen } from '$lib/stores';
 	import { search } from '$lib/api';
 	import type { SearchResult } from '$lib/types';
@@ -14,9 +15,9 @@
 	let inputel: HTMLInputElement | undefined = $state();
 
 	function href(r: SearchResult) {
-		if (r.type === 'course') return `/courses/${r.code}`;
-		if (r.type === 'faculty') return `/faculty/${r.slug}`;
-		return `/labs/${r.shortname}`;
+		if (r.type === 'course') return `${base}/courses/${r.code}`;
+		if (r.type === 'faculty') return `${base}/faculty/${r.slug}`;
+		return `${base}/labs/${r.shortname}`;
 	}
 
 	$effect(() => {

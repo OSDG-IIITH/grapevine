@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { base } from '$app/paths';
 	import { IconBook, IconUser, IconFlask, IconPencil } from '@tabler/icons-svelte';
 
 	const nav = [
@@ -10,7 +11,7 @@
 	];
 
 	function isactive(href: string) {
-		return $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+		return $page.route.id === href || $page.route.id?.startsWith(href + '/');
 	}
 </script>
 
@@ -20,7 +21,7 @@
 >
 	{#each nav as n (n.id)}
 		<a
-			href={n.href}
+			href={base + n.href}
 			aria-label={n.label}
 			class="flex h-11 w-11 items-center justify-center rounded-[10px] transition-colors duration-[120ms] {isactive(n.href) ? 'bg-[var(--bg-3)] text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
 		>

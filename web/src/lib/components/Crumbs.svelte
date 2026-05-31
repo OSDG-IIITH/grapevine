@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { base } from '$app/paths';
+
 	interface Item {
 		label: string;
 		href?: string;
@@ -17,7 +19,7 @@
 		{#if i === items.length - 1}
 			<span class="text-[var(--fg-2)]">{item.label}</span>
 		{:else}
-			<a href={item.href} class="transition-colors duration-[120ms] hover:text-[var(--fg)]">
+			<a href={base + item.href} class="transition-colors duration-[120ms] hover:text-[var(--fg)]">
 				{item.label}
 			</a>
 		{/if}

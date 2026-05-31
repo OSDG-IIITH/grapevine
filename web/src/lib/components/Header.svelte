@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { currentUser, searchOpen } from '$lib/stores';
 	import { env } from '$env/dynamic/public';
 	import { IconSearch } from '@tabler/icons-svelte';
@@ -13,7 +14,7 @@
 	];
 
 	function isactive(href: string) {
-		return $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+		return $page.route.id === href || $page.route.id?.startsWith(href + '/');
 	}
 
 	const initials = $derived(
@@ -25,7 +26,7 @@
 			.toUpperCase() ?? ''
 	);
 
-	const ishome = $derived($page.url.pathname === '/');
+	const ishome = $derived($page.route.id === '/');
 
 	let dropopen = $state(false);
 	let dropref = $state<HTMLDivElement | null>(null);
@@ -42,7 +43,7 @@
 	async function logout() {
 		await fetch(`${env.PUBLIC_API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
 		currentUser.set(null);
-		goto('/');
+		goto(base + '/');
 	}
 </script>
 
@@ -52,7 +53,7 @@
 >
 	<div>
 		<a
-			href="/"
+			href="{base}/"
 			class="inline-flex items-center gap-2 text-[22px] tracking-[-0.01em] text-[var(--fg)]"
 			style="font-family: var(--serif);"
 		>
@@ -63,7 +64,7 @@
 	<nav class="absolute left-1/2 hidden -translate-x-1/2 gap-1 md:flex">
 		{#each nav as n (n.id)}
 			<a
-				href={n.href}
+				href={base + n.href}
 				class="rounded-md px-[14px] py-[6px] text-[13px] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)] {isactive(n.href) ? 'text-[var(--fg)]' : 'text-[var(--fg-2)]'}"
 			>
 				{n.label}
@@ -121,7 +122,7 @@
 						<div class="px-3 py-[9px] text-[12px] text-[var(--fg-3)]">{$currentUser.display_name}</div>
 						<div class="border-t border-[var(--border)]"></div>
 						<a
-							href="/profile"
+							href="{base}/profile"
 							onclick={() => (dropopen = false)}
 							class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
 						>

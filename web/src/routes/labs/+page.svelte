@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getLabs } from '$lib/api';
 	import type { LabLean } from '$lib/types';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
@@ -30,7 +31,7 @@
 
 	<!-- breadcrumbs -->
 	<div class="mb-[18px] flex items-center gap-2 text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">
-		<a href="/" class="transition-colors duration-[120ms] hover:text-[var(--fg)]">grapevine</a>
+		<a href="{base}/" class="transition-colors duration-[120ms] hover:text-[var(--fg)]">grapevine</a>
 		<span class="text-[var(--fg-4)]">/</span>
 		<span class="text-[var(--fg-2)]">labs</span>
 	</div>

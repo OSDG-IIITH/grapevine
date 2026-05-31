@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { search } from '$lib/api';
 	import type { SearchResult } from '$lib/types';
 	import { IconBook, IconUser, IconFlask } from '@tabler/icons-svelte';
@@ -26,9 +27,9 @@
 	const hasquery = $derived(q.trim().length > 0);
 
 	function href(r: SearchResult) {
-		if (r.type === 'course') return `/courses/${r.code}`;
-		if (r.type === 'faculty') return `/faculty/${r.slug}`;
-		return `/labs/${r.shortname}`;
+		if (r.type === 'course') return `${base}/courses/${r.code}`;
+		if (r.type === 'faculty') return `${base}/faculty/${r.slug}`;
+		return `${base}/labs/${r.shortname}`;
 	}
 
 	function oninput() {
@@ -159,7 +160,7 @@
 		>
 			{#each hints as h (h.href)}
 				<a
-					href={h.href}
+					href={base + h.href}
 					class="rounded-[5px] border border-[var(--border-2)] px-[11px] py-[5px] transition-all duration-[150ms] hover:border-[var(--accent-line)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-2)] hover:shadow-[0_0_10px_rgba(107,143,111,0.12)]"
 				>
 					{h.label}
