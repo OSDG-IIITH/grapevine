@@ -1,4 +1,5 @@
 .env
+.direnv/
 data/
 
 # ai slop

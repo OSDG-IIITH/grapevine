@@ -1,0 +1,57 @@
+[
+  { "course": "CS3.301", "season": "M", "year": 25, "faculty": ["suresh-purini"] },
+  { "course": "CS3.301", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
+  { "course": "CS3.301", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
+
+  { "course": "CS3.303", "season": "S", "year": 25, "faculty": ["kamalakar-karlapalem"] },
+  { "course": "CS3.303", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
+
+  { "course": "CS2.201", "season": "M", "year": 25, "faculty": ["kishore-kothapalli"] },
+  { "course": "CS2.201", "season": "S", "year": 25, "faculty": ["girish-varma"] },
+  { "course": "CS2.201", "season": "M", "year": 26, "faculty": ["kishore-kothapalli"] },
+
+  { "course": "CS2.301", "season": "M", "year": 25, "faculty": ["kamalakar-karlapalem"] },
+  { "course": "CS2.301", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
+
+  { "course": "CS3.401", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
+  { "course": "CS3.401", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
+
+  { "course": "CS7.401", "season": "M", "year": 25, "faculty": ["manish-shrivastava"] },
+  { "course": "CS7.401", "season": "S", "year": 25, "faculty": ["vasudeva-varma"] },
+  { "course": "CS7.401", "season": "M", "year": 26, "faculty": ["manish-shrivastava"] },
+
+  { "course": "CS7.301", "season": "M", "year": 25, "faculty": ["sujit-gujar", "girish-varma"] },
+  { "course": "CS7.301", "season": "S", "year": 25, "faculty": ["sujit-gujar"] },
+  { "course": "CS7.301", "season": "M", "year": 26, "faculty": ["girish-varma"] },
+
+  { "course": "CS7.403", "season": "M", "year": 25, "faculty": ["vineet-gandhi"] },
+  { "course": "CS7.403", "season": "S", "year": 25, "faculty": ["anoop-namboodiri"] },
+  { "course": "CS7.403", "season": "M", "year": 26, "faculty": ["vineet-gandhi"] },
+
+  { "course": "CS7.501", "season": "S", "year": 25, "faculty": ["vineet-gandhi", "girish-varma"] },
+  { "course": "CS7.501", "season": "M", "year": 26, "faculty": ["girish-varma"] },
+
+  { "course": "CS5.301", "season": "M", "year": 25, "faculty": ["kishore-kothapalli"] },
+  { "course": "CS5.301", "season": "M", "year": 26, "faculty": ["girish-varma"] },
+
+  { "course": "CS5.303", "season": "S", "year": 25, "faculty": ["girish-varma"] },
+  { "course": "CS5.303", "season": "M", "year": 26, "faculty": ["sujit-gujar"] },
+
+  { "course": "CS6.301", "season": "M", "year": 25, "faculty": ["kamalakar-karlapalem"] },
+  { "course": "CS6.301", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
+
+  { "course": "CS6.302", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
+  { "course": "CS6.302", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
+
+  { "course": "HS3.101", "season": "M", "year": 25, "faculty": [] },
+  { "course": "HS3.101", "season": "M", "year": 26, "faculty": [] },
+
+  { "course": "MA2.101", "season": "M", "year": 25, "faculty": [] },
+  { "course": "MA2.101", "season": "M", "year": 26, "faculty": [] },
+
+  { "course": "MA2.201", "season": "S", "year": 25, "faculty": [] },
+  { "course": "MA2.201", "season": "M", "year": 26, "faculty": [] },
+
+  { "course": "CS7.601", "season": "S", "year": 25, "faculty": ["praveen-paruchuri"] },
+  { "course": "CS7.601", "season": "M", "year": 26, "faculty": ["praveen-paruchuri"] }
+]

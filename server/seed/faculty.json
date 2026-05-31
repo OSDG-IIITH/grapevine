@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Suresh Purini",
+    "slug": "suresh-purini",
+    "lab": "CVIT",
+    "bio": "Works on parallel programming, compilers, and GPU computing. Teaches compilers and operating systems."
+  },
+  {
+    "name": "Manish Shrivastava",
+    "slug": "manish-shrivastava",
+    "lab": "LTRC",
+    "bio": "Research in NLP, information extraction, and computational linguistics with a focus on Indian languages."
+  },
+  {
+    "name": "Vasudeva Varma",
+    "slug": "vasudeva-varma",
+    "lab": "LTRC",
+    "bio": "Works on information retrieval, web mining, and social media analysis. Former Dean of IIIT Hyderabad."
+  },
+  {
+    "name": "Vineet Gandhi",
+    "slug": "vineet-gandhi",
+    "lab": "CVIT",
+    "bio": "Research in computer vision, video understanding, and visual tracking."
+  },
+  {
+    "name": "Anoop Namboodiri",
+    "slug": "anoop-namboodiri",
+    "lab": "CVIT",
+    "bio": "Works on document analysis, biometrics, and pattern recognition."
+  },
+  {
+    "name": "Kamalakar Karlapalem",
+    "slug": "kamalakar-karlapalem",
+    "lab": "CVIT",
+    "bio": "Research in databases, knowledge management, and multi-agent systems."
+  },
+  {
+    "name": "Kishore Kothapalli",
+    "slug": "kishore-kothapalli",
+    "lab": "CSTAR",
+    "bio": "Works on parallel algorithms, graph algorithms, and GPU computing."
+  },
+  {
+    "name": "Sujit Gujar",
+    "slug": "sujit-gujar",
+    "lab": "CSTAR",
+    "bio": "Research in algorithmic game theory, mechanism design, and machine learning."
+  },
+  {
+    "name": "Madhava Krishna",
+    "slug": "madhava-krishna",
+    "lab": "RRC",
+    "bio": "Research in robot perception, motion planning, and autonomous navigation."
+  },
+  {
+    "name": "Girish Varma",
+    "slug": "girish-varma",
+    "lab": "CSTAR",
+    "bio": "Works on computational complexity, algorithms, and machine learning theory."
+  },
+  {
+    "name": "Praveen Paruchuri",
+    "slug": "praveen-paruchuri",
+    "lab": "CVIT",
+    "bio": "Research in multi-agent systems, reinforcement learning, and AI planning."
+  },
+  {
+    "name": "Bapi Raju",
+    "slug": "bapi-raju",
+    "lab": "CCNSB",
+    "bio": "Computational neuroscience, cognitive science, and brain-computer interfaces."
+  }
+]

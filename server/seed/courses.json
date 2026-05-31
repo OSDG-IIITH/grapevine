@@ -1,0 +1,104 @@
+[
+  {
+    "code": "CS3.301",
+    "name": "Operating Systems",
+    "type": "core",
+    "description": "Process management, memory management, file systems, and concurrency. Includes lab component with kernel programming exercises."
+  },
+  {
+    "code": "CS3.303",
+    "name": "Computer Networks",
+    "type": "core",
+    "description": "Network protocols, TCP/IP stack, routing, transport layer, and application layer protocols."
+  },
+  {
+    "code": "CS2.201",
+    "name": "Data Structures and Algorithms",
+    "type": "core",
+    "description": "Fundamental data structures, algorithm design paradigms, complexity analysis, and graph algorithms."
+  },
+  {
+    "code": "CS2.301",
+    "name": "Database Systems",
+    "type": "core",
+    "description": "Relational model, SQL, query optimization, transactions, and NoSQL systems."
+  },
+  {
+    "code": "CS3.401",
+    "name": "Compilers",
+    "type": "core",
+    "description": "Lexing, parsing, semantic analysis, IR generation, optimization, and code generation."
+  },
+  {
+    "code": "CS7.401",
+    "name": "Introduction to NLP",
+    "type": "stream",
+    "description": "Text preprocessing, language models, sequence tagging, parsing, and neural approaches to NLP tasks."
+  },
+  {
+    "code": "CS7.301",
+    "name": "Machine Learning",
+    "type": "stream",
+    "description": "Supervised and unsupervised learning, neural networks, model evaluation, and practical ML workflows."
+  },
+  {
+    "code": "CS7.403",
+    "name": "Computer Vision",
+    "type": "stream",
+    "description": "Image formation, feature extraction, object detection, segmentation, and deep learning for vision."
+  },
+  {
+    "code": "CS7.501",
+    "name": "Deep Learning",
+    "type": "stream",
+    "description": "Neural network architectures, optimization, CNNs, RNNs, transformers, and generative models."
+  },
+  {
+    "code": "CS5.301",
+    "name": "Algorithms",
+    "type": "breadth",
+    "description": "Advanced algorithm design, randomized algorithms, approximation algorithms, and computational geometry."
+  },
+  {
+    "code": "CS5.303",
+    "name": "Theory of Computation",
+    "type": "breadth",
+    "description": "Automata theory, formal languages, computability, and complexity classes."
+  },
+  {
+    "code": "CS6.301",
+    "name": "Distributed Systems",
+    "type": "open",
+    "description": "Distributed computation models, consensus protocols, fault tolerance, and distributed storage."
+  },
+  {
+    "code": "CS6.302",
+    "name": "Cloud Computing",
+    "type": "open",
+    "description": "Virtualization, container orchestration, serverless computing, and cloud-native application design."
+  },
+  {
+    "code": "HS3.101",
+    "name": "Technical Communication",
+    "type": "hs",
+    "description": "Academic and professional writing, oral presentations, and scientific communication skills."
+  },
+  {
+    "code": "MA2.101",
+    "name": "Linear Algebra",
+    "type": "math",
+    "description": "Vector spaces, linear transformations, eigenvalues, matrix decompositions, and applications."
+  },
+  {
+    "code": "MA2.201",
+    "name": "Probability and Statistics",
+    "type": "math",
+    "description": "Probability theory, random variables, distributions, hypothesis testing, and statistical inference."
+  },
+  {
+    "code": "CS7.601",
+    "name": "Reinforcement Learning",
+    "type": "stream",
+    "description": "MDPs, dynamic programming, model-free methods, policy gradient, and multi-agent RL."
+  }
+]
