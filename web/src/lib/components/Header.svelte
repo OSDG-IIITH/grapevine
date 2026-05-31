@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { currentUser, searchOpen } from '$lib/stores';
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_API_URL } from '$env/static/public';
 	import { IconSearch } from '@tabler/icons-svelte';
 
 	const nav = [
@@ -41,7 +41,7 @@
 	});
 
 	async function logout() {
-		await fetch(`${env.PUBLIC_API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
+		await fetch(`${PUBLIC_API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
 		currentUser.set(null);
 		goto(base + '/');
 	}
@@ -140,7 +140,7 @@
 			</div>
 		{:else}
 			<a
-				href="{env.PUBLIC_API_URL}/auth/login"
+				href="{PUBLIC_API_URL}/auth/login"
 				class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[6px] text-[13px] text-[var(--fg-2)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
 			>
 				Login

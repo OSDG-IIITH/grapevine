@@ -1,5 +1,5 @@
 import { toast } from 'svelte-sonner';
-import { env } from '$env/dynamic/public';
+import { PUBLIC_API_URL } from '$env/static/public';
 import type {
 	CourseLean, CourseDetail, CourseReview,
 	FacultyLean, FacultyDetail, AdvisorReview,
@@ -9,7 +9,7 @@ import type {
 	CreateAdvisorReview, EditAdvisorReview
 } from './types';
 
-const BASE = env.PUBLIC_API_URL;
+const BASE = PUBLIC_API_URL || '';
 
 async function apifetch<T>(path: string, options?: RequestInit): Promise<T | null> {
 	try {
