@@ -3,6 +3,10 @@
         uri strip_prefix /api
         reverse_proxy backend:3000
     }
+    handle /grapevine/api/* {
+        uri strip_prefix /grapevine/api
+        reverse_proxy backend:3000
+    }
     handle {
         root * /srv
         try_files {path} {path}.html /index.html
