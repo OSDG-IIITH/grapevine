@@ -1,57 +1,3458 @@
 [
-  { "course": "CS3.301", "season": "M", "year": 25, "faculty": ["suresh-purini"] },
-  { "course": "CS3.301", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
-  { "course": "CS3.301", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
-
-  { "course": "CS3.303", "season": "S", "year": 25, "faculty": ["kamalakar-karlapalem"] },
-  { "course": "CS3.303", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
-
-  { "course": "CS2.201", "season": "M", "year": 25, "faculty": ["kishore-kothapalli"] },
-  { "course": "CS2.201", "season": "S", "year": 25, "faculty": ["girish-varma"] },
-  { "course": "CS2.201", "season": "M", "year": 26, "faculty": ["kishore-kothapalli"] },
-
-  { "course": "CS2.301", "season": "M", "year": 25, "faculty": ["kamalakar-karlapalem"] },
-  { "course": "CS2.301", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
-
-  { "course": "CS3.401", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
-  { "course": "CS3.401", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
-
-  { "course": "CS7.401", "season": "M", "year": 25, "faculty": ["manish-shrivastava"] },
-  { "course": "CS7.401", "season": "S", "year": 25, "faculty": ["vasudeva-varma"] },
-  { "course": "CS7.401", "season": "M", "year": 26, "faculty": ["manish-shrivastava"] },
-
-  { "course": "CS7.301", "season": "M", "year": 25, "faculty": ["sujit-gujar", "girish-varma"] },
-  { "course": "CS7.301", "season": "S", "year": 25, "faculty": ["sujit-gujar"] },
-  { "course": "CS7.301", "season": "M", "year": 26, "faculty": ["girish-varma"] },
-
-  { "course": "CS7.403", "season": "M", "year": 25, "faculty": ["vineet-gandhi"] },
-  { "course": "CS7.403", "season": "S", "year": 25, "faculty": ["anoop-namboodiri"] },
-  { "course": "CS7.403", "season": "M", "year": 26, "faculty": ["vineet-gandhi"] },
-
-  { "course": "CS7.501", "season": "S", "year": 25, "faculty": ["vineet-gandhi", "girish-varma"] },
-  { "course": "CS7.501", "season": "M", "year": 26, "faculty": ["girish-varma"] },
-
-  { "course": "CS5.301", "season": "M", "year": 25, "faculty": ["kishore-kothapalli"] },
-  { "course": "CS5.301", "season": "M", "year": 26, "faculty": ["girish-varma"] },
-
-  { "course": "CS5.303", "season": "S", "year": 25, "faculty": ["girish-varma"] },
-  { "course": "CS5.303", "season": "M", "year": 26, "faculty": ["sujit-gujar"] },
-
-  { "course": "CS6.301", "season": "M", "year": 25, "faculty": ["kamalakar-karlapalem"] },
-  { "course": "CS6.301", "season": "M", "year": 26, "faculty": ["kamalakar-karlapalem"] },
-
-  { "course": "CS6.302", "season": "S", "year": 25, "faculty": ["suresh-purini"] },
-  { "course": "CS6.302", "season": "M", "year": 26, "faculty": ["suresh-purini"] },
-
-  { "course": "HS3.101", "season": "M", "year": 25, "faculty": [] },
-  { "course": "HS3.101", "season": "M", "year": 26, "faculty": [] },
-
-  { "course": "MA2.101", "season": "M", "year": 25, "faculty": [] },
-  { "course": "MA2.101", "season": "M", "year": 26, "faculty": [] },
-
-  { "course": "MA2.201", "season": "S", "year": 25, "faculty": [] },
-  { "course": "MA2.201", "season": "M", "year": 26, "faculty": [] },
-
-  { "course": "CS7.601", "season": "S", "year": 25, "faculty": ["praveen-paruchuri"] },
-  { "course": "CS7.601", "season": "M", "year": 26, "faculty": ["praveen-paruchuri"] }
+  {
+    "course": "CE0.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "pravin-kumar-venkat-rao"
+    ]
+  },
+  {
+    "course": "CE1.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CE1.502",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE1.604",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CE1.607",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "pravin-kumar-venkat-rao"
+    ]
+  },
+  {
+    "course": "CE1.621",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE4.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "jofin-george"
+    ]
+  },
+  {
+    "course": "CE5.502",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rehana-shaik"
+    ]
+  },
+  {
+    "course": "CE9.609",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "nagamanikandan-govindan",
+      "sachin-chaudhari"
+    ]
+  },
+  {
+    "course": "CG1.402",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "vishnu-sreekumar"
+    ]
+  },
+  {
+    "course": "CG1.403",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "bhaktee-dongaonkar"
+    ]
+  },
+  {
+    "course": "CG3.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "bapi-raju"
+    ]
+  },
+  {
+    "course": "CG3.402",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "vinoo-alluri"
+    ]
+  },
+  {
+    "course": "CL1.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rajakrishnan-p-rajkumar"
+    ]
+  },
+  {
+    "course": "CL2.203",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aditi-mukherjee"
+    ]
+  },
+  {
+    "course": "CL2.405",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "chiranjeevi-yarra"
+    ]
+  },
+  {
+    "course": "CL3.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "parameswari-krishnamurthy",
+      "rajakrishnan-p-rajkumar"
+    ]
+  },
+  {
+    "course": "CS0.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "charu-sharma",
+      "girish-varma"
+    ]
+  },
+  {
+    "course": "CS0.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "shatrunjay-rawat"
+    ]
+  },
+  {
+    "course": "CS1.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "suryajith-chillara"
+    ]
+  },
+  {
+    "course": "CS1.302",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "shantanav-chakraborty"
+    ]
+  },
+  {
+    "course": "CS1.304",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "kshitij-gajjar",
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS1.402",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "mrityunjay",
+      "venkatesh-choppella"
+    ]
+  },
+  {
+    "course": "CS1.405",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ashok-kumar-das"
+    ]
+  },
+  {
+    "course": "CS1.407",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "indranil-chakrabarty"
+    ]
+  },
+  {
+    "course": "CS1.504",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "siddhartha-das"
+    ]
+  },
+  {
+    "course": "CS2.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "CS3.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "karthik-vaidhyanathan"
+    ]
+  },
+  {
+    "course": "CS3.304",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "krishna-reddy-polepalli"
+    ]
+  },
+  {
+    "course": "CS3.306",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS3.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "kishore-kothapalli"
+    ]
+  },
+  {
+    "course": "CS3.402",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS3.405",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS3.502",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "deepak-gangadharan"
+    ]
+  },
+  {
+    "course": "CS4.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ponnurangam-kumaraguru"
+    ]
+  },
+  {
+    "course": "CS4.405",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "krishna-reddy-polepalli"
+    ]
+  },
+  {
+    "course": "CS4.406",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rahul-mishra"
+    ]
+  },
+  {
+    "course": "CS4.408",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rajan-krishnan-sundara"
+    ]
+  },
+  {
+    "course": "CS6.302",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "deepak-gangadharan",
+      "raghu-reddy",
+      "rahul-mishra"
+    ]
+  },
+  {
+    "course": "CS7.403",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ravi-kiran-s"
+    ]
+  },
+  {
+    "course": "CS7.404",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anoop-namboodiri"
+    ]
+  },
+  {
+    "course": "CS7.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "manish-shrivastava"
+    ]
+  },
+  {
+    "course": "CS7.503",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "CS7.504",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "sujit-gujar"
+    ]
+  },
+  {
+    "course": "CS7.601",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "naresh-manwani"
+    ]
+  },
+  {
+    "course": "CS8.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ashok-kumar-das",
+      "srinathan-kannan"
+    ]
+  },
+  {
+    "course": "CS9.428",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ramachandra-prasad-pillutla"
+    ]
+  },
+  {
+    "course": "CS9.429",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ramana-gogula",
+      "ramesh-loganathan"
+    ]
+  },
+  {
+    "course": "CS9.440",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rc-prasad"
+    ]
+  },
+  {
+    "course": "CS9.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "EC1.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anshu-sarje"
+    ]
+  },
+  {
+    "course": "EC2.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anil-kumar-vuppala",
+      "harikumar-kandath",
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "EC2.102",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "praful-mankar",
+      "sachin-chaudhari"
+    ]
+  },
+  {
+    "course": "EC2.201",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "abhishek-srivastava"
+    ]
+  },
+  {
+    "course": "EC2.407",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "usha-gogineni"
+    ]
+  },
+  {
+    "course": "EC2.408",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC2.409",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aftab-hussain"
+    ]
+  },
+  {
+    "course": "EC2.410",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "abhishek-pullela",
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC3.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "abhishek-srivastava",
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC4.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "nagamanikandan-govindan"
+    ]
+  },
+  {
+    "course": "EC5.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aftab-hussain",
+      "prasad-krishnan"
+    ]
+  },
+  {
+    "course": "EC5.201",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "chiranjeevi-yarra",
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "EC5.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "spandan-roy",
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "EC5.406",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "EC5.407",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "praful-mankar"
+    ]
+  },
+  {
+    "course": "EC5.408",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anil-kumar-vuppala"
+    ]
+  },
+  {
+    "course": "EC5.410",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "arti-yardi"
+    ]
+  },
+  {
+    "course": "EC5.411",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "prasad-krishnan"
+    ]
+  },
+  {
+    "course": "EC5.412",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "arti-yardi",
+      "praful-mankar"
+    ]
+  },
+  {
+    "course": "GS0.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ks-rajan"
+    ]
+  },
+  {
+    "course": "GS3.403",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "kiran-chand-thumaty",
+      "rehana-shaik"
+    ]
+  },
+  {
+    "course": "HS0.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aniket-alam"
+    ]
+  },
+  {
+    "course": "HS0.214",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "saurabh-todariya"
+    ]
+  },
+  {
+    "course": "HS0.216",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aakansha-natani",
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS1.208",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "sushmita-banerji"
+    ]
+  },
+  {
+    "course": "HS1.210",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "HS1.303",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "HS2.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "HS2.303",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "rajorshi-ray"
+    ]
+  },
+  {
+    "course": "HS3.201",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "isha-dubey"
+    ]
+  },
+  {
+    "course": "HS4.102",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aniket-alam"
+    ]
+  },
+  {
+    "course": "HS4.201",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "aakansha-natani"
+    ]
+  },
+  {
+    "course": "HS5.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS7.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS8.201",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "sushmita-banerji"
+    ]
+  },
+  {
+    "course": "MA4.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "abhishek-deshpande",
+      "samyadeb-bhattacharya"
+    ]
+  },
+  {
+    "course": "MA5.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "shantanav-chakraborty",
+      "srinathan-kannan"
+    ]
+  },
+  {
+    "course": "MA6.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "tejas-bodas"
+    ]
+  },
+  {
+    "course": "MA6.102",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "gowtham-kurri"
+    ]
+  },
+  {
+    "course": "MA6.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "naresh-manwani"
+    ]
+  },
+  {
+    "course": "MA6.302",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "pawan-kumar"
+    ]
+  },
+  {
+    "course": "MA8.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "pawan-kumar"
+    ]
+  },
+  {
+    "course": "PD1.301",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD1.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD1.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD2.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ramesh-swaminathan"
+    ]
+  },
+  {
+    "course": "PD2.421",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "himanshu"
+    ]
+  },
+  {
+    "course": "PD2.501",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "ravi-warrier"
+    ]
+  },
+  {
+    "course": "SC1.110",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "prabhakar-bhimalapuram"
+    ]
+  },
+  {
+    "course": "SC1.203",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "subhadip-mitra"
+    ]
+  },
+  {
+    "course": "SC1.310",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "samyadeb-bhattacharya"
+    ]
+  },
+  {
+    "course": "SC1.415",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.421",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "diganta-das",
+      "monalisa-patra"
+    ]
+  },
+  {
+    "course": "SC2.305",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC2.309",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "prabhakar-bhimalapuram",
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC2.401",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC3.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "SC3.202",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "nita-parekh"
+    ]
+  },
+  {
+    "course": "SC3.203",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "SC3.321",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "b-gopalakrishnan"
+    ]
+  },
+  {
+    "course": "SC4.101",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "deva-priyakumar"
+    ]
+  },
+  {
+    "course": "SC4.110",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "prabhakar-bhimalapuram",
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "TBD",
+    "season": "M",
+    "year": 24,
+    "faculty": [
+      "jofin-george"
+    ]
+  },
+  {
+    "course": "CL1.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "aditi-mukherjee"
+    ]
+  },
+  {
+    "course": "CL3.101",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "CS1.201",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "kshitij-gajjar",
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS1.305",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "kishore-kothapalli"
+    ]
+  },
+  {
+    "course": "CS1.306",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "pawan-kumar"
+    ]
+  },
+  {
+    "course": "CS2.201",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "deepak-gangadharan",
+      "praveen-paruchuri"
+    ]
+  },
+  {
+    "course": "CS3.302",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "CS3.303",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "kavita-vemuri",
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "CS3.307",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "tejas-bodas"
+    ]
+  },
+  {
+    "course": "CS4.302",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "kamalakar-karlapalem"
+    ]
+  },
+  {
+    "course": "CS6.201",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "sai-anirudh-karre"
+    ]
+  },
+  {
+    "course": "CS6.301",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "raghu-reddy"
+    ]
+  },
+  {
+    "course": "CS7.301",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "praveen-paruchuri",
+      "sujit-gujar"
+    ]
+  },
+  {
+    "course": "CS7.302",
+    "season": "S",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "CS7.303",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "anil-kumar-vuppala"
+    ]
+  },
+  {
+    "course": "CS8.301",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS9.311",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "kavita-vemuri"
+    ]
+  },
+  {
+    "course": "CS9.312",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "uttam-singh"
+    ]
+  },
+  {
+    "course": "EC2.103",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC2.202",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "arti-yardi",
+      "spandan-roy"
+    ]
+  },
+  {
+    "course": "EC2.204",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "deepak-gangadharan"
+    ]
+  },
+  {
+    "course": "EC2.205",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "andleeb-zahra"
+    ]
+  },
+  {
+    "course": "EC4.201",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "harikumar-kandath",
+      "nagamanikandan-govindan"
+    ]
+  },
+  {
+    "course": "EC5.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "arti-yardi",
+      "lalitha-vadlamani"
+    ]
+  },
+  {
+    "course": "EC5.203",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "sachin-chaudhari"
+    ]
+  },
+  {
+    "course": "EC5.205",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "lalitha-vadlamani"
+    ]
+  },
+  {
+    "course": "EC5.206",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "GS0.301",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "ks-rajan",
+      "rc-prasad"
+    ]
+  },
+  {
+    "course": "HS0.201",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "saurabh-todariya",
+      "subha-chakraburtty"
+    ]
+  },
+  {
+    "course": "HS8.101",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "anirban-dasgupta",
+      "isha-dubey"
+    ]
+  },
+  {
+    "course": "HS8.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "aakansha-natani",
+      "ashwin-jayanti"
+    ]
+  },
+  {
+    "course": "MA2.101",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "indranil-chakrabarty",
+      "siddhartha-das"
+    ]
+  },
+  {
+    "course": "OC2.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "SC1.101",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.111",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "chittaranjan-hens",
+      "nita-parekh"
+    ]
+  },
+  {
+    "course": "SC1.204",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC2.101",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC4.102",
+    "season": "S",
+    "year": 25,
+    "faculty": [
+      "prabhakar-bhimalapuram"
+    ]
+  },
+  {
+    "course": "CE0.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "pravin-kumar-venkat-rao"
+    ]
+  },
+  {
+    "course": "CE1.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CE1.502",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE1.607",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "pravin-kumar-venkat-rao"
+    ]
+  },
+  {
+    "course": "CE1.610",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CE1.620",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "jofin-george"
+    ]
+  },
+  {
+    "course": "CE1.621",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE4.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "jofin-george"
+    ]
+  },
+  {
+    "course": "CE9.609",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "maitreya-maity",
+      "shubham-singhal",
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CG1.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vishnu-sreekumar"
+    ]
+  },
+  {
+    "course": "CG3.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "bapi-raju"
+    ]
+  },
+  {
+    "course": "CG3.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vinoo-alluri"
+    ]
+  },
+  {
+    "course": "CG3.502",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vishnu-sreekumar"
+    ]
+  },
+  {
+    "course": "CG4.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "kavita-vemuri"
+    ]
+  },
+  {
+    "course": "CG9.600",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "bapi-raju",
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "CL1.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aditi-mukherjee"
+    ]
+  },
+  {
+    "course": "CL2.203",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "radhika-mamidi"
+    ]
+  },
+  {
+    "course": "CL2.405",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "chiranjeevi-yarra"
+    ]
+  },
+  {
+    "course": "CL3.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "rajakrishnan-p-rajkumar"
+    ]
+  },
+  {
+    "course": "CL9.605",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "CS0.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "abhishek-deshpande",
+      "girish-varma",
+      "vineet-gandhi"
+    ]
+  },
+  {
+    "course": "CS0.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "shatrunjay-rawat"
+    ]
+  },
+  {
+    "course": "CS1.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "srinathan-kannan"
+    ]
+  },
+  {
+    "course": "CS1.302",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "shantanav-chakraborty"
+    ]
+  },
+  {
+    "course": "CS1.304",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "kshitij-gajjar",
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS1.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "venkatesh-choppella"
+    ]
+  },
+  {
+    "course": "CS1.405",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ashok-kumar-das"
+    ]
+  },
+  {
+    "course": "CS1.407",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "indranil-chakrabarty"
+    ]
+  },
+  {
+    "course": "CS1.504",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "siddhartha-das"
+    ]
+  },
+  {
+    "course": "CS3.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "karthik-vaidhyanathan"
+    ]
+  },
+  {
+    "course": "CS3.304",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "krishna-reddy-polepalli"
+    ]
+  },
+  {
+    "course": "CS3.306",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS3.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "kishore-kothapalli"
+    ]
+  },
+  {
+    "course": "CS3.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS3.405",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS4.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ponnurangam-kumaraguru"
+    ]
+  },
+  {
+    "course": "CS4.405",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "krishna-reddy-polepalli"
+    ]
+  },
+  {
+    "course": "CS4.406",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "anil-nelakanti"
+    ]
+  },
+  {
+    "course": "CS6.302",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "abhishek-kumar-singh",
+      "sai-anirudh-karre"
+    ]
+  },
+  {
+    "course": "CS6.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "karthik-vaidhyanathan",
+      "raghu-reddy"
+    ]
+  },
+  {
+    "course": "CS7.403",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ravi-kiran-s"
+    ]
+  },
+  {
+    "course": "CS7.404",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "anoop-namboodiri"
+    ]
+  },
+  {
+    "course": "CS7.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "manish-shrivastava"
+    ]
+  },
+  {
+    "course": "CS7.503",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "CS7.504",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "sujit-gujar"
+    ]
+  },
+  {
+    "course": "CS8.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "srinathan-kannan"
+    ]
+  },
+  {
+    "course": "CS9.425",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "nimmi-rangaswamy"
+    ]
+  },
+  {
+    "course": "CS9.428",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ramachandra-prasad-pillutla"
+    ]
+  },
+  {
+    "course": "CS9.429",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "arjun-rajashekar",
+      "ramesh-loganathan"
+    ]
+  },
+  {
+    "course": "CS9.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "CS9.605",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "EC2.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "anil-kumar-vuppala",
+      "anshu-sarje",
+      "chiranjeevi-yarra",
+      "harikumar-kandath",
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "EC2.102",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "praful-mankar",
+      "saikiran-bulusu"
+    ]
+  },
+  {
+    "course": "EC2.201",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "abhishek-srivastava"
+    ]
+  },
+  {
+    "course": "EC2.408",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC2.410",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "abhishek-pullela",
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC3.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aftab-hussain",
+      "deepak-gangadharan",
+      "sachin-chaudhari"
+    ]
+  },
+  {
+    "course": "EC4.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "antony-thomas"
+    ]
+  },
+  {
+    "course": "EC5.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aftab-hussain",
+      "prasad-krishnan"
+    ]
+  },
+  {
+    "course": "EC5.201",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "EC5.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "spandan-roy",
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "EC5.406",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "EC5.407",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "praful-mankar"
+    ]
+  },
+  {
+    "course": "EC5.410",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "arti-yardi"
+    ]
+  },
+  {
+    "course": "EC5.412",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "arti-yardi",
+      "praful-mankar"
+    ]
+  },
+  {
+    "course": "EC9.605",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "GS0.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ks-rajan"
+    ]
+  },
+  {
+    "course": "GS1.402",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ks-rajan",
+      "kuldeep-kurte"
+    ]
+  },
+  {
+    "course": "GS1.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "kiran-chand-thumaty",
+      "rc-prasad"
+    ]
+  },
+  {
+    "course": "GS2.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ks-rajan"
+    ]
+  },
+  {
+    "course": "GS3.403",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "kiran-chand-thumaty",
+      "rehana-shaik"
+    ]
+  },
+  {
+    "course": "HS0.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "isha-dubey",
+      "radhika-krishnan"
+    ]
+  },
+  {
+    "course": "HS0.216",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aakansha-natani",
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS1.204",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "nazia-akhtar"
+    ]
+  },
+  {
+    "course": "HS1.208",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "sushmita-banerji"
+    ]
+  },
+  {
+    "course": "HS1.210",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "HS1.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "HS2.201",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "radhika-krishnan"
+    ]
+  },
+  {
+    "course": "HS2.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "HS2.303",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "rajorshi-ray"
+    ]
+  },
+  {
+    "course": "HS3.201",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "isha-dubey"
+    ]
+  },
+  {
+    "course": "HS4.102",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aakansha-natani",
+      "aniket-alam"
+    ]
+  },
+  {
+    "course": "HS7.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS9.302",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "saurabh-todariya"
+    ]
+  },
+  {
+    "course": "HS9.605",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "MA4.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "lalitha-vadlamani",
+      "samyadeb-bhattacharya",
+      "uttam-singh"
+    ]
+  },
+  {
+    "course": "MA4.404",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "lakshmi-burra"
+    ]
+  },
+  {
+    "course": "MA5.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "praveen-paruchuri",
+      "suryajith-chillara"
+    ]
+  },
+  {
+    "course": "MA6.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "tejas-bodas"
+    ]
+  },
+  {
+    "course": "MA6.102",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "gowtham-kurri"
+    ]
+  },
+  {
+    "course": "MA6.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "naresh-manwani"
+    ]
+  },
+  {
+    "course": "MA6.302",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "pawan-kumar"
+    ]
+  },
+  {
+    "course": "New_Causal_Inference",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "naresh-manwani"
+    ]
+  },
+  {
+    "course": "New_Environmental_Humanities",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "subha-chakraburtty"
+    ]
+  },
+  {
+    "course": "New_Hardware_AI",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "girish-varma",
+      "priyesh-shukla",
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "New_LM_Agents",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vandan-mujadia",
+      "vasudeva-varma"
+    ]
+  },
+  {
+    "course": "New_NLP_Healthcare",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "dipti-m-sharma",
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "New_QECC",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "lalitha-vadlamani"
+    ]
+  },
+  {
+    "course": "New_Quantum_Materials",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "mathimalar-s"
+    ]
+  },
+  {
+    "course": "New_Rethinking_Corruption",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "aniket-alam"
+    ]
+  },
+  {
+    "course": "OC2.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "OC9.600",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "PD1.301",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "raghu-reddy",
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD1.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "raghu-reddy",
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD1.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "PD2.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ramesh-swaminathan"
+    ]
+  },
+  {
+    "course": "PD2.421",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "PD2.501",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "ravi-warrier"
+    ]
+  },
+  {
+    "course": "PD9.403",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "PD9.601",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "SC1.110",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "prabhakar-bhimalapuram"
+    ]
+  },
+  {
+    "course": "SC1.203",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "subhadip-mitra"
+    ]
+  },
+  {
+    "course": "SC1.415",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.421",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "diganta-das",
+      "monalisa-patra"
+    ]
+  },
+  {
+    "course": "SC1.440",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "chittaranjan-hens"
+    ]
+  },
+  {
+    "course": "SC2.304",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC2.305",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC2.309",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "prabhakar-bhimalapuram",
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC2.401",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC3.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "SC3.202",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "nita-parekh"
+    ]
+  },
+  {
+    "course": "SC3.203",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "SC3.321",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "b-gopalakrishnan"
+    ]
+  },
+  {
+    "course": "SC4.101",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "marimuthu-krishnan"
+    ]
+  },
+  {
+    "course": "SC4.110",
+    "season": "M",
+    "year": 25,
+    "faculty": [
+      "chittaranjan-hens",
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC9.605",
+    "season": "M",
+    "year": 25,
+    "faculty": []
+  },
+  {
+    "course": "CE1.601",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sunitha-palissery"
+    ]
+  },
+  {
+    "course": "CE1.603",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "pravin-kumar-venkat-rao"
+    ]
+  },
+  {
+    "course": "CE1.608",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE1.609",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "jofin-george"
+    ]
+  },
+  {
+    "course": "CE8.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "jofin-george",
+      "shubham-singhal"
+    ]
+  },
+  {
+    "course": "CE9.403",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "CG1.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bhaktee-dongaonkar"
+    ]
+  },
+  {
+    "course": "CG2.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bhaktee-dongaonkar"
+    ]
+  },
+  {
+    "course": "CG3.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bapi-raju",
+      "vishnu-sreekumar"
+    ]
+  },
+  {
+    "course": "CG3.501",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bapi-raju"
+    ]
+  },
+  {
+    "course": "CG5.405",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "priyanka-srivastava",
+      "shrikant-bharadwaj"
+    ]
+  },
+  {
+    "course": "CG9.600",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bapi-raju",
+      "priyanka-srivastava"
+    ]
+  },
+  {
+    "course": "CL1.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aditi-mukherjee"
+    ]
+  },
+  {
+    "course": "CL2.204",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "radhika-mamidi"
+    ]
+  },
+  {
+    "course": "CL2.404",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "rajakrishnan-p-rajkumar"
+    ]
+  },
+  {
+    "course": "CL3.101",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "manish-shrivastava",
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "CL3.406",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "rajakrishnan-p-rajkumar"
+    ]
+  },
+  {
+    "course": "CL3.408",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "vasudeva-varma"
+    ]
+  },
+  {
+    "course": "CL3.409",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "manish-shrivastava",
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "CL5.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "chiranjeevi-yarra",
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "CL9.605",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "CS0.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "vikram-pudi"
+    ]
+  },
+  {
+    "course": "CS1.201",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kshitij-gajjar",
+      "lini-thomas",
+      "raghavendra-gs"
+    ]
+  },
+  {
+    "course": "CS1.305",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kishore-kothapalli"
+    ]
+  },
+  {
+    "course": "CS1.306",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "pawan-kumar"
+    ]
+  },
+  {
+    "course": "CS1.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "venkatesh-choppella"
+    ]
+  },
+  {
+    "course": "CS1.404",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "naresh-manwani"
+    ]
+  },
+  {
+    "course": "CS1.406",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "suryajith-chillara"
+    ]
+  },
+  {
+    "course": "CS1.408",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sujit-gujar"
+    ]
+  },
+  {
+    "course": "CS1.409",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "shantanav-chakraborty"
+    ]
+  },
+  {
+    "course": "CS1.502",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "gowtham-kurri"
+    ]
+  },
+  {
+    "course": "CS1.505",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "atul-singh-arora"
+    ]
+  },
+  {
+    "course": "CS2.201",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-kumar-singh",
+      "deepak-gangadharan"
+    ]
+  },
+  {
+    "course": "CS3.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "CS3.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kavita-vemuri",
+      "suresh-purini"
+    ]
+  },
+  {
+    "course": "CS3.307",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "tejas-bodas"
+    ]
+  },
+  {
+    "course": "CS3.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "lini-thomas"
+    ]
+  },
+  {
+    "course": "CS3.404",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "arjun-rajashekar",
+      "ramesh-loganathan"
+    ]
+  },
+  {
+    "course": "CS4.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kamalakar-karlapalem"
+    ]
+  },
+  {
+    "course": "CS4.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kamalakar-karlapalem"
+    ]
+  },
+  {
+    "course": "CS5.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "CS6.201",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "anil-nelakanti",
+      "anoop-namboodiri"
+    ]
+  },
+  {
+    "course": "CS6.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "raghu-reddy"
+    ]
+  },
+  {
+    "course": "CS6.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-kumar-singh"
+    ]
+  },
+  {
+    "course": "CS6.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "karthik-vaidhyanathan"
+    ]
+  },
+  {
+    "course": "CS6.402",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "raghu-reddy",
+      "sai-anirudh-karre"
+    ]
+  },
+  {
+    "course": "CS6.504",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "gk-goswami",
+      "raman-saxena"
+    ]
+  },
+  {
+    "course": "CS7.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "praveen-paruchuri",
+      "sujit-gujar"
+    ]
+  },
+  {
+    "course": "CS7.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "pj-narayanan",
+      "raghavendra-gs"
+    ]
+  },
+  {
+    "course": "CS7.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "chiranjeevi-yarra"
+    ]
+  },
+  {
+    "course": "CS7.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "manish-shrivastava",
+      "parameswari-krishnamurthy"
+    ]
+  },
+  {
+    "course": "CS7.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "cv-jawahar",
+      "vineet-gandhi"
+    ]
+  },
+  {
+    "course": "CS7.405",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ponnurangam-kumaraguru"
+    ]
+  },
+  {
+    "course": "CS7.505",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "charu-sharma",
+      "makarand-tapaswi"
+    ]
+  },
+  {
+    "course": "CS7.603",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "harikumar-kandath",
+      "tejas-bodas"
+    ]
+  },
+  {
+    "course": "CS8.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ankit-gangwal"
+    ]
+  },
+  {
+    "course": "CS8.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "srinathan-kannan"
+    ]
+  },
+  {
+    "course": "CS8.402",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "shatrunjay-rawat"
+    ]
+  },
+  {
+    "course": "CS8.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ashok-kumar-das"
+    ]
+  },
+  {
+    "course": "CS9.311",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "bapi-raju"
+    ]
+  },
+  {
+    "course": "CS9.312",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "uttam-singh"
+    ]
+  },
+  {
+    "course": "CS9.412",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "CS9.424",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "prakash-yalla",
+      "ramesh-loganathan"
+    ]
+  },
+  {
+    "course": "CS9.433",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "rehana-shaik"
+    ]
+  },
+  {
+    "course": "CS9.605",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "EC2.103",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "zia-abbas"
+    ]
+  },
+  {
+    "course": "EC2.202",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "arti-yardi",
+      "priyesh-shukla"
+    ]
+  },
+  {
+    "course": "EC2.204",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "priyesh-shukla"
+    ]
+  },
+  {
+    "course": "EC2.206",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "andleeb-zahra"
+    ]
+  },
+  {
+    "course": "EC2.207",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aftab-hussain"
+    ]
+  },
+  {
+    "course": "EC2.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-srivastava"
+    ]
+  },
+  {
+    "course": "EC2.412",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-pullela"
+    ]
+  },
+  {
+    "course": "EC2.413",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "anshu-sarje"
+    ]
+  },
+  {
+    "course": "EC2.502",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aftab-hussain"
+    ]
+  },
+  {
+    "course": "EC4.202",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "antony-thomas",
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "EC4.402",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "harikumar-kandath"
+    ]
+  },
+  {
+    "course": "EC4.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "antony-thomas",
+      "madhava-krishna"
+    ]
+  },
+  {
+    "course": "EC4.404",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "antony-thomas",
+      "harikumar-kandath"
+    ]
+  },
+  {
+    "course": "EC5.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "arti-yardi",
+      "lalitha-vadlamani"
+    ]
+  },
+  {
+    "course": "EC5.203",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sachin-chaudhari"
+    ]
+  },
+  {
+    "course": "EC5.205",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "lalitha-vadlamani"
+    ]
+  },
+  {
+    "course": "EC5.206",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "santosh-nannuru"
+    ]
+  },
+  {
+    "course": "EC5.207",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "prasad-krishnan"
+    ]
+  },
+  {
+    "course": "EC5.408",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "anil-kumar-vuppala"
+    ]
+  },
+  {
+    "course": "EC5.414",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "saikiran-bulusu"
+    ]
+  },
+  {
+    "course": "EC9.605",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "GS0.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kuldeep-kurte",
+      "rc-prasad"
+    ]
+  },
+  {
+    "course": "GS1.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kiran-chand-thumaty",
+      "rc-prasad"
+    ]
+  },
+  {
+    "course": "GS2.503",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ks-rajan",
+      "kuldeep-kurte"
+    ]
+  },
+  {
+    "course": "GS3.401",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "kiran-chand-thumaty"
+    ]
+  },
+  {
+    "course": "HS0.201",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "nazia-akhtar",
+      "saurabh-todariya"
+    ]
+  },
+  {
+    "course": "HS0.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "anirban-dasgupta",
+      "rajorshi-ray"
+    ]
+  },
+  {
+    "course": "HS0.305",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ashwin-jayanti"
+    ]
+  },
+  {
+    "course": "HS1.209",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "HS1.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sushmita-banerji"
+    ]
+  },
+  {
+    "course": "HS1.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "nazia-akhtar"
+    ]
+  },
+  {
+    "course": "HS2.304",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "rajorshi-ray"
+    ]
+  },
+  {
+    "course": "HS3.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aniket-alam"
+    ]
+  },
+  {
+    "course": "HS4.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aakansha-natani"
+    ]
+  },
+  {
+    "course": "HS5.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "anirban-dasgupta"
+    ]
+  },
+  {
+    "course": "HS7.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "radhika-krishnan"
+    ]
+  },
+  {
+    "course": "HS8.101",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "angarika-rakshit",
+      "khaliq-parkar"
+    ]
+  },
+  {
+    "course": "HS8.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "aniket-alam",
+      "ashwin-jayanti"
+    ]
+  },
+  {
+    "course": "HS8.202",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "subha-chakraburtty"
+    ]
+  },
+  {
+    "course": "HS8.302",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "radhika-krishnan"
+    ]
+  },
+  {
+    "course": "HS8.304",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "khaliq-parkar"
+    ]
+  },
+  {
+    "course": "HS8.305",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "angarika-rakshit"
+    ]
+  },
+  {
+    "course": "HS9.605",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "MA2.101",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "atul-singh-arora",
+      "gowtham-kurri",
+      "siddhartha-das"
+    ]
+  },
+  {
+    "course": "MA4.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "lakshmi-burra"
+    ]
+  },
+  {
+    "course": "MA4.303",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "samyadeb-bhattacharya"
+    ]
+  },
+  {
+    "course": "MA5.501",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "prasad-krishnan"
+    ]
+  },
+  {
+    "course": "MA7.501",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "uttam-singh"
+    ]
+  },
+  {
+    "course": "MA8.402",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sukrit-mittal"
+    ]
+  },
+  {
+    "course": "OC2.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "saroja-tk"
+    ]
+  },
+  {
+    "course": "OC9.600",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "PD1.411",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "prakash-yalla",
+      "raghu-reddy"
+    ]
+  },
+  {
+    "course": "PD2.403",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sridhar-kalyanasundaram"
+    ]
+  },
+  {
+    "course": "PD2.422",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "sarath-babu-a"
+    ]
+  },
+  {
+    "course": "PD2.502",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "ravi-warrier"
+    ]
+  },
+  {
+    "course": "PD9.404",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "PD9.602",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  },
+  {
+    "course": "SC1.101",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "diganta-das"
+    ]
+  },
+  {
+    "course": "SC1.111",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "chittaranjan-hens",
+      "prabhakar-bhimalapuram"
+    ]
+  },
+  {
+    "course": "SC1.204",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC1.205",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "marimuthu-krishnan"
+    ]
+  },
+  {
+    "course": "SC1.308",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "chittaranjan-hens",
+      "diganta-das",
+      "subhadip-mitra"
+    ]
+  },
+  {
+    "course": "SC1.420",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "subhadip-mitra"
+    ]
+  },
+  {
+    "course": "SC1.425",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "mathimalar-s"
+    ]
+  },
+  {
+    "course": "SC2.101",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC2.202",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "prabhakar-bhimalapuram"
+    ]
+  },
+  {
+    "course": "SC2.203",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "deva-priyakumar"
+    ]
+  },
+  {
+    "course": "SC2.301",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "marimuthu-krishnan"
+    ]
+  },
+  {
+    "course": "SC2.315",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "harjinder-singh"
+    ]
+  },
+  {
+    "course": "SC2.316",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "deva-priyakumar",
+      "marimuthu-krishnan"
+    ]
+  },
+  {
+    "course": "SC3.316",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-deshpande"
+    ]
+  },
+  {
+    "course": "SC3.404",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "jagan-pongubala"
+    ]
+  },
+  {
+    "course": "SC3.410",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "nita-parekh"
+    ]
+  },
+  {
+    "course": "SC4.102",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "abhishek-deshpande"
+    ]
+  },
+  {
+    "course": "SC4.111",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "chittaranjan-hens",
+      "tapan-kumar-sau"
+    ]
+  },
+  {
+    "course": "SC4.411",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "deva-priyakumar",
+      "prabhakar-bhimalapuram",
+      "vinod-pk"
+    ]
+  },
+  {
+    "course": "SC5.450",
+    "season": "S",
+    "year": 26,
+    "faculty": [
+      "monalisa-patra"
+    ]
+  },
+  {
+    "course": "SC9.605",
+    "season": "S",
+    "year": 26,
+    "faculty": []
+  }
 ]

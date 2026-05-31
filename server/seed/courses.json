@@ -1,104 +1,1694 @@
 [
   {
-    "code": "CS3.301",
-    "name": "Operating Systems",
+    "code": "CE0.501",
+    "name": "Theory of Elasticity",
     "type": "core",
-    "description": "Process management, memory management, file systems, and concurrency. Includes lab component with kernel programming exercises."
+    "description": ""
   },
   {
-    "code": "CS3.303",
-    "name": "Computer Networks",
+    "code": "CE1.501",
+    "name": "Structural Dynamics",
     "type": "core",
-    "description": "Network protocols, TCP/IP stack, routing, transport layer, and application layer protocols."
+    "description": ""
+  },
+  {
+    "code": "CE1.502",
+    "name": "Structural Engineering Design Studio",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CE1.601",
+    "name": "Earthquake Engineering",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.603",
+    "name": "Advanced Structural Analysis",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.604",
+    "name": "Advanced Design of Steel Structures",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "CE1.607",
+    "name": "Earthquake Resistant Design of Masonry Structures",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.608",
+    "name": "Analysis & Design of Precast and Prestressed Structures",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.609",
+    "name": "Analysis and Design of Bridge Infrastructure",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.610",
+    "name": "Advanced Design of Steel Structures",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.620",
+    "name": "Structural Assessment of Existing Infrastructure",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE1.621",
+    "name": "Retrofit of Existing Infrastructure",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE4.501",
+    "name": "Finite Element Methods",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CE5.502",
+    "name": "Hydrological modelling and Software Development",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE8.401",
+    "name": "Disaster Management",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CE9.403",
+    "name": "CASE Project",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CE9.609",
+    "name": "IoT Workshop",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CG1.402",
+    "name": "Intro to Cognitive Science",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CG1.403",
+    "name": "Learning and Memory",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG2.401",
+    "name": "Cognitive Neuroscience",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG3.401",
+    "name": "Introduction to Neural and Cognitive Modeling",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG3.402",
+    "name": "Behavioral Research & Experimental Design",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG3.403",
+    "name": "Behavioral Research: Statistical Methods",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG3.501",
+    "name": "Cognitive Science and AI",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG3.502",
+    "name": "Neuroinformatics",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG4.402",
+    "name": "Introduction to Neuroeconomics",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG5.405",
+    "name": "Art, Vision, & Feelings",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CG9.600",
+    "name": "Cognitive Science Seminar",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL1.101",
+    "name": "Introduction to Linguistics-1",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL1.102",
+    "name": "Introduction to Linguistics II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL2.203",
+    "name": "Language and Society",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL2.204",
+    "name": "Language Typology and Universals",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL2.404",
+    "name": "Computational Psycholinguistics",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL2.405",
+    "name": "Speech Analysis and Linguistics",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL3.101",
+    "name": "Computational Linguistics 1",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL3.202",
+    "name": "Computational Linguistics II: Comp Semantics and Discourse parsing",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CL3.406",
+    "name": "Linguistic Data 3: Data Modeling in ILs",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL3.408",
+    "name": "Applications of Language Models",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL3.409",
+    "name": "Evaluation Methods for NLP",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL5.401",
+    "name": "Topics in SSMT",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CL9.605",
+    "name": "Thesis",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS0.101",
+    "name": "Computer Programming",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS0.301",
+    "name": "Computer Problem Solving",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS0.302",
+    "name": "Computing Tools",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS1.201",
+    "name": "Data Structures and Algorithms",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS1.301",
+    "name": "Algorithm Analysis and Design",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS1.302",
+    "name": "Automata Theory",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS1.304",
+    "name": "Data Structures & Algorithms for Problem Solving",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS1.305",
+    "name": "Introduction to Algorithms Engineering",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS1.306",
+    "name": "Numerical Algorithms",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS1.402",
+    "name": "Principles of Programming Languages",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS1.403",
+    "name": "Compilers",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS1.404",
+    "name": "Optimization Methods",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS1.405",
+    "name": "Modern Complexity Theory",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS1.406",
+    "name": "Advanced Algorithms",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS1.407",
+    "name": "Entropy and Information",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "CS1.408",
+    "name": "Introduction to Game Theory",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS1.409",
+    "name": "Quantum Algorithms",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS1.502",
+    "name": "Information-Theoretic Methods in Computer Science",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS1.504",
+    "name": "Quantum Information Theory",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS1.505",
+    "name": "Quantum aspects of Cryptography",
+    "type": "open",
+    "description": ""
   },
   {
     "code": "CS2.201",
-    "name": "Data Structures and Algorithms",
+    "name": "Computer Systems Organization",
     "type": "core",
-    "description": "Fundamental data structures, algorithm design paradigms, complexity analysis, and graph algorithms."
+    "description": ""
   },
   {
-    "code": "CS2.301",
-    "name": "Database Systems",
+    "code": "CS2.501",
+    "name": "Advanced Computer Architecture",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS3.301",
+    "name": "Operating Systems and Networks",
     "type": "core",
-    "description": "Relational model, SQL, query optimization, transactions, and NoSQL systems."
+    "description": ""
+  },
+  {
+    "code": "CS3.302",
+    "name": "Software Programming for Performance",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS3.303",
+    "name": "Introduction to IoT",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS3.304",
+    "name": "Advanced Operating Systems",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS3.306",
+    "name": "Algorithms and Operating Systems",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS3.307",
+    "name": "Performance Modeling of Computer Systems",
+    "type": "breadth",
+    "description": ""
   },
   {
     "code": "CS3.401",
-    "name": "Compilers",
+    "name": "Distributed Systems",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS3.402",
+    "name": "Advanced Computer Networks",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS3.404",
+    "name": "Internals of Application Servers",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS3.405",
+    "name": "Blockchain and Web3 Development",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS3.502",
+    "name": "Real-Time Embedded Systems",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "CS4.301",
+    "name": "Data and Applications",
     "type": "core",
-    "description": "Lexing, parsing, semantic analysis, IR generation, optimization, and code generation."
+    "description": ""
+  },
+  {
+    "code": "CS4.302",
+    "name": "Data Visualisation",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS4.401",
+    "name": "Data Systems",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS4.405",
+    "name": "Data Analytics I",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS4.406",
+    "name": "Information Retrieval & Extraction",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS4.408",
+    "name": "Spatial Informatics",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS5.401",
+    "name": "User Interaction and Usability of Digital Products",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS6.201",
+    "name": "Introduction to Software Systems",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS6.301",
+    "name": "Design and Analysis of Software Systems",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS6.302",
+    "name": "Software Systems Development",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS6.303",
+    "name": "Foundations for Trustworthy Parallel Computing",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS6.401",
+    "name": "Software Engineering",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS6.402",
+    "name": "Engineering Virtual Reality Systems",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS6.501",
+    "name": "Topics in Software Engineering",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS6.504",
+    "name": "Law, Technology and Digital Governance",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS7.301",
+    "name": "Machine, Data and Learning",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS7.302",
+    "name": "Computer Graphics",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS7.303",
+    "name": "Digital Signal Analysis",
+    "type": "breadth",
+    "description": ""
   },
   {
     "code": "CS7.401",
     "name": "Introduction to NLP",
-    "type": "stream",
-    "description": "Text preprocessing, language models, sequence tagging, parsing, and neural approaches to NLP tasks."
-  },
-  {
-    "code": "CS7.301",
-    "name": "Machine Learning",
-    "type": "stream",
-    "description": "Supervised and unsupervised learning, neural networks, model evaluation, and practical ML workflows."
+    "type": "core",
+    "description": ""
   },
   {
     "code": "CS7.403",
-    "name": "Computer Vision",
-    "type": "stream",
-    "description": "Image formation, feature extraction, object detection, segmentation, and deep learning for vision."
+    "name": "Statistical Methods in AI",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS7.404",
+    "name": "Digital Image Processing",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS7.405",
+    "name": "Responsible & Safe AI Systems",
+    "type": "open",
+    "description": ""
   },
   {
     "code": "CS7.501",
-    "name": "Deep Learning",
+    "name": "Advanced NLP",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS7.503",
+    "name": "Mobile Robotics",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS7.504",
+    "name": "Fairness, Privacy and Ethics in Al",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS7.505",
+    "name": "Computer Vision",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "CS7.601",
+    "name": "Deep Learning: Theory and Practices",
     "type": "stream",
-    "description": "Neural network architectures, optimization, CNNs, RNNs, transformers, and generative models."
+    "description": ""
   },
   {
-    "code": "CS5.301",
-    "name": "Algorithms",
-    "type": "breadth",
-    "description": "Advanced algorithm design, randomized algorithms, approximation algorithms, and computational geometry."
-  },
-  {
-    "code": "CS5.303",
-    "name": "Theory of Computation",
-    "type": "breadth",
-    "description": "Automata theory, formal languages, computability, and complexity classes."
-  },
-  {
-    "code": "CS6.301",
-    "name": "Distributed Systems",
+    "code": "CS7.603",
+    "name": "Topics in Reinforcement Learning",
     "type": "open",
-    "description": "Distributed computation models, consensus protocols, fault tolerance, and distributed storage."
+    "description": ""
   },
   {
-    "code": "CS6.302",
-    "name": "Cloud Computing",
+    "code": "CS8.301",
+    "name": "Introduction to Information Security",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS8.401",
+    "name": "Principles of Information Security",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS8.402",
+    "name": "Information Security Audit and Assurance",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS8.403",
+    "name": "System and Network Security",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS8.501",
+    "name": "Research in Information Security",
     "type": "open",
-    "description": "Virtualization, container orchestration, serverless computing, and cloud-native application design."
+    "description": ""
   },
   {
-    "code": "HS3.101",
-    "name": "Technical Communication",
+    "code": "CS9.311",
+    "name": "Introduction to Brain and Cognition",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS9.312",
+    "name": "Introduction to Quantum Information and Computation",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "CS9.412",
+    "name": "PG-Project",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS9.424",
+    "name": "Technology Product Entrepreneurship",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.425",
+    "name": "Social Science Perspective on HCI",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.428",
+    "name": "Environmental Science & Technology",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.429",
+    "name": "Design for Social Innovation",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.433",
+    "name": "Hydro Informatics & Climate Sciences",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.440",
+    "name": "Introduction to Remote Sensing",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "CS9.501",
+    "name": "User Research Methods",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "CS9.605",
+    "name": "Thesis",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC1.202",
+    "name": "Bioinstrumentation and Devices",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC2.101",
+    "name": "Digital Systems and Microcontrollers",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.102",
+    "name": "Electronic Workshop-1",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.103",
+    "name": "Analog Electronic Circuits",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.201",
+    "name": "VLSI Design",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.202",
+    "name": "Electronics Workshop II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.204",
+    "name": "Intro to Processor Architecture",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.205",
+    "name": "Radio Frequency Based Sensors design: Principles and Applications",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC2.206",
+    "name": "VLSI & Embedded Systems Foundations of RF and Microwave Sensors",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.207",
+    "name": "Intro to VLSI and Embedded Systems",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.401",
+    "name": "Analog IC Design",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.407",
+    "name": "Design for Testability",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.408",
+    "name": "Digital VLSI Design",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC2.409",
+    "name": "Principles of Semiconductor Devices",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "EC2.410",
+    "name": "CMOS References and Regulators",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC2.412",
+    "name": "CMOS Oscillator Design",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.413",
+    "name": "Instrumentation and Devices",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC2.502",
+    "name": "Flexible Electronics",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC3.202",
+    "name": "Embedded Systems Workshop",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC4.201",
+    "name": "Mechatronics System Design-1",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC4.202",
+    "name": "Intro to Robotics: Perception and Planning",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "EC4.401",
+    "name": "Robotics: Dynamics and Control",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC4.402",
+    "name": "Intro to UAV Design",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC4.403",
+    "name": "Robotics: Planning and Navigation",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC4.404",
+    "name": "Mechatronics System Design",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "EC5.101",
+    "name": "Networks, Signals and Systems",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC5.102",
+    "name": "Information and Communication",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC5.201",
+    "name": "Signal Processing",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC5.202",
+    "name": "Systems Thinking",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC5.203",
+    "name": "Communication Theory",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "EC5.205",
+    "name": "Introduction to Coding Theory",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "EC5.206",
+    "name": "Introduction to Statistical Signal Processing",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC5.207",
+    "name": "The Mathematics of Information: Theory & Application",
+    "type": "breadth",
+    "description": ""
+  },
+  {
+    "code": "EC5.406",
+    "name": "Signal Detection and Estimation Theory",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC5.407",
+    "name": "Wireless Communications",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC5.408",
+    "name": "Speech Signal Processing",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC5.410",
+    "name": "Information Theory",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC5.411",
+    "name": "Modern Coding Theory",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC5.412",
+    "name": "Foundations for Signal Processing and Communication",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "EC5.414",
+    "name": "Machine Learning for Communication",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "EC9.605",
+    "name": "Thesis",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "GS0.101",
+    "name": "Spatial Thinking and Practice",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "GS0.301",
+    "name": "Introduction to Spatial Sciences and Technology",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "GS1.401",
+    "name": "Optical Remote Sensing",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "GS1.402",
+    "name": "Cyber GIS: Geospatial Web and GeoBI",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "GS1.501",
+    "name": "Advanced Remote Sensing",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "GS2.401",
+    "name": "Spatial Informatics",
+    "type": "stream",
+    "description": ""
+  },
+  {
+    "code": "GS2.503",
+    "name": "Spatial Data Sciences",
+    "type": "bouquet",
+    "description": ""
+  },
+  {
+    "code": "GS3.401",
+    "name": "Geospatial for Sustainable Development",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "GS3.403",
+    "name": "Geospatial Technology for Disaster Risk Modelling",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "HS0.201",
+    "name": "Thinking and Knowing in the Human Sciences-I",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS0.202",
+    "name": "Thinking and Knowing in the Human Sciences - II",
     "type": "hs",
-    "description": "Academic and professional writing, oral presentations, and scientific communication skills."
+    "description": ""
+  },
+  {
+    "code": "HS0.214",
+    "name": "Introduction to Philosophy",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS0.216",
+    "name": "Thinking and Knowing in the Human Sciences III",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS0.302",
+    "name": "Research Methods in Human Sciences",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS0.305",
+    "name": "Introduction to Philosophy of Technology",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.204",
+    "name": "Introduction to Literature",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.208",
+    "name": "Introduction to Film Studies",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.209",
+    "name": "Music Language Creativity",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.210",
+    "name": "Music Workshop",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.301",
+    "name": "Critical Viewing and Reading",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.302",
+    "name": "Readings in Russian Literature",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.303",
+    "name": "Readings from Hindi Literature",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS1.401",
+    "name": "Readings from Hindi Literature",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS2.201",
+    "name": "Introduction to Sociology",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS2.202",
+    "name": "Introduction to Psychology",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS2.303",
+    "name": "Work, Entrepreneurship and Technology in Contemporary Societies",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS2.304",
+    "name": "Sociology of Platform Economies",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS3.201",
+    "name": "Introduction to History",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS3.303",
+    "name": "Theories and Practices of Nationalism",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS4.102",
+    "name": "Making of the Contemporary India",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS4.201",
+    "name": "Introduction to Politics",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS4.303",
+    "name": "Digital Democracy and Data Governance in the European Union",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS5.202",
+    "name": "Introduction to Economics",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS5.301",
+    "name": "Growth and Development",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS7.101",
+    "name": "Human Sciences Lab-1",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS7.301",
+    "name": "Science, Technology and Society",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS8.101",
+    "name": "Making of Contemporary World",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS8.102",
+    "name": "Intro to Human Sciences",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS8.201",
+    "name": "Gender and Society",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS8.202",
+    "name": "Gender, Culture and Representation",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS8.302",
+    "name": "Classical Text Readings II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS8.304",
+    "name": "The Digital City",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS8.305",
+    "name": "Knowing India Through Data",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "HS9.302",
+    "name": "Classical Text Reading",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "HS9.605",
+    "name": "Thesis",
+    "type": "core",
+    "description": ""
   },
   {
     "code": "MA2.101",
     "name": "Linear Algebra",
-    "type": "math",
-    "description": "Vector spaces, linear transformations, eigenvalues, matrix decompositions, and applications."
+    "type": "core",
+    "description": ""
   },
   {
-    "code": "MA2.201",
+    "code": "MA4.101",
+    "name": "Real Analysis",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "MA4.301",
+    "name": "Differential Equations",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA4.303",
+    "name": "Linear Partial Differential Equations and Variational Calculus",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA4.404",
+    "name": "Functional Analysis",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA5.101",
+    "name": "Discrete Structures",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "MA5.501",
+    "name": "Topics in Discrete Mathematics",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA6.101",
     "name": "Probability and Statistics",
-    "type": "math",
-    "description": "Probability theory, random variables, distributions, hypothesis testing, and statistical inference."
+    "type": "core",
+    "description": ""
   },
   {
-    "code": "CS7.601",
-    "name": "Reinforcement Learning",
-    "type": "stream",
-    "description": "MDPs, dynamic programming, model-free methods, policy gradient, and multi-agent RL."
+    "code": "MA6.102",
+    "name": "Probability and Random Processes",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "MA6.301",
+    "name": "Maths for Computer Science 1- Probability and Statistics",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA6.302",
+    "name": "Maths for Computer Science 2 - Linear Algebra",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA7.501",
+    "name": "Continuous Variable Quantum Information Theory and Computation",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA8.401",
+    "name": "Topics in Applied Optimization",
+    "type": "math",
+    "description": ""
+  },
+  {
+    "code": "MA8.402",
+    "name": "Mathematics for Finance",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_Causal_Inference",
+    "name": "Causal Inference",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_Environmental_Humanities",
+    "name": "Environmental Humanities",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "New_Hardware_AI",
+    "name": "Hardware for AI",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_LM_Agents",
+    "name": "Language Models and Agents",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_NLP_Healthcare",
+    "name": "NLP and Healthcare",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_QECC",
+    "name": "Quantum Error Correcting Codes",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "New_Quantum_Materials",
+    "name": "Quantum Materials and Devices",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "New_Rethinking_Corruption",
+    "name": "Rethinking Corruption in India",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "OC2.101",
+    "name": "Arts-1",
+    "type": "hs",
+    "description": ""
+  },
+  {
+    "code": "OC2.102",
+    "name": "Arts-2",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "OC9.600",
+    "name": "Institute Seminar",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD1.301",
+    "name": "Design Thinking - Research to Define",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD1.401",
+    "name": "Design Thinking - Idea to Evaluate",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD1.411",
+    "name": "Product Design Workshop",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "PD1.501",
+    "name": "Human Computer Interaction",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "PD2.401",
+    "name": "Product Management 101",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD2.403",
+    "name": "Sustainable Growth Strategy for Startup",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "PD2.421",
+    "name": "Business Fundamentals",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD2.422",
+    "name": "Business Finance",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD2.501",
+    "name": "Product Marketing",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "PD2.502",
+    "name": "Product Lifecycle Management",
+    "type": "open",
+    "description": ""
+  },
+  {
+    "code": "PD9.403",
+    "name": "PDM Project-3",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD9.404",
+    "name": "PDM Project-4",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD9.601",
+    "name": "PDM-Seminar",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "PD9.602",
+    "name": "PDM Seminar",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.101",
+    "name": "Electrodynamics",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.102",
+    "name": "Classical Mechanics",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.110",
+    "name": "Science 1",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.111",
+    "name": "Science II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.203",
+    "name": "Quantum Mechanics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.204",
+    "name": "Thermodynamics",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.205",
+    "name": "Statistical Mechanics",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC1.308",
+    "name": "The Universe Across Scales",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.310",
+    "name": "Open Quantum Systems and Quantum Thermodynamics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.415",
+    "name": "Physics of Early Universe",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.420",
+    "name": "Introduction to Particle Physics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.421",
+    "name": "Introduction to Quantum Field Theory",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.425",
+    "name": "Topics in Physics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC1.440",
+    "name": "Dynamical Process in Complex Networks",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.101",
+    "name": "General and Structural Chemistry",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC2.202",
+    "name": "Organic Chemistry",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC2.203",
+    "name": "Biomolecular Structures",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC2.301",
+    "name": "Physics of Soft Condensed Matter",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.304",
+    "name": "Spectroscopy",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.305",
+    "name": "Chemical Kinetics and Reaction Dynamics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.309",
+    "name": "Chemistry Topics for Engineers",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.315",
+    "name": "Molecular Symmetry and Quantum Mechanics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.316",
+    "name": "Molecular Modeling and Simulations",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC2.401",
+    "name": "Topics in Nanosciences",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.101",
+    "name": "Introduction to Biology",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.202",
+    "name": "Bioinformatics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.203",
+    "name": "Systems Biology",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.316",
+    "name": "Mathematical Models in Biology",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.321",
+    "name": "Biomolecular Structure Interaction & Dynamics",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.404",
+    "name": "Molecular Biology",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC3.410",
+    "name": "NGS Data Analysis",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC4.101",
+    "name": "Computing in Sciences-1",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC4.102",
+    "name": "Computing in Sciences II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC4.110",
+    "name": "Science Lab I",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC4.111",
+    "name": "Science Lab II",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "SC4.411",
+    "name": "Machine Learning for Natural Sciences",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC5.450",
+    "name": "Mathematical Methods in Sciences",
+    "type": "sci",
+    "description": ""
+  },
+  {
+    "code": "SC9.605",
+    "name": "Thesis",
+    "type": "core",
+    "description": ""
+  },
+  {
+    "code": "TBD",
+    "name": "Structural Safety of Built Infrastructure",
+    "type": "open",
+    "description": ""
   }
 ]

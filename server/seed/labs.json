@@ -1,32 +1,107 @@
 [
   {
-    "name": "Centre for Visual Information Technology",
-    "shortname": "CVIT",
-    "description": "Research in computer vision, image processing, and visual data analysis. Known for work in scene understanding, video analytics, and document analysis."
-  },
-  {
     "name": "Language Technologies Research Centre",
     "shortname": "LTRC",
-    "description": "Research in natural language processing, computational linguistics, and speech processing for Indian languages."
+    "description": "Research in natural language processing, speech technologies, and computational linguistics."
   },
   {
-    "name": "Centre for Security Theory and Algorithmic Research",
-    "shortname": "CSTAR",
-    "description": "Research in theoretical computer science, cryptography, algorithms, and formal methods."
-  },
-  {
-    "name": "Robotics Research Center",
+    "name": "Robotics Research Centre",
     "shortname": "RRC",
-    "description": "Research in autonomous robots, manipulation, perception, and human-robot interaction."
+    "description": "Research in robotics, autonomous systems, mobile manipulation, and aerial vehicles."
   },
   {
-    "name": "Signal Processing and Communications Research Centre",
+    "name": "Data Sciences and Analytics Center",
+    "shortname": "DSAC",
+    "description": "Research in data engineering, analytics, and large-scale data systems."
+  },
+  {
+    "name": "Signal Processing and Communication Research Center",
     "shortname": "SPCRC",
-    "description": "Research in signal processing, wireless communications, and information theory."
+    "description": "Research in signal processing, wireless communications, coding theory, and IoT."
+  },
+  {
+    "name": "Center for Security, Theory and Algorithmic Research",
+    "shortname": "CSTAR",
+    "description": "Research in algorithms, complexity theory, cryptography, distributed computing, and information security."
+  },
+  {
+    "name": "Software Engineering Research Centre",
+    "shortname": "SERC",
+    "description": "Research in software engineering, empirical methods, requirements engineering, and cloud computing."
+  },
+  {
+    "name": "Center for Visual Information Technology",
+    "shortname": "CVIT",
+    "description": "Research in computer vision, image processing, computer graphics, and machine learning."
+  },
+  {
+    "name": "Center for VLSI and Embedded System Technologies",
+    "shortname": "CVEST",
+    "description": "Research in VLSI design, embedded systems, IoT devices, and flexible electronics."
+  },
+  {
+    "name": "Computer Systems Group",
+    "shortname": "CSG",
+    "description": "Research in computer architecture, compilers, operating systems, and distributed computing."
+  },
+  {
+    "name": "Machine Learning Lab",
+    "shortname": "MLL",
+    "description": "Research in machine learning, optimization, game theory, and AI decision-making."
+  },
+  {
+    "name": "Centre for Quantum Science and Technology",
+    "shortname": "CQST",
+    "description": "Research in quantum algorithms, quantum cryptography, quantum networks, and quantum thermodynamics."
+  },
+  {
+    "name": "PreCog",
+    "shortname": "PreCog",
+    "description": "Research in computational social science, cybersecurity, privacy, and social computing."
+  },
+  {
+    "name": "Lab for Spatial Informatics",
+    "shortname": "LSI",
+    "description": "Research in geospatial science, remote sensing, hydrology, and climate informatics."
+  },
+  {
+    "name": "Cognitive Science Lab",
+    "shortname": "CogSci",
+    "description": "Interdisciplinary research on mind and behaviour using AI, psychology, neuroscience, and linguistics."
+  },
+  {
+    "name": "Earthquake Engineering Research Center",
+    "shortname": "EERC",
+    "description": "Research in structural engineering, seismic design, earthquake safety, and disaster mitigation."
   },
   {
     "name": "Center for Computational Natural Sciences and Bioinformatics",
     "shortname": "CCNSB",
-    "description": "Interdisciplinary research at the intersection of computation, natural sciences, and biology."
+    "description": "Research in computational chemistry, bioinformatics, molecular dynamics, and nanoscience."
+  },
+  {
+    "name": "Human Sciences Research Centre",
+    "shortname": "HSRC",
+    "description": "Research at the intersection of social sciences, humanities, and digital technologies."
+  },
+  {
+    "name": "Biomedical Research Center",
+    "shortname": "BMRC",
+    "description": "Multidisciplinary research in biomedical devices, biosensors, medical imaging, and clinical neuroscience."
+  },
+  {
+    "name": "Cyber Manthan Center",
+    "shortname": "CMC",
+    "description": "Research in cybersecurity, privacy, and social computing."
+  },
+  {
+    "name": "Raj Reddy Center for Technology & Society",
+    "shortname": "RCTS",
+    "description": "Research and technologies in solving societal problems."
+  },
+  {
+    "name": "iHub-Data",
+    "shortname": "IHUB",
+    "description": "Research in data engineering, analytics, and large-scale data systems."
   }
 ]

@@ -1,74 +1,1062 @@
 [
   {
-    "name": "Suresh Purini",
-    "slug": "suresh-purini",
-    "labs": ["CVIT"],
-    "bio": "Works on parallel programming, compilers, and GPU computing. Teaches compilers and operating systems."
+    "name": "Aakansha Natani",
+    "slug": "aakansha-natani",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
   },
   {
-    "name": "Manish Shrivastava",
-    "slug": "manish-shrivastava",
-    "labs": ["LTRC"],
-    "bio": "Research in NLP, information extraction, and computational linguistics with a focus on Indian languages."
+    "name": "Abhishek Deshpande",
+    "slug": "abhishek-deshpande",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
   },
   {
-    "name": "Vasudeva Varma",
-    "slug": "vasudeva-varma",
-    "labs": ["LTRC"],
-    "bio": "Works on information retrieval, web mining, and social media analysis. Former Dean of IIIT Hyderabad."
+    "name": "Abhishek Kumar Singh",
+    "slug": "abhishek-kumar-singh",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
   },
   {
-    "name": "Vineet Gandhi",
-    "slug": "vineet-gandhi",
-    "labs": ["CVIT"],
-    "bio": "Research in computer vision, video understanding, and visual tracking."
+    "name": "Abhishek Pullela",
+    "slug": "abhishek-pullela",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Abhishek Srivastava",
+    "slug": "abhishek-srivastava",
+    "labs": [
+      "BMRC",
+      "CVEST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Aditi Mukherjee",
+    "slug": "aditi-mukherjee",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Aftab Hussain",
+    "slug": "aftab-hussain",
+    "labs": [
+      "CVEST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Andleeb Zahra",
+    "slug": "andleeb-zahra",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Angarika Rakshit",
+    "slug": "angarika-rakshit",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Aniket Alam",
+    "slug": "aniket-alam",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Anil Kumar Vuppala",
+    "slug": "anil-kumar-vuppala",
+    "labs": [
+      "BMRC",
+      "LTRC",
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Anil Nelakanti",
+    "slug": "anil-nelakanti",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Anirban Dasgupta",
+    "slug": "anirban-dasgupta",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ankit Gangwal",
+    "slug": "ankit-gangwal",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
   },
   {
     "name": "Anoop Namboodiri",
     "slug": "anoop-namboodiri",
-    "labs": ["CVIT"],
+    "labs": [
+      "CVIT"
+    ],
     "bio": "Works on document analysis, biometrics, and pattern recognition."
   },
   {
-    "name": "Kamalakar Karlapalem",
-    "slug": "kamalakar-karlapalem",
-    "labs": ["CVIT"],
-    "bio": "Research in databases, knowledge management, and multi-agent systems."
+    "name": "Anshu Sarje",
+    "slug": "anshu-sarje",
+    "labs": [
+      "BMRC",
+      "CVEST"
+    ],
+    "bio": null
   },
   {
-    "name": "Kishore Kothapalli",
-    "slug": "kishore-kothapalli",
-    "labs": ["CSTAR"],
-    "bio": "Works on parallel algorithms, graph algorithms, and GPU computing."
+    "name": "Antony Thomas",
+    "slug": "antony-thomas",
+    "labs": [
+      "RRC"
+    ],
+    "bio": null
   },
   {
-    "name": "Sujit Gujar",
-    "slug": "sujit-gujar",
-    "labs": ["CSTAR"],
-    "bio": "Research in algorithmic game theory, mechanism design, and machine learning."
+    "name": "Arjun Rajashekar",
+    "slug": "arjun-rajashekar",
+    "labs": [
+      "RCTS"
+    ],
+    "bio": null
   },
   {
-    "name": "Madhava Krishna",
-    "slug": "madhava-krishna",
-    "labs": ["RRC"],
-    "bio": "Research in robot perception, motion planning, and autonomous navigation."
+    "name": "Arti Yardi",
+    "slug": "arti-yardi",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
   },
   {
-    "name": "Girish Varma",
-    "slug": "girish-varma",
-    "labs": ["CSTAR"],
-    "bio": "Works on computational complexity, algorithms, and machine learning theory."
+    "name": "Ashok Kumar Das",
+    "slug": "ashok-kumar-das",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
   },
   {
-    "name": "Praveen Paruchuri",
-    "slug": "praveen-paruchuri",
-    "labs": ["CVIT"],
-    "bio": "Research in multi-agent systems, reinforcement learning, and AI planning."
+    "name": "Ashwin Jayanti",
+    "slug": "ashwin-jayanti",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Atul Singh Arora",
+    "slug": "atul-singh-arora",
+    "labs": [
+      "CQST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "B Gopalakrishnan",
+    "slug": "b-gopalakrishnan",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
   },
   {
     "name": "Bapi Raju",
     "slug": "bapi-raju",
-    "labs": ["CCNSB"],
+    "labs": [
+      "CogSci"
+    ],
     "bio": "Computational neuroscience, cognitive science, and brain-computer interfaces."
+  },
+  {
+    "name": "Bhaktee Dongaonkar",
+    "slug": "bhaktee-dongaonkar",
+    "labs": [
+      "CogSci"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Charu Sharma",
+    "slug": "charu-sharma",
+    "labs": [
+      "MLL"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Chiranjeevi Yarra",
+    "slug": "chiranjeevi-yarra",
+    "labs": [
+      "BMRC",
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Chittaranjan Hens",
+    "slug": "chittaranjan-hens",
+    "labs": [
+      "BMRC",
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "CV Jawahar",
+    "slug": "cv-jawahar",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": "Computer vision, document image analysis, and multimodal learning. Leads CVIT and has supervised over 30 doctoral students."
+  },
+  {
+    "name": "Deva Priyakumar",
+    "slug": "deva-priyakumar",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Deepak Gangadharan",
+    "slug": "deepak-gangadharan",
+    "labs": [
+      "CSG"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Diganta Das",
+    "slug": "diganta-das",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Dipti M Sharma",
+    "slug": "dipti-m-sharma",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "GK Goswami",
+    "slug": "gk-goswami",
+    "labs": [
+      "CMC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Girish Varma",
+    "slug": "girish-varma",
+    "labs": [
+      "BMRC",
+      "CSTAR",
+      "MLL"
+    ],
+    "bio": "Works on computational complexity, algorithms, and machine learning theory."
+  },
+  {
+    "name": "Gowtham Kurri",
+    "slug": "gowtham-kurri",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Harikumar Kandath",
+    "slug": "harikumar-kandath",
+    "labs": [
+      "RRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Harjinder Singh",
+    "slug": "harjinder-singh",
+    "labs": [
+      "CCNSB",
+      "CQST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Himanshu",
+    "slug": "himanshu",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Indranil Chakrabarty",
+    "slug": "indranil-chakrabarty",
+    "labs": [
+      "CQST",
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Isha Dubey",
+    "slug": "isha-dubey",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Jagan Pongubala",
+    "slug": "jagan-pongubala",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Jofin George",
+    "slug": "jofin-george",
+    "labs": [
+      "EERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Madhava Krishna",
+    "slug": "madhava-krishna",
+    "labs": [
+      "RRC"
+    ],
+    "bio": "Research in robot perception, motion planning, and autonomous navigation."
+  },
+  {
+    "name": "KS Rajan",
+    "slug": "ks-rajan",
+    "labs": [
+      "LSI"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Kamalakar Karlapalem",
+    "slug": "kamalakar-karlapalem",
+    "labs": [
+      "DSAC"
+    ],
+    "bio": "Research in databases, knowledge management, and multi-agent systems."
+  },
+  {
+    "name": "Karthik Vaidhyanathan",
+    "slug": "karthik-vaidhyanathan",
+    "labs": [
+      "SERC"
+    ],
+    "bio": "Software architecture, self-adaptive systems, and ML for software engineering. Teaches operating systems and software engineering at IIIT Hyderabad."
+  },
+  {
+    "name": "Kavita Vemuri",
+    "slug": "kavita-vemuri",
+    "labs": [
+      "BMRC",
+      "CogSci"
+    ],
+    "bio": "Cognitive science, neuroaesthetics, and human-computer interaction. Runs an interdisciplinary lab exploring the relationship between perception, emotion, and design."
+  },
+  {
+    "name": "Khaliq Parkar",
+    "slug": "khaliq-parkar",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Kiran Chand Thumaty",
+    "slug": "kiran-chand-thumaty",
+    "labs": [
+      "LSI"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Kishore Kothapalli",
+    "slug": "kishore-kothapalli",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": "Works on parallel algorithms, graph algorithms, and GPU computing."
+  },
+  {
+    "name": "Krishna Reddy Polepalli",
+    "slug": "krishna-reddy-polepalli",
+    "labs": [
+      "DSAC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Kshitij Gajjar",
+    "slug": "kshitij-gajjar",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Kuldeep Kurte",
+    "slug": "kuldeep-kurte",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Lakshmi Burra",
+    "slug": "lakshmi-burra",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Lalitha Vadlamani",
+    "slug": "lalitha-vadlamani",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Lini Thomas",
+    "slug": "lini-thomas",
+    "labs": [
+      "DSAC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Maitreya Maity",
+    "slug": "maitreya-maity",
+    "labs": [
+      "IHUB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Makarand Tapaswi",
+    "slug": "makarand-tapaswi",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Manish Shrivastava",
+    "slug": "manish-shrivastava",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": "Research in NLP, information extraction, and computational linguistics with a focus on Indian languages."
+  },
+  {
+    "name": "Marimuthu Krishnan",
+    "slug": "marimuthu-krishnan",
+    "labs": [
+      "BMRC",
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Mathimalar S",
+    "slug": "mathimalar-s",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Monalisa Patra",
+    "slug": "monalisa-patra",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Mrityunjay",
+    "slug": "mrityunjay",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Nagamanikandan Govindan",
+    "slug": "nagamanikandan-govindan",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Naresh Manwani",
+    "slug": "naresh-manwani",
+    "labs": [
+      "MLL"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Nazia Akhtar",
+    "slug": "nazia-akhtar",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Nimmi Rangaswamy",
+    "slug": "nimmi-rangaswamy",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Nita Parekh",
+    "slug": "nita-parekh",
+    "labs": [
+      "BMRC",
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Pravin Kumar Venkat Rao",
+    "slug": "pravin-kumar-venkat-rao",
+    "labs": [
+      "EERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Parameswari Krishnamurthy",
+    "slug": "parameswari-krishnamurthy",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Pawan Kumar",
+    "slug": "pawan-kumar",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "PJ Narayanan",
+    "slug": "pj-narayanan",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ponnurangam Kumaraguru",
+    "slug": "ponnurangam-kumaraguru",
+    "labs": [
+      "PreCog"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Prabhakar Bhimalapuram",
+    "slug": "prabhakar-bhimalapuram",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Prakash Yalla",
+    "slug": "prakash-yalla",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Praful Mankar",
+    "slug": "praful-mankar",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Prasad Krishnan",
+    "slug": "prasad-krishnan",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Praveen Paruchuri",
+    "slug": "praveen-paruchuri",
+    "labs": [
+      "MLL"
+    ],
+    "bio": "Research in multi-agent systems, reinforcement learning, and AI planning."
+  },
+  {
+    "name": "Priyanka Srivastava",
+    "slug": "priyanka-srivastava",
+    "labs": [
+      "CogSci"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Priyesh Shukla",
+    "slug": "priyesh-shukla",
+    "labs": [
+      "CSG"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Radhika Krishnan",
+    "slug": "radhika-krishnan",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Radhika Mamidi",
+    "slug": "radhika-mamidi",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Raghavendra GS",
+    "slug": "raghavendra-gs",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Raghu Reddy",
+    "slug": "raghu-reddy",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Rahul Mishra",
+    "slug": "rahul-mishra",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Rajakrishnan P Rajkumar",
+    "slug": "rajakrishnan-p-rajkumar",
+    "labs": [
+      "LTRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Rajan Krishnan Sundara",
+    "slug": "rajan-krishnan-sundara",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Rajorshi Ray",
+    "slug": "rajorshi-ray",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ramachandra Prasad Pillutla",
+    "slug": "ramachandra-prasad-pillutla",
+    "labs": [
+      "LSI"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Raman Saxena",
+    "slug": "raman-saxena",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ramana Gogula",
+    "slug": "ramana-gogula",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Ramesh Loganathan",
+    "slug": "ramesh-loganathan",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ramesh Swaminathan",
+    "slug": "ramesh-swaminathan",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Ravi Kiran S",
+    "slug": "ravi-kiran-s",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Ravi Warrier",
+    "slug": "ravi-warrier",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "RC Prasad",
+    "slug": "rc-prasad",
+    "labs": [
+      "LSI"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Rehana Shaik",
+    "slug": "rehana-shaik",
+    "labs": [
+      "LSI"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sachin Chaudhari",
+    "slug": "sachin-chaudhari",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Saikiran Bulusu",
+    "slug": "saikiran-bulusu",
+    "labs": [
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sai Anirudh Karre",
+    "slug": "sai-anirudh-karre",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Samyadeb Bhattacharya",
+    "slug": "samyadeb-bhattacharya",
+    "labs": [
+      "CQST",
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Santosh Nannuru",
+    "slug": "santosh-nannuru",
+    "labs": [
+      "BMRC",
+      "SPCRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sarath Babu A",
+    "slug": "sarath-babu-a",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Saroja TK",
+    "slug": "saroja-tk",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Saurabh Todariya",
+    "slug": "saurabh-todariya",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Shantanav Chakraborty",
+    "slug": "shantanav-chakraborty",
+    "labs": [
+      "CQST",
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Shatrunjay Rawat",
+    "slug": "shatrunjay-rawat",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Shrikant Bharadwaj",
+    "slug": "shrikant-bharadwaj",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Shubham Singhal",
+    "slug": "shubham-singhal",
+    "labs": [
+      "EERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Siddhartha Das",
+    "slug": "siddhartha-das",
+    "labs": [
+      "CQST",
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Spandan Roy",
+    "slug": "spandan-roy",
+    "labs": [
+      "BMRC",
+      "RRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sridhar Kalyanasundaram",
+    "slug": "sridhar-kalyanasundaram",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Srinathan Kannan",
+    "slug": "srinathan-kannan",
+    "labs": [
+      "CQST",
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Subha Chakraburtty",
+    "slug": "subha-chakraburtty",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Subhadip Mitra",
+    "slug": "subhadip-mitra",
+    "labs": [
+      "CCNSB",
+      "CQST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sujit Gujar",
+    "slug": "sujit-gujar",
+    "labs": [
+      "MLL"
+    ],
+    "bio": "Research in algorithmic game theory, mechanism design, and machine learning."
+  },
+  {
+    "name": "Sukrit Mittal",
+    "slug": "sukrit-mittal",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Sunitha Palissery",
+    "slug": "sunitha-palissery",
+    "labs": [
+      "EERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Suresh Purini",
+    "slug": "suresh-purini",
+    "labs": [
+      "CSG"
+    ],
+    "bio": "Works on parallel programming, compilers, and GPU computing. Teaches compilers and operating systems."
+  },
+  {
+    "name": "Suryajith Chillara",
+    "slug": "suryajith-chillara",
+    "labs": [
+      "CSTAR"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Sushmita Banerji",
+    "slug": "sushmita-banerji",
+    "labs": [
+      "HSRC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Tapan Kumar Sau",
+    "slug": "tapan-kumar-sau",
+    "labs": [
+      "BMRC",
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Tejas Bodas",
+    "slug": "tejas-bodas",
+    "labs": [
+      "CSG"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Usha Gogineni",
+    "slug": "usha-gogineni",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Uttam Singh",
+    "slug": "uttam-singh",
+    "labs": [
+      "CQST"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Vandan Mujadia",
+    "slug": "vandan-mujadia",
+    "labs": [],
+    "bio": null
+  },
+  {
+    "name": "Vasudeva Varma",
+    "slug": "vasudeva-varma",
+    "labs": [
+      "LTRC",
+      "SERC"
+    ],
+    "bio": "Works on information retrieval, web mining, and social media analysis. Former Dean of IIIT Hyderabad."
+  },
+  {
+    "name": "Venkatesh Choppella",
+    "slug": "venkatesh-choppella",
+    "labs": [
+      "SERC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Vikram Pudi",
+    "slug": "vikram-pudi",
+    "labs": [
+      "DSAC"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Vineet Gandhi",
+    "slug": "vineet-gandhi",
+    "labs": [
+      "CVIT"
+    ],
+    "bio": "Research in computer vision, video understanding, and visual tracking."
+  },
+  {
+    "name": "Vinod PK",
+    "slug": "vinod-pk",
+    "labs": [
+      "CCNSB"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Vinoo Alluri",
+    "slug": "vinoo-alluri",
+    "labs": [
+      "CogSci"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Vishnu Sreekumar",
+    "slug": "vishnu-sreekumar",
+    "labs": [
+      "CogSci"
+    ],
+    "bio": null
+  },
+  {
+    "name": "Zia Abbas",
+    "slug": "zia-abbas",
+    "labs": [
+      "CVEST"
+    ],
+    "bio": null
   }
 ]
