@@ -5,7 +5,8 @@ RUN bun install --frozen-lockfile
 COPY . .
 ARG BASE_PATH=""
 ENV BASE_PATH=$BASE_PATH
-ENV PUBLIC_API_URL=""
+ARG PUBLIC_API_URL="/api"
+ENV PUBLIC_API_URL=$PUBLIC_API_URL
 RUN bun run build
 
 FROM caddy:2-alpine
