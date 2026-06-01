@@ -8,6 +8,7 @@
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
+	import Pager from '$lib/components/Pager.svelte';
 
 	const code = $derived($page.params.code);
 
@@ -61,6 +62,11 @@
 
 	const shown = $derived(tab === 'all' ? reviews : reviews.filter((r) => r.offering_id === tab));
 	const selectedoffering = $derived(course && tab !== 'all' ? course.offerings.find((o) => o.id === tab) : null);
+
+	const PER_PAGE = 10;
+	let reviewpage = $state(1);
+	const reviewpages = $derived(Math.max(1, Math.ceil(shown.length / PER_PAGE)));
+	const visiblereviews = $derived(shown.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE));
 </script>
 
 <div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
@@ -108,7 +114,7 @@
 			bar="continuous"
 		/>
 
-		<Tabs items={tabs} active={tab} onchange={(id) => (tab = id)} />
+		<Tabs items={tabs} active={tab} onchange={(id) => { tab = id; reviewpage = 1; }} />
 
 		<!-- taught-by banner -->
 		{#if selectedoffering}
@@ -129,7 +135,7 @@
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
-				{#each shown as r (r.id)}
+				{#each visiblereviews as r (r.id)}
 					<ReviewCard
 						review={r}
 						axisorder={[...COURSE_AXIS_ORDER]}
@@ -142,6 +148,8 @@
 				{/each}
 			</div>
 		{/if}
+
+		<Pager page={reviewpage} totalpages={reviewpages} totalitems={shown.length} onchange={(p) => (reviewpage = p)} />
 
 	{:else}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>

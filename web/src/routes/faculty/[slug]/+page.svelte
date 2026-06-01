@@ -8,6 +8,7 @@
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
+	import Pager from '$lib/components/Pager.svelte';
 
 	const slug = $derived($page.params.slug);
 
@@ -58,6 +59,11 @@
 		{ id: 'advisor', label: 'As Advisor', count: advisorreviews.length },
 		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length }
 	]);
+
+	const PER_PAGE = 10;
+	let reviewpage = $state(1);
+	const showncount = $derived(tab === 'advisor' ? advisorreviews.length : instructorreviews.length);
+	const reviewpages = $derived(Math.max(1, Math.ceil(showncount / PER_PAGE)));
 
 	const taughtcourses = $derived((() => {
 		if (!faculty) return [];
@@ -125,7 +131,7 @@
 			bar="continuous"
 		/>
 
-		<Tabs items={tabs} active={tab} mono={false} onchange={(id) => (tab = id)} />
+		<Tabs items={tabs} active={tab} mono={false} onchange={(id) => { tab = id; reviewpage = 1; }} />
 
 		{#if tab === 'advisor'}
 			{#if advisorreviews.length === 0}
@@ -134,7 +140,7 @@
 				</div>
 			{:else}
 				<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
-					{#each advisorreviews as r (r.id)}
+					{#each advisorreviews.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE) as r (r.id)}
 						<ReviewCard
 							review={r}
 							axisorder={[...ADVISOR_AXIS_ORDER]}
@@ -168,7 +174,7 @@
 				</div>
 			{:else}
 				<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
-					{#each instructorreviews as r (`${r.id}-${r.offeringcode}`)}
+					{#each instructorreviews.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE) as r (`${r.id}-${r.offeringcode}`)}
 						<ReviewCard
 							review={r}
 							axisorder={[...COURSE_AXIS_ORDER]}
@@ -183,6 +189,8 @@
 				</div>
 			{/if}
 		{/if}
+
+		<Pager page={reviewpage} totalpages={reviewpages} totalitems={showncount} onchange={(p) => (reviewpage = p)} />
 
 	{:else}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>

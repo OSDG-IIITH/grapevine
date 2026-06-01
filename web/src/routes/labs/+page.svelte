@@ -12,7 +12,7 @@
 	let page = $state(1);
 
 	$effect(() => {
-		getLabs().then((data) => { if (data) all = data; });
+		getLabs().then((data) => { if (Array.isArray(data)) all = data; });
 	});
 
 	const filtered = $derived(

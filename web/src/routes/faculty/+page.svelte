@@ -15,14 +15,14 @@
 	let page = $state(1);
 
 	$effect(() => {
-		getLabs().then((data) => { if (data) labs = data; });
+		getLabs().then((data) => { if (Array.isArray(data)) labs = data; });
 	});
 
 	$effect(() => {
 		const params: { sort?: 'rating_asc' | 'rating_desc' } = {};
 		if (sort) params.sort = sort;
 		page = 1;
-		getFaculty(params).then((data) => { if (data) all = data; });
+		getFaculty(params).then((data) => { if (Array.isArray(data)) all = data; });
 	});
 
 	const filtered = $derived(

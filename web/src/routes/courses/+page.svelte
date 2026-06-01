@@ -17,7 +17,7 @@
 	let page = $state(1);
 
 	$effect(() => {
-		getFaculty().then((data) => { if (data) allfaculty = data; });
+		getFaculty().then((data) => { if (Array.isArray(data)) allfaculty = data; });
 	});
 
 	$effect(() => {
@@ -25,7 +25,7 @@
 		if (instructor) params.instructor = instructor;
 		if (sort) params.sort = sort;
 		page = 1;
-		getCourses(params).then((data) => { if (data) all = data; });
+		getCourses(params).then((data) => { if (Array.isArray(data)) all = data; });
 	});
 
 	const filtered = $derived(
