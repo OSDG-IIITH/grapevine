@@ -5,17 +5,11 @@
 	import type { SearchResult } from '$lib/types';
 	import { IconBook, IconUser, IconFlask } from '@tabler/icons-svelte';
 
-	interface Hint {
-		label: string;
-		href: string;
-	}
-
 	interface Props {
-		hints?: Hint[];
 		placeholder?: string;
 	}
 
-	let { hints = [], placeholder = 'Search a course, faculty, or lab…' }: Props = $props();
+	let { placeholder = 'Search a course, faculty, or lab…' }: Props = $props();
 
 	let q = $state('');
 	let loading = $state(false);
@@ -152,20 +146,4 @@
 			</div>
 		{/if}
 	</div>
-
-	{#if hints.length > 0}
-		<div
-			class="mt-[18px] flex flex-wrap justify-center gap-[6px] text-[11px] text-[var(--fg-3)]"
-			style="font-family: var(--mono);"
-		>
-			{#each hints as h (h.href)}
-				<a
-					href={base + h.href}
-					class="rounded-[5px] border border-[var(--border-2)] px-[11px] py-[5px] transition-all duration-[150ms] hover:border-[var(--accent-line)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-2)] hover:shadow-[0_0_10px_rgba(107,143,111,0.12)]"
-				>
-					{h.label}
-				</a>
-			{/each}
-		</div>
-	{/if}
 </div>

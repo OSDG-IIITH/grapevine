@@ -1,12 +1,5 @@
 <script lang="ts">
 	import SearchBox from '$lib/components/SearchBox.svelte';
-
-	const hints = [
-		{ label: 'CS3.301 Operating Systems', href: '/courses/cs3301' },
-		{ label: 'Manish Shrivastava', href: '/faculty/f2' },
-		{ label: 'CVIT', href: '/labs/l1' },
-		{ label: 'CS7.401 NLP', href: '/courses/cs7401' }
-	];
 </script>
 
 <div
@@ -33,6 +26,6 @@
 			style="background: radial-gradient(closest-side, rgba(143,207,163,0.22), transparent 70%); filter: blur(20px);"
 		></div>
 
-		<SearchBox {hints} />
+		<SearchBox />
 	</div>
 </div>
