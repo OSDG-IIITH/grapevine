@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, season as \"season: Season\", year FROM offerings WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "season: Season",
+        "type_info": {
+          "Custom": {
+            "name": "offering_season",
+            "kind": {
+              "Enum": [
+                "M",
+                "S"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "year",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "45aba8a42d6e3f7b208e2c5556c546014128464fa212bce844d815061858c1cf"
+}

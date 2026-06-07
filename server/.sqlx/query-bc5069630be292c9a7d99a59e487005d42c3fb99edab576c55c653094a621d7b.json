@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM faculty_labs WHERE faculty_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bc5069630be292c9a7d99a59e487005d42c3fb99edab576c55c653094a621d7b"
+}
