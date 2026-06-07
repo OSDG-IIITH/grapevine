@@ -1,5 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 
+process.env.PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:3000';
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	compilerOptions: {
