@@ -1,28 +1,62 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getLab } from '$lib/api';
+	import { getLab, updateLab } from '$lib/api';
 	import type { LabDetail } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
+	import { currentUser } from '$lib/stores';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import SegBar from '$lib/components/SegBar.svelte';
+	import { Textarea } from '$lib/components/ui/textarea/index.js';
 
 	const shortname = $derived($page.params.shortname);
 
 	let lab = $state<LabDetail | null>(null);
 	let error = $state('');
 
+	let editing = $state(false);
+	let saving = $state(false);
+	let editname = $state('');
+	let editshort = $state('');
+	let editdesc = $state('');
+
 	$effect(() => {
 		const s = shortname;
 		if (!s) return;
 		lab = null;
 		error = '';
+		editing = false;
 		getLab(s).then((data) => {
 			if (!data) { error = 'Lab not found.'; return; }
 			lab = data;
 		});
 	});
+
+	function startEdit() {
+		if (!lab) return;
+		editname = lab.name;
+		editshort = lab.short;
+		editdesc = lab.description;
+		editing = true;
+	}
+
+	function cancelEdit() { editing = false; }
+
+	async function saveEdit() {
+		if (!lab) return;
+		saving = true;
+		const updated = await updateLab(lab.short, { name: editname, short: editshort, description: editdesc });
+		saving = false;
+		if (updated) {
+			lab = updated;
+			editing = false;
+			if (updated.short !== shortname) {
+				goto(`${base}/labs/${updated.short}`, { replaceState: true });
+			}
+		}
+	}
 </script>
 
 <div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
@@ -39,21 +73,79 @@
 
 		<!-- page head -->
 		<div class="flex flex-wrap items-start justify-between gap-6">
-			<div>
-				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
-					{lab.name}
-				</h1>
+			<div class="min-w-0 flex-1">
+				{#if editing}
+					<input
+						bind:value={editname}
+						class="mb-4 w-full min-w-0 rounded-[6px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[var(--fg)] outline-none focus:border-[var(--accent-2)]"
+						style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;"
+					/>
+				{:else}
+					<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
+						{lab.name}
+					</h1>
+				{/if}
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
-					<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{lab.short}</span>
-					<span class="text-[var(--fg-4)]">·</span>
+					{#if editing}
+						<input
+							bind:value={editshort}
+							class="rounded-[5px] border border-[var(--border-strong)] bg-transparent px-2 py-[3px] text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+							style="font-family: var(--mono); min-width: 80px;"
+						/>
+					{:else}
+						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{lab.short}</span>
+					{/if}
 					<span>{lab.facultycount} faculty</span>
 				</div>
 			</div>
+			<div class="flex shrink-0 items-center gap-2">
+				{#if editing}
+					<button
+						type="button"
+						onclick={cancelEdit}
+						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						onclick={saveEdit}
+						disabled={saving}
+						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms] disabled:opacity-60"
+						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+					>
+						{saving ? 'Saving…' : 'Save'}
+					</button>
+				{:else}
+					{#if $currentUser?.is_admin}
+						<button
+							type="button"
+							onclick={startEdit}
+							class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+							</svg>
+							Edit
+						</button>
+					{/if}
+				{/if}
+			</div>
 		</div>
 
-		<p class="mb-7 mt-[14px] max-w-[720px] leading-[1.65] text-[var(--fg-2)]" style="font-size: 15px; text-wrap: pretty;">
-			{lab.description}
-		</p>
+		{#if editing}
+			<Textarea
+				bind:value={editdesc}
+				rows={4}
+				class="mb-7 mt-[14px] w-full resize-none border-[var(--border-strong)] text-[var(--fg-2)] focus-visible:border-[var(--accent-2)] focus-visible:ring-0 dark:bg-input/10"
+				style="font-size: 15px; line-height: 1.65;"
+			/>
+		{:else}
+			<p class="mb-7 mt-[14px] max-w-[720px] leading-[1.65] text-[var(--fg-2)]" style="font-size: 15px; text-wrap: pretty;">
+				{lab.description}
+			</p>
+		{/if}
 
 		<RatingsBlock
 			overall={lab.overall}
@@ -74,7 +166,7 @@
 			</div>
 		{:else}
 			<div
-				class="overflow-hidden rounded-[10px] border border-[var(--border)]"
+				class="flex flex-col overflow-hidden rounded-[10px] border border-[var(--border)]"
 				style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107, 143, 111, 0.035), transparent 42%);"
 			>
 				{#each lab.faculty as m (m.id)}

@@ -1,6 +1,13 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use crate::error::AppError;
+
+#[derive(Debug, Deserialize)]
+pub struct PatchLab {
+    pub name: String,
+    pub short: String,
+    pub description: String,
+}
 
 #[derive(Debug, Serialize)]
 pub struct LabLean {
@@ -65,6 +72,24 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<LabLean>, AppErr
         description: r.description.unwrap_or_default(),
         facultycount: r.facultycount, overall: r.overall,
     }).collect())
+}
+
+pub async fn update_lab(pool: &PgPool, current_short: &str, patch: &PatchLab) -> Result<LabDetail, AppError> {
+    if patch.short != current_short {
+        let exists: Option<String> = sqlx::query_scalar!("SELECT id FROM labs WHERE shortname = $1", patch.short)
+            .fetch_optional(pool)
+            .await?;
+        if exists.is_some() { return Err(AppError::BadRequest("shortname already in use".into())); }
+    }
+    let rows = sqlx::query!(
+        "UPDATE labs SET name = $1, shortname = $2, description = $3 WHERE shortname = $4",
+        patch.name, patch.short, patch.description, current_short
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+    if rows == 0 { return Err(AppError::NotFound); }
+    get_by_shortname(pool, &patch.short).await
 }
 
 pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetail, AppError> {

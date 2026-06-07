@@ -3,7 +3,26 @@ use sqlx::PgPool;
 use crate::error::AppError;
 use super::offering::Season;
 
-#[derive(Debug, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Deserialize)]
+pub struct CreateOffering {
+    pub season: Season,
+    pub year: i16,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PatchOffering {
+    pub faculty_ids: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PatchCourse {
+    pub name: String,
+    pub description: String,
+    #[serde(rename = "type")]
+    pub kind: CourseType,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type)]
 #[serde(rename_all = "lowercase")]
 #[sqlx(type_name = "course_type", rename_all = "lowercase")]
 pub enum CourseType {
@@ -101,6 +120,68 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
     }
 
     Ok(results)
+}
+
+pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Result<CourseDetail, AppError> {
+    let rows = sqlx::query!(
+        r#"UPDATE courses SET name = $1, description = $2, type = $3 WHERE code = $4"#,
+        patch.name,
+        patch.description,
+        patch.kind.clone() as CourseType,
+        code
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+    if rows == 0 { return Err(AppError::NotFound); }
+    get_by_code(pool, code).await
+}
+
+pub async fn create_offering(pool: &PgPool, course_code: &str, body: &CreateOffering) -> Result<OfferingDetail, AppError> {
+    let course_id = id_by_code(pool, course_code).await?;
+    let id = sqlx::query_scalar!(
+        r#"INSERT INTO offerings (course_id, season, year) VALUES ($1, $2, $3) RETURNING id"#,
+        course_id, body.season.clone() as Season, body.year
+    )
+    .fetch_one(pool).await?;
+    let code = format!("{}{}", match &body.season { Season::M => "M", Season::S => "S" }, body.year);
+    Ok(OfferingDetail { id, code, season: body.season.clone(), year: body.year, faculty: vec![] })
+}
+
+pub async fn delete_offering(pool: &PgPool, offering_id: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("DELETE FROM offerings WHERE id = $1", offering_id)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+pub async fn update_offering_faculty(pool: &PgPool, offering_id: &str, faculty_ids: &[String]) -> Result<OfferingDetail, AppError> {
+    let row = sqlx::query!(
+        r#"SELECT id, season as "season: Season", year FROM offerings WHERE id = $1"#,
+        offering_id
+    )
+    .fetch_optional(pool).await?.ok_or(AppError::NotFound)?;
+
+    sqlx::query!("DELETE FROM offering_faculty WHERE offering_id = $1", offering_id)
+        .execute(pool).await?;
+    for fid in faculty_ids {
+        sqlx::query!(
+            "INSERT INTO offering_faculty (offering_id, faculty_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            offering_id, fid
+        )
+        .execute(pool).await?;
+    }
+
+    let frows = sqlx::query!(
+        "SELECT f.id, f.slug, f.name FROM offering_faculty ofac JOIN faculty f ON f.id = ofac.faculty_id WHERE ofac.offering_id = $1",
+        offering_id
+    )
+    .fetch_all(pool).await?;
+
+    let code = format!("{}{}", match &row.season { Season::M => "M", Season::S => "S" }, row.year);
+    Ok(OfferingDetail {
+        id: row.id, code, season: row.season, year: row.year,
+        faculty: frows.into_iter().map(|f| FacultyRef { id: f.id, slug: f.slug, name: f.name }).collect(),
+    })
 }
 
 pub async fn id_by_code(pool: &PgPool, code: &str) -> Result<String, AppError> {

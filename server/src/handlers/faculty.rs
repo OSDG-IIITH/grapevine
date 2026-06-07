@@ -3,7 +3,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use crate::{auth::session::MaybeAuth, error::AppError, models::{faculty, review}, state::AppState};
+use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{faculty, review}, state::AppState};
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
@@ -23,6 +23,16 @@ pub async fn get(
     Path(slug): Path<String>,
 ) -> Result<Json<faculty::FacultyDetail>, AppError> {
     Ok(Json(faculty::get_by_slug(&s.pool, &slug).await?))
+}
+
+pub async fn update(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(slug): Path<String>,
+    Json(body): Json<faculty::PatchFaculty>,
+) -> Result<Json<faculty::FacultyDetail>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(faculty::update_faculty(&s.pool, &slug, &body).await?))
 }
 
 pub async fn reviews(

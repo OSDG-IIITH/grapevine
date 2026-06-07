@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
-	import { getCourse, getCourseReviews } from '$lib/api';
-	import type { CourseDetail, CourseReview } from '$lib/types';
-	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
+	import { getCourse, getCourseReviews, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean } from '$lib/types';
+	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, COURSE_TYPES } from '$lib/types';
+	import { currentUser } from '$lib/stores';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
+	import { Textarea } from '$lib/components/ui/textarea/index.js';
 
 	const code = $derived($page.params.code);
 
@@ -17,6 +19,19 @@
 	let tab = $state('all');
 	let error = $state('');
 
+	let editing = $state(false);
+	let saving = $state(false);
+	let editname = $state('');
+	let editdesc = $state('');
+	let edittype = $state('');
+	let editofferings = $state<Offering[]>([]);
+	let allfaculty = $state<FacultyLean[]>([]);
+	let facultyloaded = $state(false);
+	let creating = $state(false);
+	let crseason = $state('M');
+	let cryear = $state('');
+	let cryearerror = $state(false);
+
 	$effect(() => {
 		const c = code;
 		if (!c) return;
@@ -24,6 +39,7 @@
 		course = null;
 		reviews = [];
 		tab = 'all';
+		editing = false;
 
 		const decoded = decodeURIComponent(c);
 		Promise.all([getCourse(decoded), getCourseReviews(decoded)])
@@ -33,6 +49,98 @@
 				reviews = r ?? [];
 			});
 	});
+
+	async function startEdit() {
+		if (!course) return;
+		editname = course.name;
+		editdesc = course.description;
+		edittype = course.type;
+		editofferings = course.offerings.map((o) => ({ ...o, faculty: [...o.faculty] }));
+		editing = true;
+		if (!facultyloaded) {
+			const all = await getFaculty();
+			allfaculty = all ?? [];
+			facultyloaded = true;
+		}
+	}
+
+	function cancelEdit() {
+		editing = false;
+		creating = false;
+		cryear = '';
+		cryearerror = false;
+	}
+
+	function parseyear(s: string): number | null {
+		const t = s.trim();
+		if (/^\d{2}$/.test(t)) return parseInt(t, 10);
+		if (/^\d{4}$/.test(t)) { const y = parseInt(t, 10); return y >= 2000 && y <= 2099 ? y % 100 : null; }
+		return null;
+	}
+
+	function fullyear(y: number): number { return y < 100 ? 2000 + y : y; }
+
+	function availablefaculty(offeringId: string) {
+		const o = editofferings.find((o) => o.id === offeringId);
+		if (!o) return allfaculty;
+		return allfaculty.filter((f) => !o.faculty.find((of) => of.id === f.id));
+	}
+
+	async function addInstructor(offeringId: string, facultyId: string) {
+		const o = editofferings.find((o) => o.id === offeringId);
+		if (!o || o.faculty.find((f) => f.id === facultyId)) return;
+		const ids = [...o.faculty.map((f) => f.id), facultyId];
+		const updated = await updateOfferingFaculty(offeringId, ids);
+		if (updated) {
+			editofferings = editofferings.map((o) => o.id === offeringId ? { ...o, faculty: updated.faculty } : o);
+			if (course) course = { ...course, offerings: course.offerings.map((o) => o.id === offeringId ? { ...o, faculty: updated.faculty } : o) };
+		}
+	}
+
+	async function removeInstructor(offeringId: string, facultyId: string) {
+		const o = editofferings.find((o) => o.id === offeringId);
+		if (!o) return;
+		const ids = o.faculty.filter((f) => f.id !== facultyId).map((f) => f.id);
+		const updated = await updateOfferingFaculty(offeringId, ids);
+		if (updated) {
+			editofferings = editofferings.map((o) => o.id === offeringId ? { ...o, faculty: updated.faculty } : o);
+			if (course) course = { ...course, offerings: course.offerings.map((o) => o.id === offeringId ? { ...o, faculty: updated.faculty } : o) };
+		}
+	}
+
+	async function removeOffering(offeringId: string) {
+		const ok = await deleteOffering(offeringId);
+		if (ok) {
+			editofferings = editofferings.filter((o) => o.id !== offeringId);
+			if (course) course = { ...course, offerings: course.offerings.filter((o) => o.id !== offeringId) };
+		}
+	}
+
+	async function addOffering() {
+		if (!course) return;
+		const year = parseyear(cryear);
+		if (year === null) { cryearerror = true; return; }
+		cryearerror = false;
+		const added = await createOffering(course.code, { season: crseason, year });
+		if (added) {
+			editofferings = [...editofferings, added];
+			if (course) course = { ...course, offerings: [...course.offerings, added] };
+			creating = false;
+			cryear = '';
+			crseason = 'M';
+		}
+	}
+
+	async function saveEdit() {
+		if (!course) return;
+		saving = true;
+		const updated = await updateCourse(course.code, { name: editname, description: editdesc, type: edittype });
+		saving = false;
+		if (updated) {
+			course = updated;
+			editing = false;
+		}
+	}
 
 	const axes = $derived((() => {
 		if (!reviews.length) return { difficulty: 0, workload: 0, teaching: 0, grading: 0, content: 0 };
@@ -79,31 +187,225 @@
 
 		<!-- page head -->
 		<div class="flex flex-wrap items-start justify-between gap-6">
-			<div>
-				<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
-					{course.name}
-				</h1>
+			<div class="min-w-0 flex-1">
+				{#if editing}
+					<input
+						bind:value={editname}
+						class="mb-4 w-full min-w-0 rounded-[6px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[var(--fg)] outline-none focus:border-[var(--accent-2)]"
+						style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;"
+					/>
+				{:else}
+					<h1 class="m-0 mb-4 font-normal text-[var(--fg)]" style="font-family: var(--serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.015em;">
+						{course.name}
+					</h1>
+				{/if}
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
 					<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.code}</span>
-					<span class="text-[var(--fg-4)]">·</span>
-					<span class="text-[11px] tracking-[0.04em] {course.type === 'core' ? 'text-[var(--accent-2)]' : 'text-[var(--fg-4)]'}" style="font-family: var(--mono);">{course.type}</span>
+					{#if editing}
+						<select
+							bind:value={edittype}
+							class="rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-2 py-[3px] text-[12px] text-[var(--fg-2)] outline-none"
+							style="font-family: var(--mono);"
+						>
+							{#each COURSE_TYPES as t (t)}
+								<option value={t}>{t}</option>
+							{/each}
+						</select>
+					{:else}
+						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.type}</span>
+					{/if}
 				</div>
 			</div>
-			<a
-				href="{base}/review?course={course.code}"
-				class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
-				style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
-			>
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M5 12h14M12 5v14" />
-				</svg>
-				Write a review
-			</a>
+			<div class="flex shrink-0 items-center gap-2">
+				{#if editing}
+					<button
+						type="button"
+						onclick={cancelEdit}
+						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						onclick={saveEdit}
+						disabled={saving}
+						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms] disabled:opacity-60"
+						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+					>
+						{saving ? 'Saving…' : 'Save'}
+					</button>
+				{:else}
+					{#if $currentUser?.is_admin}
+						<button
+							type="button"
+							onclick={startEdit}
+							class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+							</svg>
+							Edit
+						</button>
+					{/if}
+					<a
+						href="{base}/review?course={course.code}"
+						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
+						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+					>
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M5 12h14M12 5v14" />
+						</svg>
+						Write a review
+					</a>
+				{/if}
+			</div>
 		</div>
 
-		<p class="mb-7 mt-[14px] max-w-[720px] leading-[1.65] text-[var(--fg-2)]" style="font-size: 15px; text-wrap: pretty;">
-			{course.description}
-		</p>
+		{#if editing}
+			<Textarea
+				bind:value={editdesc}
+				rows={4}
+				class="mb-7 mt-[14px] w-full resize-none border-[var(--border-strong)] text-[var(--fg-2)] focus-visible:border-[var(--accent-2)] focus-visible:ring-0 dark:bg-input/10"
+				style="font-size: 15px; line-height: 1.65;"
+			/>
+
+			<!-- offerings editor -->
+			<div class="mb-7 overflow-hidden rounded-[10px] border border-[var(--border)]" style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107, 143, 111, 0.04), transparent 48%);">
+
+				<!-- header -->
+				<div class="flex items-center justify-between border-b border-[var(--border)] px-5 py-[13px]">
+					<div class="flex items-center gap-[10px]">
+						<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Offerings</span>
+						{#if editofferings.length > 0}
+							<span class="rounded-full bg-[var(--bg-3)] px-[7px] py-[1px] text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{editofferings.length}</span>
+						{/if}
+					</div>
+					{#if !creating}
+						<button
+							type="button"
+							onclick={() => { creating = true; }}
+							class="inline-flex items-center gap-[5px] rounded-[6px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[10px] py-[5px] text-[12px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-4)] hover:text-[var(--fg)]"
+						>
+							<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+								<path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+							</svg>
+							New offering
+						</button>
+					{/if}
+				</div>
+
+				<!-- offering rows -->
+				{#if editofferings.length === 0 && !creating}
+					<div class="px-5 py-[44px] text-center text-[13px] text-[var(--fg-4)]">No offerings yet.</div>
+				{:else}
+					{#each editofferings as o (o.id)}
+						<div class="flex items-center gap-[12px] border-b border-[var(--border)] px-5 py-[13px]">
+							<!-- season + year -->
+							<div class="w-[118px] shrink-0">
+								<span class="text-[13px] font-medium text-[var(--fg)]">{o.season === 'M' ? 'Monsoon' : 'Spring'} {fullyear(o.year)}</span>
+							</div>
+							<!-- instructors -->
+							<div class="flex flex-1 flex-wrap items-center gap-[6px]">
+								{#each o.faculty as f (f.id)}
+									<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
+										{f.name}
+										<button
+											type="button"
+											onclick={() => removeInstructor(o.id, f.id)}
+											aria-label="Remove {f.name}"
+											class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+										>
+											<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+												<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+											</svg>
+										</button>
+									</span>
+								{/each}
+								{#if facultyloaded && availablefaculty(o.id).length > 0}
+									<select
+										onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) { addInstructor(o.id, v); (e.target as HTMLSelectElement).value = ''; } }}
+										class="appearance-none rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
+										style="font-family: var(--mono); width: 110px;"
+									>
+										<option value="">+ instructor</option>
+										{#each availablefaculty(o.id) as f (f.id)}
+											<option value={f.id}>{f.name}</option>
+										{/each}
+									</select>
+								{/if}
+							</div>
+							<!-- delete -->
+							<button
+								type="button"
+								onclick={() => removeOffering(o.id)}
+								aria-label="Delete offering"
+								class="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[6px] text-[var(--fg-4)] transition-colors duration-[120ms] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]"
+							>
+								<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+								</svg>
+							</button>
+						</div>
+					{/each}
+
+					<!-- creation row -->
+					{#if creating}
+						<div class="flex flex-wrap items-center gap-[8px] border-t border-[var(--border)] px-5 py-[13px]" style="background: rgba(107, 143, 111, 0.035);">
+							<!-- season toggle -->
+							<div class="flex rounded-[6px] border border-[var(--border-strong)] p-[2px]" style="background: var(--bg-3);">
+								<button
+									type="button"
+									onclick={() => { crseason = 'M'; }}
+									class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {crseason === 'M' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+									style="font-family: var(--mono); {crseason === 'M' ? 'background: var(--bg-4);' : ''}"
+								>M</button>
+								<button
+									type="button"
+									onclick={() => { crseason = 'S'; }}
+									class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {crseason === 'S' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+									style="font-family: var(--mono); {crseason === 'S' ? 'background: var(--bg-4);' : ''}"
+								>S</button>
+							</div>
+							<!-- year input -->
+							<input
+								bind:value={cryear}
+								placeholder="26"
+								oninput={() => { cryearerror = false; }}
+								onkeydown={(e) => { if (e.key === 'Enter') addOffering(); if (e.key === 'Escape') { creating = false; cryear = ''; cryearerror = false; crseason = 'M'; } }}
+								class="rounded-[5px] border bg-transparent px-[8px] py-[4px] text-[12px] outline-none transition-colors duration-[100ms] {cryearerror ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-strong)] text-[var(--fg-2)] focus:border-[var(--accent-2)]'}"
+								style="font-family: var(--mono); width: 52px;"
+							/>
+							{#if cryearerror}
+								<span class="text-[11px] text-[var(--danger)]">Enter a valid year (e.g. 26 or 2026)</span>
+							{/if}
+							<div class="flex items-center gap-[6px]">
+								<button
+									type="button"
+									onclick={addOffering}
+									class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium transition-colors duration-[120ms]"
+									style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
+								>Add</button>
+								<button
+									type="button"
+									onclick={() => { creating = false; cryear = ''; cryearerror = false; crseason = 'M'; }}
+									aria-label="Cancel"
+									class="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] border border-[var(--border-strong)] text-[var(--fg-4)] transition-colors hover:bg-[var(--bg-4)] hover:text-[var(--fg-3)]"
+								>
+									<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+										<path d="M1 1l9 9M10 1L1 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+									</svg>
+								</button>
+							</div>
+						</div>
+					{/if}
+				{/if}
+			</div>
+		{:else}
+			<p class="mb-7 mt-[14px] max-w-[720px] leading-[1.65] text-[var(--fg-2)]" style="font-size: 15px; text-wrap: pretty;">
+				{course.description}
+			</p>
+		{/if}
 
 		<RatingsBlock
 			overall={course.overall}

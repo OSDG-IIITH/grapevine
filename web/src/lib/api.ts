@@ -1,12 +1,13 @@
 import { toast } from 'svelte-sonner';
 import { PUBLIC_API_URL } from '$env/static/public';
 import type {
-	CourseLean, CourseDetail, CourseReview,
+	CourseLean, CourseDetail, CourseReview, Offering,
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, AuthUser,
 	SearchResult, MyReviews,
 	CreateCourseReview, EditCourseReview,
-	CreateAdvisorReview, EditAdvisorReview
+	CreateAdvisorReview, EditAdvisorReview,
+	PatchCourse, PatchFaculty, PatchLab
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -158,6 +159,30 @@ export async function flagCourseReview(id: string, reason: string): Promise<bool
 
 export async function flagAdvisorReview(id: string, reason: string): Promise<boolean> {
 	return apivoid(`/reviews/advisor/${id}/flag`, json({ reason }));
+}
+
+export async function createOffering(code: string, body: { season: string; year: number }): Promise<Offering | null> {
+	return apifetch<Offering>(`/courses/${encodeURIComponent(code)}/offerings`, json(body));
+}
+
+export async function deleteOffering(id: string): Promise<boolean> {
+	return apivoid(`/offerings/${id}`, { method: 'DELETE' });
+}
+
+export async function updateOfferingFaculty(id: string, faculty_ids: string[]): Promise<Offering | null> {
+	return apifetch<Offering>(`/offerings/${id}`, json({ faculty_ids }, 'PATCH'));
+}
+
+export async function updateCourse(code: string, body: PatchCourse): Promise<CourseDetail | null> {
+	return apifetch<CourseDetail>(`/courses/${encodeURIComponent(code)}`, json(body, 'PATCH'));
+}
+
+export async function updateFaculty(slug: string, body: PatchFaculty): Promise<FacultyDetail | null> {
+	return apifetch<FacultyDetail>(`/faculty/${slug}`, json(body, 'PATCH'));
+}
+
+export async function updateLab(shortname: string, body: PatchLab): Promise<LabDetail | null> {
+	return apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
 }
 
 export async function getFlags(): Promise<FlagResponse[] | null> {

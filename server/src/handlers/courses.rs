@@ -3,7 +3,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use crate::{auth::session::MaybeAuth, error::AppError, models::{course, review}, state::AppState};
+use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{course, review}, state::AppState};
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
@@ -24,6 +24,26 @@ pub async fn get(
     Path(code): Path<String>,
 ) -> Result<Json<course::CourseDetail>, AppError> {
     Ok(Json(course::get_by_code(&s.pool, &code).await?))
+}
+
+pub async fn update(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(code): Path<String>,
+    Json(body): Json<course::PatchCourse>,
+) -> Result<Json<course::CourseDetail>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(course::update_course(&s.pool, &code, &body).await?))
+}
+
+pub async fn create_offering(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(code): Path<String>,
+    Json(body): Json<course::CreateOffering>,
+) -> Result<Json<course::OfferingDetail>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(course::create_offering(&s.pool, &code, &body).await?))
 }
 
 pub async fn reviews(

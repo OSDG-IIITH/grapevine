@@ -177,3 +177,24 @@ export interface MyReviews {
 	course: CourseReview[];
 	advisor: AdvisorReview[];
 }
+
+export interface PatchCourse {
+	name: string;
+	description: string;
+	type: string;
+}
+
+export interface PatchFaculty {
+	name: string;
+	slug: string;
+	bio: string;
+	lab_ids: string[];
+}
+
+export interface PatchLab {
+	name: string;
+	short: string;
+	description: string;
+}
+
+export const COURSE_TYPES = ['core', 'open', 'breadth', 'stream', 'bouquet', 'hs', 'sci', 'math'] as const;

@@ -1,8 +1,16 @@
 use std::collections::HashMap;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use crate::error::AppError;
 use super::offering::Season;
+
+#[derive(Debug, Deserialize)]
+pub struct PatchFaculty {
+    pub name: String,
+    pub slug: String,
+    pub bio: String,
+    pub lab_ids: Vec<String>,
+}
 
 #[derive(Debug, Serialize)]
 pub struct FacultyLean {
@@ -103,6 +111,34 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
     }
 
     Ok(results)
+}
+
+pub async fn update_faculty(pool: &PgPool, current_slug: &str, patch: &PatchFaculty) -> Result<FacultyDetail, AppError> {
+    if patch.slug != current_slug {
+        let exists: Option<String> = sqlx::query_scalar!("SELECT id FROM faculty WHERE slug = $1", patch.slug)
+            .fetch_optional(pool)
+            .await?;
+        if exists.is_some() { return Err(AppError::BadRequest("slug already in use".into())); }
+    }
+    let id: String = sqlx::query_scalar!("SELECT id FROM faculty WHERE slug = $1", current_slug)
+        .fetch_optional(pool)
+        .await?
+        .ok_or(AppError::NotFound)?;
+    sqlx::query!(
+        "UPDATE faculty SET name = $1, slug = $2, bio = $3 WHERE id = $4",
+        patch.name, patch.slug, patch.bio, id
+    )
+    .execute(pool)
+    .await?;
+    sqlx::query!("DELETE FROM faculty_labs WHERE faculty_id = $1", id)
+        .execute(pool)
+        .await?;
+    for lab_id in &patch.lab_ids {
+        sqlx::query!("INSERT INTO faculty_labs (faculty_id, lab_id) VALUES ($1, $2)", id, lab_id)
+            .execute(pool)
+            .await?;
+    }
+    get_by_slug(pool, &patch.slug).await
 }
 
 pub async fn id_by_slug(pool: &PgPool, slug: &str) -> Result<String, AppError> {
