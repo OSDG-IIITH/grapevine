@@ -4,7 +4,7 @@ grapevine is a course and advisor review platform for IIIT Hyderabad.
 
 ### Setup
 
-If you use **Nix**, you can use flake.nix for a development shell with required dependencies.
+If you use **Nix**, you can use `flake.nix` for a development shell with required dependencies.
 
 Otherwise,you will need:
 - [Rust](https://www.rust-lang.org/)
@@ -14,7 +14,7 @@ Otherwise,you will need:
 
 #### Environment Variables
 
-Copy `.env.example` over to `.env`. Make changes if needed.
+Copy `.env.example` over to `.env`. Make changes if needed (add your email to `MODERATOR_EMAILS` to test moderator capabilities)
 ```
 cp .env.example .env
 ```
