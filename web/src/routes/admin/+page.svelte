@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getFlags, dismissFlag, deleteFlaggedReview } from '$lib/api';
+	import { getFlags, dismissFlag, deleteFlaggedReview, exportSeedData } from '$lib/api';
 	import { currentUser } from '$lib/stores';
 	import type { FlagResponse } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -22,6 +22,23 @@
 
 	async function deleteReview(id: string) {
 		if (await deleteFlaggedReview(id)) items = items.filter((i) => i.id !== id);
+	}
+
+	let exporting = $state(false);
+
+	async function doexport() {
+		exporting = true;
+		const data = await exportSeedData();
+		exporting = false;
+		if (!data) return;
+		for (const key of ['labs', 'faculty', 'courses', 'offerings'] as const) {
+			const blob = new Blob([JSON.stringify(data[key], null, 2)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url; a.download = `${key}.json`; a.click();
+			URL.revokeObjectURL(url);
+			await new Promise((r) => setTimeout(r, 80));
+		}
 	}
 
 	function reltime(iso: string): string {
@@ -58,6 +75,17 @@
 					<span>review and act — delete removes the review; dismiss closes the report</span>
 				</div>
 			</div>
+			<button
+				type="button"
+				onclick={doexport}
+				disabled={exporting}
+				class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)] disabled:opacity-50"
+			>
+				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+				</svg>
+				{exporting ? 'Exporting…' : 'Export seed data'}
+			</button>
 		</div>
 
 		{#if items.length === 0}

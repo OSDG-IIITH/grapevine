@@ -185,6 +185,10 @@ export async function updateLab(shortname: string, body: PatchLab): Promise<LabD
 	return apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
 }
 
+export async function exportSeedData(): Promise<{ labs: unknown[]; faculty: unknown[]; courses: unknown[]; offerings: unknown[] } | null> {
+	return apifetch('/admin/export');
+}
+
 export async function getFlags(): Promise<FlagResponse[] | null> {
 	return apifetch<FlagResponse[]>('/admin/flags');
 }
