@@ -520,11 +520,20 @@ paths:
   /auth/logout:
     post:
       operationId: casLogout
-      summary: flush session and redirect to CAS logout
+      summary: flush session and return CAS logout redirect URL
       tags: [auth]
       responses:
-        '302':
-          description: redirect to CAS logout page
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [redirect_url]
+                properties:
+                  redirect_url:
+                    type: string
+                    format: uri
 
   # ── courses ─────────────────────────────────────────────────────────────────
 

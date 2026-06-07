@@ -41,7 +41,20 @@
 	});
 
 	async function logout() {
-		await fetch(`${PUBLIC_API_URL || '/grapevine/api'}/auth/logout`, { method: 'POST', credentials: 'include' });
+		try {
+			const res = await fetch(`${PUBLIC_API_URL || '/grapevine/api'}/auth/logout`, {
+				method: 'POST',
+				credentials: 'include'
+			});
+			if (res.ok) {
+				const data = await res.json();
+				currentUser.set(null);
+				window.location.href = data.redirect_url;
+				return;
+			}
+		} catch (e) {
+			console.error('Logout failed:', e);
+		}
 		currentUser.set(null);
 		goto(base + '/');
 	}

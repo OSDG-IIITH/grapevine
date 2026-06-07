@@ -1,8 +1,9 @@
 use axum::{
     extract::{Query, State},
     response::Redirect,
+    Json,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 use ulid::Ulid;
 use crate::{error::AppError, state::AppState};
@@ -11,6 +12,11 @@ use super::session::{IS_ADMIN_KEY, USER_ID_KEY};
 #[derive(Deserialize)]
 pub struct TicketQuery {
     ticket: String,
+}
+
+#[derive(Serialize)]
+pub struct LogoutResponse {
+    pub redirect_url: String,
 }
 
 pub async fn login(State(s): State<AppState>) -> Redirect {
@@ -72,9 +78,10 @@ pub async fn callback(
     Ok(Redirect::to(&s.cfg.frontend_url))
 }
 
-pub async fn logout(State(s): State<AppState>, session: Session) -> Result<Redirect, AppError> {
+pub async fn logout(State(s): State<AppState>, session: Session) -> Result<Json<LogoutResponse>, AppError> {
     session.flush().await.map_err(|_| AppError::Internal)?;
-    Ok(Redirect::to(&format!("{}/logout", s.cfg.cas_base_url)))
+    let redirect_url = format!("{}/logout?service={}", s.cfg.cas_base_url, urlenc(&s.cfg.frontend_url));
+    Ok(Json(LogoutResponse { redirect_url }))
 }
 
 fn parse_cas_user(xml: &str) -> Option<String> {
