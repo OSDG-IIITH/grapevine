@@ -121,7 +121,8 @@
 				bind:value={instructor}
 				placeholder="any instructor"
 				searchplaceholder="search instructors…"
-				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[border-color,color] duration-[120ms] {instructor ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] bg-[var(--bg-inset)] text-[var(--fg-3)] hover:border-[var(--border-2)] hover:text-[var(--fg)]'}"
+				popoverwidth="260px"
+				class="min-w-[140px] rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[color,background,border-color] duration-[120ms] {instructor ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
 				style="font-family: var(--mono);"
 			/>
 		</div>

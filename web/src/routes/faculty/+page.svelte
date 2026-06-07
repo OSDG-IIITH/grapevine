@@ -4,6 +4,7 @@
 	import type { FacultyLean, LabLean } from '$lib/types';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
+	import Combobox from '$lib/components/Combobox.svelte';
 
 	const PER_PAGE = 9;
 
@@ -81,40 +82,15 @@
 
 	<!-- toolbar -->
 	<div class="mb-[22px] mt-[18px] flex flex-wrap items-center justify-between gap-3">
-		<div class="flex flex-wrap gap-[6px]">
-			<!-- mobile: lab select -->
-			<select
-				bind:value={labfilter}
-				onchange={() => (page = 1)}
-				class="sm:hidden rounded-[5px] border bg-[var(--bg-inset)] px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[border-color,color] duration-[120ms] {labfilter !== 'all' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)]'}"
-				style="font-family: var(--mono);"
-			>
-				<option value="all">all labs</option>
-				{#each labs as l (l.id)}<option value={l.short}>{l.short}</option>{/each}
-				<option value="independent">independent</option>
-			</select>
-			<!-- desktop: lab pills -->
-			<button
-				type="button"
-				onclick={() => { labfilter = 'all'; page = 1; }}
-				class="hidden sm:inline-block rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {labfilter === 'all' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-			>all labs</button>
-			{#each labs as l (l.id)}
-				<button
-					type="button"
-					onclick={() => { labfilter = l.short; page = 1; }}
-					class="hidden sm:inline-block rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {labfilter === l.short ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-					style="font-family: var(--mono);"
-				>{l.short}</button>
-			{/each}
-			<button
-				type="button"
-				onclick={() => { labfilter = 'independent'; page = 1; }}
-				class="hidden sm:inline-block rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {labfilter === 'independent' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-			>independent</button>
-		</div>
+		<Combobox
+			items={[{ value: 'all', label: 'all labs' }, ...labs.map((l) => ({ value: l.short, label: l.short })), { value: 'independent', label: 'independent' }]}
+			bind:value={labfilter}
+			placeholder="all labs"
+			searchplaceholder="search labs…"
+			onselect={() => (page = 1)}
+			class="min-w-[140px] rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[color,background,border-color] duration-[120ms] {labfilter !== 'all' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
+			style="font-family: var(--mono);"
+		/>
 		<div class="flex flex-1 items-center gap-2 sm:flex-none">
 			<button
 				type="button"

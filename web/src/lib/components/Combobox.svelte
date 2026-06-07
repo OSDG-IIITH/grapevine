@@ -12,6 +12,8 @@
 		value = $bindable(''),
 		placeholder = 'Select…',
 		searchplaceholder = 'Search…',
+		onselect,
+		popoverwidth,
 		class: className = '',
 		style = ''
 	}: {
@@ -19,6 +21,8 @@
 		value?: string;
 		placeholder?: string;
 		searchplaceholder?: string;
+		onselect?: (v: string) => void;
+		popoverwidth?: string;
 		class?: string;
 		style?: string;
 	} = $props();
@@ -45,7 +49,7 @@
 				{#each items as item (item.value)}
 					<Command.Item
 						value={item.label}
-						onSelect={() => { value = item.value; open = false; }}
+						onSelect={() => { value = item.value; open = false; onselect?.(item.value); }}
 					>
 						<span class="min-w-0 truncate">{item.label}</span>
 					</Command.Item>
@@ -56,7 +60,7 @@
 {/snippet}
 
 {#snippet trigger()}
-	<span class="min-w-0 truncate">{selected?.label ?? placeholder}</span>
+	<span class="min-w-0 truncate flex-1">{selected?.label ?? placeholder}</span>
 	<svg class="shrink-0" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
 		<path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
 	</svg>
@@ -65,7 +69,7 @@
 {#if isDesktop}
 	<Popover.Root bind:open>
 		<Popover.Trigger
-			class={cn('flex items-center justify-between gap-2 text-left', className)}
+			class={cn('inline-flex items-center justify-between gap-2 text-left', className)}
 			{style}
 			aria-label="Select option"
 		>
@@ -73,7 +77,7 @@
 		</Popover.Trigger>
 		<Popover.Content
 			class="w-auto p-0 rounded-[8px] bg-[var(--bg-inset)] border border-[var(--border-2)] shadow-lg ring-0"
-			style="width: var(--bits-floating-anchor-width, 200px);"
+			style="width: {popoverwidth ?? 'var(--bits-floating-anchor-width, 200px)'};"
 			sideOffset={5}
 			align="start"
 		>
@@ -83,7 +87,7 @@
 {:else}
 	<Drawer.Root bind:open>
 		<Drawer.Trigger
-			class={cn('flex items-center justify-between gap-2 text-left', className)}
+			class={cn('inline-flex items-center justify-between gap-2 text-left', className)}
 			{style}
 			aria-label="Select option"
 		>
