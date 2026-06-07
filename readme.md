@@ -28,7 +28,9 @@ docker compose -f docker-compose.dev.yml up -d
 
 Run the migrations:
 ```
+cd server
 sqlx migrate run
+cd ..
 ```
 
 Seed the database:
@@ -45,7 +47,7 @@ To run the backend:
 cd server
 cargo run
 ```
-Runs ar `http://localhost:3000`
+Runs at `http://localhost:3000`
 
 To run the frontend:
 ```
