@@ -45,7 +45,7 @@ cd ..
 To run the backend:
 ```
 cd server
-cargo run --bin server
+cargo run
 ```
 Runs at `http://localhost:3000`
 
