@@ -3,6 +3,18 @@
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 
+@theme {
+  --color-popover: #0e1410;
+  --color-popover-foreground: #e8ebe6;
+  --color-muted: #1f2620;
+  --color-muted-foreground: #7d847d;
+  --color-foreground: #e8ebe6;
+  --color-input: #2c332d;
+  --color-border: #232a25;
+  --color-accent: #6b8f6f;
+  --color-accent-foreground: #7fa583;
+}
+
 :root {
   --bg: #121814;
   --bg-2: #181f1a;

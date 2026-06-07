@@ -4,6 +4,7 @@
 	import type { CourseLean, FacultyLean } from '$lib/types';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
+	import Combobox from '$lib/components/Combobox.svelte';
 
 	const TYPES = ['core', 'open', 'breadth', 'stream', 'bouquet', 'hs', 'sci', 'math'];
 	const PER_PAGE = 9;
@@ -115,17 +116,14 @@
 					style="font-family: var(--mono);"
 				>{t}</button>
 			{/each}
-			<select
+			<Combobox
+				items={[{ value: '', label: 'any instructor' }, ...allfaculty.map((f) => ({ value: f.slug, label: f.name }))]}
 				bind:value={instructor}
-				onchange={() => (page = 1)}
-				class="rounded-[5px] border border-[var(--border)] bg-[var(--bg-inset)] px-[10px] py-[5px] text-[11px] tracking-[0.04em] text-[var(--fg-3)] outline-none transition-[border-color,color] duration-[120ms] hover:border-[var(--border-2)] hover:text-[var(--fg)] {instructor ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : ''}"
+				placeholder="any instructor"
+				searchplaceholder="search instructors…"
+				class="rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[border-color,color] duration-[120ms] {instructor ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] bg-[var(--bg-inset)] text-[var(--fg-3)] hover:border-[var(--border-2)] hover:text-[var(--fg)]'}"
 				style="font-family: var(--mono);"
-			>
-				<option value="">any instructor</option>
-				{#each allfaculty as f (f.id)}
-					<option value={f.slug}>{f.name}</option>
-				{/each}
-			</select>
+			/>
 		</div>
 		<div class="flex flex-1 items-center gap-2 sm:flex-none">
 			<button

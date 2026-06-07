@@ -10,6 +10,7 @@
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import SegBar from '$lib/components/SegBar.svelte';
 	import Crumbs from '$lib/components/Crumbs.svelte';
+	import Combobox from '$lib/components/Combobox.svelte';
 
 	const precourse = page.url.searchParams.get('course');
 	const prefaculty = page.url.searchParams.get('faculty');
@@ -171,21 +172,13 @@
 						Course & offering
 					</div>
 					<div class="min-w-0" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
-						<div class="relative">
-							<select
-								class="w-full appearance-none rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-8 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
-								bind:value={courseid}
-							>
-								{#each allcourses as c (c.id)}
-									<option value={c.id}>{c.code} — {c.name}</option>
-								{/each}
-							</select>
-							<div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-								<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-									<path d="M2 4l3 3 3-3" stroke="var(--fg-3)" stroke-width="1.4" stroke-linecap="round" />
-								</svg>
-							</div>
-						</div>
+						<Combobox
+							items={allcourses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+							bind:value={courseid}
+							placeholder="Select course…"
+							searchplaceholder="Search courses…"
+							class="w-full rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-4 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)]"
+						/>
 						<div class="relative">
 							<select
 								class="w-full appearance-none rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-8 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
@@ -209,21 +202,13 @@
 						Faculty
 					</div>
 					<div class="min-w-0">
-						<div class="relative">
-							<select
-								class="w-full appearance-none rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-8 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
-								bind:value={facultyid}
-							>
-								{#each allfaculty as f (f.id)}
-									<option value={f.id}>{f.name}</option>
-								{/each}
-							</select>
-							<div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-								<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-									<path d="M2 4l3 3 3-3" stroke="var(--fg-3)" stroke-width="1.4" stroke-linecap="round" />
-								</svg>
-							</div>
-						</div>
+						<Combobox
+							items={allfaculty.map((f) => ({ value: f.id, label: f.name }))}
+							bind:value={facultyid}
+							placeholder="Select faculty…"
+							searchplaceholder="Search faculty…"
+							class="w-full rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-4 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)]"
+						/>
 					</div>
 				</div>
 			{/if}
