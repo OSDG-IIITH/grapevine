@@ -3,11 +3,28 @@ use axum::{
     response::Redirect,
     Json,
 };
+use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
+use sha2::Sha256;
 use tower_sessions::Session;
 use ulid::Ulid;
 use crate::{error::AppError, state::AppState};
-use super::session::{IS_ADMIN_KEY, USER_ID_KEY};
+use super::session::{AuthUser, AUTH_METHOD_KEY, IS_ADMIN_KEY, USER_ID_KEY, VERIFIED_KEY};
+use super::validate::is_allowed_email_domain;
+
+/// HMAC-SHA256 of the lowercased email, keyed by `verify_email_secret`, hex-encoded.
+/// Load-bearing for anonymity: a DB reader sees only this hash, never the address.
+fn email_hmac(email: &str, secret: &str) -> String {
+    let mut mac = Hmac::<Sha256>::new_from_slice(secret.as_bytes())
+        .expect("HMAC accepts any key length");
+    mac.update(email.trim().to_lowercase().as_bytes());
+    let bytes = mac.finalize().into_bytes();
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for b in bytes {
+        out.push_str(&format!("{:02x}", b));
+    }
+    out
+}
 
 #[derive(Deserialize)]
 pub struct TicketQuery {
@@ -43,17 +60,40 @@ pub async fn callback(
         .map_err(|_| AppError::Internal)?;
 
     let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
+
+    // Only allowed-domain emails may log in via CAS.
+    if !is_allowed_email_domain(&cas_id, &s.cfg.allowed_email_domains) {
+        return Err(AppError::Forbidden);
+    }
+
+    // Read-only check: if this email already backs an anonymous (local) account,
+    // reject the CAS login. CAS never writes to verified_emails.
+    let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
+    let already_used = sqlx::query_scalar!(
+        "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
+        hash
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .is_some();
+    if already_used {
+        return Err(AppError::BadRequest(
+            "this email is already linked to an anonymous account".into(),
+        ));
+    }
+
     let display_name = parse_cas_display_name(&xml).unwrap_or_else(|| name_from_cas_id(&cas_id));
     let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
 
     let id = Ulid::new().to_string();
     let row = sqlx::query!(
         r#"
-        INSERT INTO users (id, cas_id, display_name)
-        VALUES ($1, $2, $3)
+        INSERT INTO users (id, cas_id, display_name, verified)
+        VALUES ($1, $2, $3, true)
         ON CONFLICT (cas_id) DO UPDATE
             SET cas_id = EXCLUDED.cas_id,
-                display_name = EXCLUDED.display_name
+                display_name = EXCLUDED.display_name,
+                verified = true
         RETURNING id, is_admin
         "#,
         id, cas_id, display_name
@@ -74,13 +114,108 @@ pub async fn callback(
 
     session.insert(USER_ID_KEY, row.id).await.map_err(|_| AppError::Internal)?;
     session.insert(IS_ADMIN_KEY, is_admin).await.map_err(|_| AppError::Internal)?;
+    session.insert(VERIFIED_KEY, true).await.map_err(|_| AppError::Internal)?;
+    session.insert(AUTH_METHOD_KEY, "cas").await.map_err(|_| AppError::Internal)?;
+
+    Ok(Redirect::to(&s.cfg.frontend_url))
+}
+
+/// Start the anonymous-account verification flow: send the (logged-in, possibly
+/// unverified) user to CAS with a service URL distinct from the login callback.
+pub async fn verify_login(State(s): State<AppState>, _user: AuthUser) -> Redirect {
+    let service = format!("{}/auth/verify/callback", s.cfg.app_url);
+    Redirect::to(&format!("{}/login?service={}", s.cfg.cas_base_url, urlenc(&service)))
+}
+
+/// Finish verification: validate the CAS ticket, confirm an allowed-domain email
+/// that doesn't already back a CAS account, record only its HMAC, flip the
+/// session's own user row to verified, and never write the email onto that row.
+pub async fn verify_callback(
+    Query(q): Query<TicketQuery>,
+    State(s): State<AppState>,
+    session: Session,
+    user: AuthUser,
+) -> Result<Redirect, AppError> {
+    let service = format!("{}/auth/verify/callback", s.cfg.app_url);
+    let validate_url = format!(
+        "{}/serviceValidate?ticket={}&service={}",
+        s.cfg.cas_base_url, q.ticket, urlenc(&service)
+    );
+
+    let xml = reqwest::get(&validate_url)
+        .await
+        .map_err(|_| AppError::Internal)?
+        .text()
+        .await
+        .map_err(|_| AppError::Internal)?;
+
+    let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
+
+    if !is_allowed_email_domain(&cas_id, &s.cfg.allowed_email_domains) {
+        return Err(AppError::Forbidden);
+    }
+
+    // Reject if a CAS account already exists for this email (use the plaintext we hold).
+    let cas_account_exists = sqlx::query_scalar!(
+        "SELECT id FROM users WHERE cas_id = $1",
+        cas_id
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .is_some();
+    if cas_account_exists {
+        return Err(AppError::BadRequest(
+            "this email already has a CAS account".into(),
+        ));
+    }
+
+    // Reject if the email's HMAC is already in the used-email set.
+    let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
+    let already_used = sqlx::query_scalar!(
+        "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
+        hash
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .is_some();
+    if already_used {
+        return Err(AppError::BadRequest(
+            "this email has already been used to verify an account".into(),
+        ));
+    }
+
+    // This flow is the only writer to verified_emails.
+    sqlx::query!(
+        "INSERT INTO verified_emails (email_hash) VALUES ($1)",
+        hash
+    )
+    .execute(&s.pool)
+    .await?;
+
+    // Flip only the session's own user row; never write cas_id/email onto it.
+    sqlx::query!(
+        "UPDATE users SET verified = true WHERE id = $1",
+        user.id
+    )
+    .execute(&s.pool)
+    .await?;
+
+    session.insert(VERIFIED_KEY, true).await.map_err(|_| AppError::Internal)?;
+    // Session-fixation mitigation: rotate the session id (available in tower-sessions 0.13).
+    session.cycle_id().await.map_err(|_| AppError::Internal)?;
 
     Ok(Redirect::to(&s.cfg.frontend_url))
 }
 
 pub async fn logout(State(s): State<AppState>, session: Session) -> Result<Json<LogoutResponse>, AppError> {
+    let auth_method: Option<String> = session.get(AUTH_METHOD_KEY).await.unwrap_or(None);
     session.flush().await.map_err(|_| AppError::Internal)?;
-    let redirect_url = format!("{}/logout?service={}", s.cfg.cas_base_url, urlenc(&s.cfg.frontend_url));
+    let redirect_url = if auth_method.as_deref() == Some("local") {
+        // Local sessions have no CAS ticket to clear; bounce to the frontend login page.
+        format!("{}/login", s.cfg.frontend_url)
+    } else {
+        format!("{}/logout?service={}", s.cfg.cas_base_url, urlenc(&s.cfg.frontend_url))
+    };
     Ok(Json(LogoutResponse { redirect_url }))
 }
 

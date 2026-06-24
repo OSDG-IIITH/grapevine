@@ -4,7 +4,6 @@ use password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVeri
 /// Hash a password with argon2id (default params) and a random per-password salt.
 /// Returns the PHC string suitable for storing in `users.password_hash`.
 /// Never logs the password.
-#[allow(dead_code)]
 pub fn hash(password: &str) -> Result<String, password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
     let hash = Argon2::default().hash_password(password.as_bytes(), &salt)?;
@@ -13,7 +12,6 @@ pub fn hash(password: &str) -> Result<String, password_hash::Error> {
 
 /// Constant-time verify of `password` against a stored PHC hash string.
 /// Returns false on any mismatch or malformed hash; never logs secrets.
-#[allow(dead_code)]
 pub fn verify(password: &str, stored_hash: &str) -> bool {
     let Ok(parsed) = PasswordHash::new(stored_hash) else {
         return false;

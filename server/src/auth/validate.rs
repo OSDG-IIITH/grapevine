@@ -1,19 +1,14 @@
 //! Shared credential + email validators for the auth flows.
 //! Reused by the register/login/verify handlers (wired by a later agent).
 
-#[allow(dead_code)]
 pub const PASSWORD_MIN_LEN: usize = 8;
-#[allow(dead_code)]
 pub const PASSWORD_MAX_LEN: usize = 128;
-#[allow(dead_code)]
 pub const USERNAME_MIN_LEN: usize = 3;
-#[allow(dead_code)]
 pub const USERNAME_MAX_LEN: usize = 32;
 
 /// Validate a plaintext password. Min 8 chars, max 128 (bound argon2 cost),
 /// no composition rules. Rejects empty/whitespace-only.
 /// Returns Ok(()) or a user-facing error message.
-#[allow(dead_code)]
 pub fn validate_password(password: &str) -> Result<(), String> {
     if password.trim().is_empty() {
         return Err("password must not be empty".into());
@@ -31,7 +26,6 @@ pub fn validate_password(password: &str) -> Result<(), String> {
 /// Validate and normalize a username. 3–32 chars from `[a-z0-9_.-]`.
 /// Compared/stored lowercased (case-insensitive uniqueness).
 /// Returns the normalized (lowercased) username on success, or an error message.
-#[allow(dead_code)]
 pub fn normalize_username(username: &str) -> Result<String, String> {
     let normalized = username.trim().to_lowercase();
     let len = normalized.chars().count();
@@ -50,7 +44,6 @@ pub fn normalize_username(username: &str) -> Result<String, String> {
 }
 
 /// Whether `email`'s domain is in `allowed_domains` (case-insensitive).
-#[allow(dead_code)]
 pub fn is_allowed_email_domain(email: &str, allowed_domains: &[String]) -> bool {
     let email = email.trim().to_lowercase();
     let Some(domain) = email.rsplit('@').next().filter(|d| *d != email) else {

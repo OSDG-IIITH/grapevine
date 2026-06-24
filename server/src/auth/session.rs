@@ -6,7 +6,6 @@ use crate::error::AppError;
 pub const USER_ID_KEY: &str = "user_id";
 pub const IS_ADMIN_KEY: &str = "is_admin";
 pub const VERIFIED_KEY: &str = "verified";
-#[allow(dead_code)]
 pub const AUTH_METHOD_KEY: &str = "auth_method";
 
 pub struct AuthUser {
@@ -17,7 +16,6 @@ pub struct AuthUser {
 
 /// extractor for the gated app: requires a logged-in AND verified session.
 /// 401 if no session/user, 403 if logged in but not verified.
-#[allow(dead_code)]
 pub struct VerifiedUser {
     pub id: String,
     pub is_admin: bool,

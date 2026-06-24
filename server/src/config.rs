@@ -9,9 +9,7 @@ pub struct Config {
     #[allow(dead_code)]
     pub session_secret: String,
     pub moderator_emails: Vec<String>,
-    #[allow(dead_code)]
     pub allowed_email_domains: Vec<String>,
-    #[allow(dead_code)]
     pub verify_email_secret: String,
 }
 

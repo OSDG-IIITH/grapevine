@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO users (id, cas_id, display_name)\n        VALUES ($1, $2, $3)\n        ON CONFLICT (cas_id) DO UPDATE\n            SET cas_id = EXCLUDED.cas_id,\n                display_name = EXCLUDED.display_name\n        RETURNING id, is_admin\n        ",
+  "query": "\n        INSERT INTO users (id, cas_id, display_name, verified)\n        VALUES ($1, $2, $3, true)\n        ON CONFLICT (cas_id) DO UPDATE\n            SET cas_id = EXCLUDED.cas_id,\n                display_name = EXCLUDED.display_name,\n                verified = true\n        RETURNING id, is_admin\n        ",
   "describe": {
     "columns": [
       {
@@ -26,5 +26,5 @@
       false
     ]
   },
-  "hash": "c0146aaab1e82762ddf691c80d2f2c2ac7f96d746fff71cb88863c20c2e394e5"
+  "hash": "4a0287b9f330433f6bf3bff2f8e747a777471a96a7cd134820af53ae371cba47"
 }
