@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { currentUser } from '$lib/stores';
-	import { getMe, updateMe, getMyReviews } from '$lib/api';
+	import { updateMe, getMyReviews } from '$lib/api';
 	import type { MyReviews } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -18,12 +16,6 @@
 	let saving = $state(false);
 
 	onMount(async () => {
-		let user = $currentUser;
-		if (!user) {
-			user = await getMe();
-			if (user) currentUser.set(user);
-		}
-		if (!user) { goto(base + '/'); return; }
 		const data = await getMyReviews();
 		if (data) reviews = data;
 	});

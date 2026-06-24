@@ -105,6 +105,22 @@ export async function getMe(): Promise<AuthUser | null> {
 	return apifetch<AuthUser>('/me');
 }
 
+export async function registerLocal(username: string, password: string): Promise<AuthUser | null> {
+	return apifetch<AuthUser>('/auth/register', json({ username, password }));
+}
+
+export async function loginLocal(username: string, password: string): Promise<AuthUser | null> {
+	return apifetch<AuthUser>('/auth/login/local', json({ username, password }));
+}
+
+export function casLoginUrl(): string {
+	return `${BASE}/auth/login`;
+}
+
+export function casVerifyUrl(): string {
+	return `${BASE}/auth/verify`;
+}
+
 export async function updateMe(display_name: string): Promise<AuthUser | null> {
 	return apifetch<AuthUser>('/me', json({ display_name }, 'PATCH'));
 }

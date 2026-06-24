@@ -2,10 +2,7 @@
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview } from '$lib/api';
-	import { currentUser } from '$lib/stores';
-	import { PUBLIC_API_URL } from '$env/static/public';
 	import type { CourseLean, FacultyLean, Offering } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import SegBar from '$lib/components/SegBar.svelte';
@@ -79,10 +76,6 @@
 
 	async function submit() {
 		if (!cansubmit) return;
-		if (!get(currentUser)) {
-			window.location.href = `${PUBLIC_API_URL || '/grapevine/api'}/auth/login`;
-			return;
-		}
 		submitting = true;
 
 		let result;
