@@ -9,7 +9,13 @@ pub struct Config {
     #[allow(dead_code)]
     pub session_secret: String,
     pub moderator_emails: Vec<String>,
+    #[allow(dead_code)]
+    pub allowed_email_domains: Vec<String>,
+    #[allow(dead_code)]
+    pub verify_email_secret: String,
 }
+
+const DEFAULT_ALLOWED_EMAIL_DOMAINS: &str = "students.iiit.ac.in,research.iiit.ac.in";
 
 impl Config {
     pub fn load() -> Arc<Self> {
@@ -20,6 +26,14 @@ impl Config {
             .map(|s| s.trim().to_string())
             .filter(|s| !s.is_empty())
             .collect();
+        let allowed_email_domains = std::env::var("ALLOWED_EMAIL_DOMAINS")
+            .ok()
+            .filter(|s| !s.trim().is_empty())
+            .unwrap_or_else(|| DEFAULT_ALLOWED_EMAIL_DOMAINS.to_string())
+            .split(',')
+            .map(|s| s.trim().to_lowercase())
+            .filter(|s| !s.is_empty())
+            .collect();
         Arc::new(Self {
             database_url: var("DATABASE_URL"),
             cas_base_url: var("CAS_BASE_URL"),
@@ -27,6 +41,8 @@ impl Config {
             frontend_url: var("FRONTEND_URL"),
             session_secret: var("SESSION_SECRET"),
             moderator_emails,
+            allowed_email_domains,
+            verify_email_secret: var("VERIFY_EMAIL_SECRET"),
         })
     }
 }
