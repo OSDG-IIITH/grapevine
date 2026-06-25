@@ -97,12 +97,11 @@
 				{/if}
 
 				<p class="text-[14px] leading-[1.7] text-[var(--fg-2)]">
-					To keep grapevine trustworthy, every account verifies once through IIIT CAS. You'll sign in
-					with your institute email just this once.
+					To keep grapevine trustworthy, you need to do a one-time verification of your account
+					through CAS.
 				</p>
 				<p class="mt-3 text-[14px] leading-[1.7] text-[var(--fg-3)]">
-					We never store your email against your account — only a one-way hash that proves the
-					address was used. Your username stays anonymous.
+					Note: we don't store your email against your account.
 				</p>
 
 				<a
