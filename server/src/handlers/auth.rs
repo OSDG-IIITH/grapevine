@@ -44,12 +44,15 @@ pub async fn me(
     State(s): State<AppState>,
     user: AuthUser,
 ) -> Result<Json<Me>, AppError> {
+    // The session's user row can be gone (e.g. deleted) while the cookie lives;
+    // treat that as an invalid session (401) rather than a 500.
     let row = sqlx::query!(
         "SELECT display_name, username, cas_id, verified FROM users WHERE id = $1",
         user.id
     )
-    .fetch_one(&s.pool)
-    .await?;
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::Unauthorized)?;
     let auth_method = if row.cas_id.is_some() { "cas" } else { "local" };
     Ok(Json(Me {
         id: user.id,
@@ -155,8 +158,9 @@ pub async fn update_me(
         "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING username, cas_id, verified",
         name, user.id
     )
-    .fetch_one(&s.pool)
-    .await?;
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::Unauthorized)?;
     let auth_method = if row.cas_id.is_some() { "cas" } else { "local" };
     Ok(Json(Me {
         id: user.id,
