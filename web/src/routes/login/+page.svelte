@@ -169,7 +169,7 @@
 
 					{#if mode === 'register'}
 						<p class="mt-2 text-[12px] leading-[1.5] text-[var(--fg-4)]">
-							3–32 chars (a–z, 0–9, _ . -). Password at least 8 characters.
+							Username: 3–32 characters (a–z, 0–9, _ . -). Password: at least 8 characters.
 						</p>
 					{/if}
 
