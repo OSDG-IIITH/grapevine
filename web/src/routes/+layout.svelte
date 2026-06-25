@@ -4,7 +4,7 @@
 	import { Toaster } from 'svelte-sonner';
 	import { IconBrandGithub } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { goto, afterNavigate } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Header from '$lib/components/Header.svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
@@ -27,17 +27,32 @@
 		isPublicRoute || (authChecked && !!$currentUser && $currentUser.verified)
 	);
 
+	// Single source of truth for redirects: logged-out -> /login, logged-in but
+	// unverified -> /verify, and verified users bounced off the front door. Runs
+	// after the initial /me check AND after every client-side navigation (not
+	// just on mount), so deep links and back/forward into a gated route are
+	// guarded too. Loop-free: each branch only redirects when the current route
+	// isn't already the allowed one.
+	function enforce() {
+		if (!authChecked) return;
+		const id = page.route.id;
+		const u = $currentUser;
+		if (!u) {
+			if (id !== '/login') goto(base + '/login');
+		} else if (!u.verified) {
+			if (id !== '/verify') goto(base + '/verify');
+		} else if (id === '/login' || id === '/verify') {
+			goto(base + '/');
+		}
+	}
+
+	afterNavigate(() => enforce());
+
 	onMount(() => {
 		getMe().then((u) => {
 			currentUser.set(u);
 			authChecked = true;
-			const id = page.route.id;
-			const onPublic = !!id && PUBLIC_ROUTES.includes(id);
-			if (!u) {
-				if (!onPublic) goto(base + '/login');
-			} else if (!u.verified) {
-				if (id !== '/verify') goto(base + '/verify');
-			}
+			enforce();
 		});
 
 		function onkeydown(e: KeyboardEvent) {
