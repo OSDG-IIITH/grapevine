@@ -18,4 +18,5 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=builder /app/target/release/server /app/grapevine
+COPY --from=builder /app/target/release/seed /app/seed
 ENTRYPOINT ["/app/grapevine"]
