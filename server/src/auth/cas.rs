@@ -153,46 +153,45 @@ pub async fn verify_callback(
         return Ok(Redirect::to(&format!("{}/verify?error=domain", s.cfg.frontend_url)));
     }
 
+    let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
+
+    // One transaction: re-check the CAS account, claim the email (PK dedup), and
+    // flip the user row together, so concurrent verifies can't interleave and a
+    // failed update never leaves an orphaned hash behind.
+    let mut tx = s.pool.begin().await?;
+
     // Reject if a CAS account already exists for this email (use the plaintext we hold).
     let cas_account_exists = sqlx::query_scalar!(
         "SELECT id FROM users WHERE cas_id = $1",
         cas_id
     )
-    .fetch_optional(&s.pool)
+    .fetch_optional(&mut *tx)
     .await?
     .is_some();
     if cas_account_exists {
         return Ok(Redirect::to(&format!("{}/verify?error=email_has_cas", s.cfg.frontend_url)));
     }
 
-    // Reject if the email's HMAC is already in the used-email set.
-    let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
-    let already_used = sqlx::query_scalar!(
-        "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
-        hash
-    )
-    .fetch_optional(&s.pool)
-    .await?
-    .is_some();
-    if already_used {
-        return Ok(Redirect::to(&format!("{}/verify?error=email_used", s.cfg.frontend_url)));
+    // This flow is the only writer to verified_emails. The email_hash PK is the
+    // real guard: a duplicate insert (23505) means the email already verified
+    // another account — surface it as the friendly redirect, not a 500.
+    match sqlx::query!("INSERT INTO verified_emails (email_hash) VALUES ($1)", hash)
+        .execute(&mut *tx)
+        .await
+    {
+        Ok(_) => {}
+        Err(sqlx::Error::Database(e)) if e.code().as_deref() == Some("23505") => {
+            return Ok(Redirect::to(&format!("{}/verify?error=email_used", s.cfg.frontend_url)));
+        }
+        Err(e) => return Err(e.into()),
     }
 
-    // This flow is the only writer to verified_emails.
-    sqlx::query!(
-        "INSERT INTO verified_emails (email_hash) VALUES ($1)",
-        hash
-    )
-    .execute(&s.pool)
-    .await?;
-
     // Flip only the session's own user row; never write cas_id/email onto it.
-    sqlx::query!(
-        "UPDATE users SET verified = true WHERE id = $1",
-        user.id
-    )
-    .execute(&s.pool)
-    .await?;
+    sqlx::query!("UPDATE users SET verified = true WHERE id = $1", user.id)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
 
     session.insert(VERIFIED_KEY, true).await.map_err(|_| AppError::Internal)?;
     // Session-fixation mitigation: rotate the session id (available in tower-sessions 0.13).

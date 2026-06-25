@@ -115,9 +115,14 @@ pub async fn login_local(
         username
     )
     .fetch_optional(&s.pool)
-    .await?
-    .ok_or_else(invalid)?;
+    .await?;
 
+    // Always run exactly one argon2 verification, even when the username doesn't
+    // exist, so a missing user and a wrong password take the same time.
+    let Some(row) = row else {
+        password::dummy_verify(&body.password);
+        return Err(invalid());
+    };
     let stored = row.password_hash.as_deref().ok_or_else(invalid)?;
     if !password::verify(&body.password, stored) {
         return Err(invalid());

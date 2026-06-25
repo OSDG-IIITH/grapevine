@@ -1,3 +1,4 @@
+use std::sync::OnceLock;
 use argon2::Argon2;
 use password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 
@@ -19,6 +20,15 @@ pub fn verify(password: &str, stored_hash: &str) -> bool {
     Argon2::default()
         .verify_password(password.as_bytes(), &parsed)
         .is_ok()
+}
+
+/// Run one argon2 verification against a throwaway hash and discard the result.
+/// Call this on the "username not found" path of login so a missing user takes
+/// roughly the same time as a real one, defeating enumeration via timing.
+pub fn dummy_verify(password: &str) {
+    static DUMMY: OnceLock<String> = OnceLock::new();
+    let h = DUMMY.get_or_init(|| hash("grapevine-timing-equalizer").expect("dummy hash"));
+    let _ = verify(password, h);
 }
 
 #[cfg(test)]
