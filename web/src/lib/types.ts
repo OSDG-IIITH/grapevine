@@ -147,6 +147,9 @@ export interface AuthUser {
 	id: string;
 	display_name: string;
 	is_admin: boolean;
+	verified: boolean;
+	username: string | null;
+	auth_method: 'cas' | 'local';
 }
 
 export interface CreateCourseReview {

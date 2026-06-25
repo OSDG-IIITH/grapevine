@@ -1,7 +1,23 @@
 Auth
-  GET  /auth/login
-  GET  /auth/callback
-  POST /auth/logout
+  GET  /auth/login                  initiates direct CAS authentication
+  GET  /auth/callback               handles CAS login callback
+  POST /auth/register              registers a local user (body: { username, password })
+  POST /auth/login/local           logs in a local user (body: { username, password })
+  GET  /auth/verify                initiates CAS verification check for local user
+  GET  /auth/verify/callback       handles verification return from CAS (sets user as verified)
+  POST /auth/logout                logs out and invalidates the session (triggers CAS logout if CAS user)
+  GET  /me                         returns current user info
+                                     Response shape: { id, display_name, is_admin, verified, username (string | null), auth_method ("cas" | "local") }
+  PATCH /me                        updates user display name (body: { display_name })
+  GET  /me/reviews                 returns reviews created by current user
+                                     Response shape: { course: CourseReview[], advisor: AdvisorReview[] }
+
+
+Note on Access Control:
+- The entire application (Courses, Course Reviews, Faculty, Advisor Reviews, Labs, Admin) is protected by a verification gate middleware.
+- Unauthenticated requests to protected endpoints return 401 Unauthorized.
+- Logged-in but unverified local accounts return 403 Forbidden on protected endpoints.
+- `/me`, `/auth/verify`, `/auth/verify/callback`, and `/auth/logout` are open to unverified logged-in sessions.
 
 Courses
   GET  /courses                          list + search
@@ -37,4 +53,7 @@ Labs
 
 Admin
   GET    /admin/flags                    list all flagged reviews
-  POST   /admin/flags/:id/resolve        hide or dismiss
+  POST   /admin/flags/:id/dismiss        dismiss flag without deleting review
+  POST   /admin/flags/:id/delete-review  delete flagged review and cascade its flags
+  GET    /admin/export                   export database tables to JSON seeding format
+

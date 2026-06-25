@@ -14,10 +14,11 @@ Otherwise,you will need:
 
 #### Environment Variables
 
-Copy `.env.example` over to `.env`. Make changes if needed (add your email to `MODERATOR_EMAILS` to test moderator capabilities)
+Copy `.env.example` over to `.env`.
 ```
 cp .env.example .env
 ```
+Make changes if needed (add your email to `MODERATOR_EMAILS` to test moderator capabilities, or modify `ALLOWED_EMAIL_DOMAINS` to add custom domains for registration. Defaults to `students.iiit.ac.in,research.iiit.ac.in`).
 
 #### Database
 
