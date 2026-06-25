@@ -9,12 +9,27 @@
 	let username = $state('');
 	let password = $state('');
 	let error = $state('');
+	let notice = $state('');
 	let submitting = $state(false);
 	let checking = $state(true);
 
 	const USERNAME_RE = /^[a-z0-9_.-]+$/;
 
+	// Friendly copy for the ?error= codes the CAS login callback redirects back with.
+	const NOTICES: Record<string, string> = {
+		domain: 'Only @students.iiit.ac.in and @research.iiit.ac.in emails can be used.',
+		email_has_local:
+			'This email is already tied to a username/password account — sign in with that account instead.'
+	};
+
 	onMount(async () => {
+		// Surface a CAS-callback rejection, then strip the param so a refresh is clean.
+		const code = new URLSearchParams(window.location.search).get('error');
+		if (code && NOTICES[code]) {
+			notice = NOTICES[code];
+			history.replaceState(null, '', base + '/login');
+		}
+
 		// Bounce already-authenticated users out of the front door.
 		let user = $currentUser;
 		if (!user) user = await getMe();
@@ -99,6 +114,15 @@
 				class="rounded-[10px] border border-[var(--border)] p-6 sm:p-7"
 				style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
 			>
+				{#if notice}
+					<div
+						class="mb-5 rounded-[7px] border px-[12px] py-[10px] text-[13px] leading-[1.5]"
+						style="border-color: rgba(201,122,122,0.32); background: var(--danger-bg); color: var(--danger);"
+					>
+						{notice}
+					</div>
+				{/if}
+
 				<div class="mb-5 flex items-baseline justify-between">
 					<h2 class="text-[20px] text-[var(--fg)]" style="font-family: var(--serif);">
 						{mode === 'login' ? 'Sign in' : 'Create account'}

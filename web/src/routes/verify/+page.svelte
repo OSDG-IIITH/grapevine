@@ -7,8 +7,23 @@
 	import { getMe, casVerifyUrl } from '$lib/api';
 
 	let checking = $state(true);
+	let notice = $state('');
+
+	// Friendly copy for the ?error= codes the CAS verify callback redirects back with.
+	const NOTICES: Record<string, string> = {
+		domain: 'Only @students.iiit.ac.in and @research.iiit.ac.in emails can be used.',
+		email_has_cas: 'This email already has a CAS account — log in with CAS instead.',
+		email_used: 'This email has already been used to verify an account.'
+	};
 
 	onMount(async () => {
+		// Surface a CAS-callback rejection, then strip the param so a refresh is clean.
+		const code = new URLSearchParams(window.location.search).get('error');
+		if (code && NOTICES[code]) {
+			notice = NOTICES[code];
+			history.replaceState(null, '', base + '/verify');
+		}
+
 		let user = $currentUser;
 		if (!user) user = await getMe();
 		if (user) currentUser.set(user);
@@ -72,6 +87,15 @@
 				class="rounded-[10px] border border-[var(--border)] p-6 sm:p-7"
 				style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
 			>
+				{#if notice}
+					<div
+						class="mb-5 rounded-[7px] border px-[12px] py-[10px] text-[13px] leading-[1.5]"
+						style="border-color: rgba(201,122,122,0.32); background: var(--danger-bg); color: var(--danger);"
+					>
+						{notice}
+					</div>
+				{/if}
+
 				<p class="text-[14px] leading-[1.7] text-[var(--fg-2)]">
 					To keep grapevine trustworthy, every account verifies once through IIIT CAS. You'll sign in
 					with your institute email just this once.

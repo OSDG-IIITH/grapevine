@@ -63,7 +63,7 @@ pub async fn callback(
 
     // Only allowed-domain emails may log in via CAS.
     if !is_allowed_email_domain(&cas_id, &s.cfg.allowed_email_domains) {
-        return Err(AppError::Forbidden);
+        return Ok(Redirect::to(&format!("{}/login?error=domain", s.cfg.frontend_url)));
     }
 
     // Read-only check: if this email already backs an anonymous (local) account,
@@ -77,9 +77,7 @@ pub async fn callback(
     .await?
     .is_some();
     if already_used {
-        return Err(AppError::BadRequest(
-            "this email is already linked to an anonymous account".into(),
-        ));
+        return Ok(Redirect::to(&format!("{}/login?error=email_has_local", s.cfg.frontend_url)));
     }
 
     let display_name = parse_cas_display_name(&xml).unwrap_or_else(|| name_from_cas_id(&cas_id));
@@ -152,7 +150,7 @@ pub async fn verify_callback(
     let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
 
     if !is_allowed_email_domain(&cas_id, &s.cfg.allowed_email_domains) {
-        return Err(AppError::Forbidden);
+        return Ok(Redirect::to(&format!("{}/verify?error=domain", s.cfg.frontend_url)));
     }
 
     // Reject if a CAS account already exists for this email (use the plaintext we hold).
@@ -164,9 +162,7 @@ pub async fn verify_callback(
     .await?
     .is_some();
     if cas_account_exists {
-        return Err(AppError::BadRequest(
-            "this email already has a CAS account".into(),
-        ));
+        return Ok(Redirect::to(&format!("{}/verify?error=email_has_cas", s.cfg.frontend_url)));
     }
 
     // Reject if the email's HMAC is already in the used-email set.
@@ -179,9 +175,7 @@ pub async fn verify_callback(
     .await?
     .is_some();
     if already_used {
-        return Err(AppError::BadRequest(
-            "this email has already been used to verify an account".into(),
-        ));
+        return Ok(Redirect::to(&format!("{}/verify?error=email_used", s.cfg.frontend_url)));
     }
 
     // This flow is the only writer to verified_emails.
