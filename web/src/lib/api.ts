@@ -12,16 +12,16 @@ import type {
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
 
-async function apifetch<T>(path: string, options?: RequestInit): Promise<T | null> {
+async function apifetch<T>(path: string, options?: RequestInit, silent = false): Promise<T | null> {
 	try {
 		const res = await fetch(`${BASE}${path}`, { credentials: 'include', ...options });
 		if (!res.ok) {
-			if (res.status !== 401) toast.error(await res.text());
+			if (res.status !== 401 && !silent) toast.error(await res.text());
 			return null;
 		}
 		return res.json();
 	} catch {
-		toast.error('Network error — is the backend running?');
+		if (!silent) toast.error('Network error — is the backend running?');
 		return null;
 	}
 }
@@ -106,11 +106,13 @@ export async function getMe(): Promise<AuthUser | null> {
 }
 
 export async function registerLocal(username: string, password: string): Promise<AuthUser | null> {
-	return apifetch<AuthUser>('/auth/register', json({ username, password }));
+	// silent: the login page shows these errors inline, no toast.
+	return apifetch<AuthUser>('/auth/register', json({ username, password }), true);
 }
 
 export async function loginLocal(username: string, password: string): Promise<AuthUser | null> {
-	return apifetch<AuthUser>('/auth/login/local', json({ username, password }));
+	// silent: the login page shows these errors inline, no toast.
+	return apifetch<AuthUser>('/auth/login/local', json({ username, password }), true);
 }
 
 export function casLoginUrl(): string {
