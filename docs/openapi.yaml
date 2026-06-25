@@ -488,6 +488,111 @@ components:
         reporter:
           $ref: '#/components/schemas/AuthorRef'
 
+    Credentials:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    Me:
+      type: object
+      required: [id, display_name, is_admin, verified, auth_method]
+      properties:
+        id:
+          $ref: '#/components/schemas/Ulid'
+        display_name:
+          type: string
+        is_admin:
+          type: boolean
+        verified:
+          type: boolean
+        username:
+          type: string
+          nullable: true
+        auth_method:
+          type: string
+          enum: [cas, local]
+
+    SeedExport:
+      type: object
+      required: [labs, faculty, courses, offerings]
+      properties:
+        labs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeedLab'
+        faculty:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeedFaculty'
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeedCourse'
+        offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeedOffering'
+
+    SeedLab:
+      type: object
+      required: [name, shortname]
+      properties:
+        name:
+          type: string
+        shortname:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    SeedFaculty:
+      type: object
+      required: [name, slug, labs]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        labs:
+          type: array
+          items:
+            type: string
+        bio:
+          type: string
+          nullable: true
+
+    SeedCourse:
+      type: object
+      required: [code, name, type, description]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+
+    SeedOffering:
+      type: object
+      required: [course, season, year, faculty]
+      properties:
+        course:
+          type: string
+        season:
+          type: string
+        year:
+          type: integer
+        faculty:
+          type: array
+          items:
+            type: string
+
 paths:
   # ── auth ────────────────────────────────────────────────────────────────────
 
@@ -534,6 +639,153 @@ paths:
                   redirect_url:
                     type: string
                     format: uri
+
+  /auth/register:
+    post:
+      operationId: registerLocal
+      summary: register a local anonymous account
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: ok, returns the logged in user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/login/local:
+    post:
+      operationId: loginLocal
+      summary: log in a local anonymous account
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: ok, returns the logged in user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/verify:
+    get:
+      operationId: verifyLogin
+      summary: start CAS email domain verification
+      tags: [auth]
+      security:
+        - session: []
+      responses:
+        '302':
+          description: redirect to CAS login page for verification
+
+  /auth/verify/callback:
+    get:
+      operationId: verifyCallback
+      summary: CAS callback for verification
+      tags: [auth]
+      security:
+        - session: []
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: redirect to frontend on success (with verified user)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /me:
+    get:
+      operationId: getMe
+      summary: get current user profile
+      tags: [auth]
+      security:
+        - session: []
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      operationId: updateMe
+      summary: update user display name
+      tags: [auth]
+      security:
+        - session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [display_name]
+              properties:
+                display_name:
+                  type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/reviews:
+    get:
+      operationId: listMyReviews
+      summary: list reviews created by current user
+      tags: [reviews]
+      security:
+        - session: []
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [course, advisor]
+                properties:
+                  course:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CourseReview'
+                  advisor:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdvisorReview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   # ── courses ─────────────────────────────────────────────────────────────────
 
@@ -1114,3 +1366,22 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /admin/export:
+    get:
+      operationId: exportData
+      summary: export database to seeding format
+      tags: [admin]
+      security:
+        - session: []
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeedExport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

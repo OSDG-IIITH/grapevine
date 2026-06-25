@@ -1,6 +1,16 @@
-/                       landing — search bar only
+/login                  public landing / login / register page
+                          - wordmark, short description
+                          - username/password form with toggle
+                          - "Continue with CAS" button
+                          - redirects to / or /verify on successful session creation
 
-/courses                browse courses (filter by type)
+/verify                 one-time CAS verification page
+                          - for local unverified accounts
+                          - explains anonymity guarantees, initiates verification flow
+
+/                       authenticated landing/home — search bar only (gated)
+
+/courses                browse courses (filter by type) (gated)
 /courses/[id]           course detail
                           - name, description, type, ratings block
                           - offerings as tabs (first tab = all offerings combined)
@@ -20,3 +30,10 @@
                           - if navigated from a course/faculty page, pre-selects that entity
 
 /admin                  all admin tools — flagged reviews, hide/dismiss actions
+
+Global Layout Guard (web/src/routes/+layout.svelte):
+- Checks authentication status via `getMe()` on mount.
+- If not logged in: redirects to `/login` (unless already on `/login`).
+- If logged in but unverified: redirects to `/verify` (unless on `/verify` or `/login`).
+- If verified: redirects away from `/login` and `/verify` to `/`.
+- Replaces individual soft-guards on pages like `/profile` and `/review`.
