@@ -103,7 +103,7 @@ for offering_id, course_name in offerings:
         uid = user_ids[name]
         axes = rand_axes(["difficulty", "teaching", "grading", "content", "workload"])
         body = random.choice(COURSE_TEXTS)
-        anon = str(random.choice([True, False])).lower()
+        anon = "true"
         ts = rand_ts()
         course_review_rows.append(
             f"({sql_str(new_ulid())}, {sql_str(uid)}, {sql_str(offering_id)}, {anon}, "
@@ -118,7 +118,7 @@ for faculty_id, faculty_name in faculty:
         uid = user_ids[name]
         axes = rand_axes(["research", "availability", "mentorship", "support", "workload"])
         body = random.choice(ADVISOR_TEXTS)
-        anon = str(random.choice([True, False])).lower()
+        anon = "true"
         ts = rand_ts()
         advisor_review_rows.append(
             f"({sql_str(new_ulid())}, {sql_str(uid)}, {sql_str(faculty_id)}, {anon}, "
