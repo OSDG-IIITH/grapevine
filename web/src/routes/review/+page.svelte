@@ -8,6 +8,7 @@
 	import SegBar from '$lib/components/SegBar.svelte';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
+	import Loader from "@lucide/svelte/icons/loader";
 
 	const precourse = page.url.searchParams.get('course');
 	const prefaculty = page.url.searchParams.get('faculty');
@@ -50,13 +51,20 @@
 	});
 
 	let fetchseq = 0;
-	$effect(() => {
+	let loadingOfferings = false;
+	$effect((untrack) => {
 		const id = courseid;
 		if (!id || !allcourses.length) return;
 		const c = allcourses.find((co) => co.id === id);
 		if (!c) return;
 		const seq = ++fetchseq;
+		untrack(() => {
+			loadingOfferings = false;
+		});
 		getCourse(c.code).then((detail) => {
+			untrack(() => {
+				loadingOfferings = true;
+			});
 			if (seq !== fetchseq) return;
 			offerings = detail?.offerings ?? [];
 			if (offerings.length) offeringid = offerings[0].id;
@@ -176,11 +184,17 @@
 							<select
 								class="w-full appearance-none rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[10px] pl-[14px] pr-8 text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
 								bind:value={offeringid}
+								disabled={loadingOfferings}
 							>
 								{#each offerings as o (o.id)}
 									<option value={o.id}>{o.season} {o.year}</option>
 								{/each}
 							</select>
+							{#if loadingOfferings}
+								<div class="pointer-events-none absolute inset-y-0 right-6 flex items-center">
+									<Loader class="animate-spin size-3" style="stroke: var(--fg-3)" />
+								</div>
+							{/if}
 							<div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
 								<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
 									<path d="M2 4l3 3 3-3" stroke="var(--fg-3)" stroke-width="1.4" stroke-linecap="round" />
