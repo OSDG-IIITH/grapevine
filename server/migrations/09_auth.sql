@@ -20,3 +20,8 @@ CREATE TABLE verified_emails (
   email_hash TEXT PRIMARY KEY,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- recovery methods for local accounts
+ALTER TABLE users ADD COLUMN recovery_code_hash TEXT;
+ALTER TABLE users ADD COLUMN security_question TEXT;
+ALTER TABLE users ADD COLUMN security_answer_hash TEXT;

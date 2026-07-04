@@ -105,9 +105,26 @@ export async function getMe(): Promise<AuthUser | null> {
 	return apifetch<AuthUser>('/me');
 }
 
-export async function registerLocal(username: string, password: string): Promise<AuthUser | null> {
-	// silent: the login page shows these errors inline, no toast.
-	return apifetch<AuthUser>('/auth/register', json({ username, password }), true);
+export async function registerLocal(
+	username: string,
+	password: string,
+	recovery_code?: string,
+	security_question?: string,
+	security_answer?: string
+): Promise<AuthUser | null> {
+	return apifetch<AuthUser>('/auth/register', json({ username, password, recovery_code, security_question, security_answer }), true);
+}
+
+export async function recoveryInfo(username: string): Promise<{ has_recovery_code: boolean; security_question: string | null } | null> {
+	return apifetch(`/auth/recovery/${encodeURIComponent(username)}`, undefined, true);
+}
+
+export async function resetPassword(
+	username: string,
+	new_password: string,
+	opts: { recovery_code?: string; security_answer?: string }
+): Promise<{ new_recovery_code: string | null } | null> {
+	return apifetch('/auth/reset-password', json({ username, new_password, ...opts }), true);
 }
 
 export async function loginLocal(username: string, password: string): Promise<AuthUser | null> {
