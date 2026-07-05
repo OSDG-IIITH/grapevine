@@ -1,4 +1,4 @@
-use axum::{extract::{Path, State}, Json};
+use axum::{extract::{Path, State}, http::StatusCode, Json};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 use ulid::Ulid;
@@ -21,6 +21,8 @@ pub struct Me {
     pub verified: bool,
     pub username: Option<String>,
     pub auth_method: String,
+    pub security_question: Option<String>,
+    pub has_recovery_code: bool,
 }
 
 #[derive(Deserialize)]
@@ -57,6 +59,23 @@ pub struct RecoveryInfoResponse {
     pub security_question: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct ChangePasswordBody {
+    pub current_password: String,
+    pub new_password: String,
+}
+
+#[derive(Deserialize)]
+pub struct SecurityQuestionBody {
+    pub question: Option<String>,
+    pub answer: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct RecoveryCodeResponse {
+    pub code: String,
+}
+
 #[derive(Serialize)]
 pub struct MyReviewsResponse {
     pub course: Vec<review::CourseReview>,
@@ -68,7 +87,6 @@ pub struct UpdateMeBody {
     pub display_name: String,
 }
 
-/// Generate a recovery code: grapevine-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX
 fn gen_recovery_code() -> String {
     use password_hash::rand_core::{OsRng, RngCore};
     const CHARS: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -83,7 +101,7 @@ pub async fn me(
     user: AuthUser,
 ) -> Result<Json<Me>, AppError> {
     let row = sqlx::query!(
-        "SELECT display_name, username, cas_id, verified FROM users WHERE id = $1",
+        "SELECT display_name, username, cas_id, verified, security_question, recovery_code_hash FROM users WHERE id = $1",
         user.id
     )
     .fetch_optional(&s.pool)
@@ -97,6 +115,8 @@ pub async fn me(
         verified: row.verified,
         username: row.username,
         auth_method: auth_method.to_string(),
+        security_question: row.security_question,
+        has_recovery_code: row.recovery_code_hash.is_some(),
     }))
 }
 
@@ -147,6 +167,8 @@ pub async fn register(
         verified: row.verified,
         username: row.username,
         auth_method: "local".to_string(),
+        security_question: body.security_question,
+        has_recovery_code: recovery_code_hash.is_some(),
     }))
 }
 
@@ -159,7 +181,7 @@ pub async fn login_local(
     let username = normalize_username(&body.username).map_err(|_| invalid())?;
 
     let row = sqlx::query!(
-        "SELECT id, display_name, is_admin, verified, username, password_hash FROM users WHERE username = $1",
+        "SELECT id, display_name, is_admin, verified, username, password_hash, security_question, recovery_code_hash FROM users WHERE username = $1",
         username
     )
     .fetch_optional(&s.pool)
@@ -185,6 +207,8 @@ pub async fn login_local(
         verified: row.verified,
         username: row.username,
         auth_method: "local".to_string(),
+        security_question: row.security_question,
+        has_recovery_code: row.recovery_code_hash.is_some(),
     }))
 }
 
@@ -260,6 +284,73 @@ pub async fn reset_password(
     Err(AppError::BadRequest("provide recovery_code or security_answer".into()))
 }
 
+pub async fn change_password(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<ChangePasswordBody>,
+) -> Result<StatusCode, AppError> {
+    validate_password(&body.new_password).map_err(AppError::BadRequest)?;
+    let row = sqlx::query!(
+        "SELECT password_hash FROM users WHERE id = $1",
+        user.id
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::Unauthorized)?;
+
+    let stored = row.password_hash.as_deref()
+        .ok_or_else(|| AppError::BadRequest("CAS accounts cannot change password here".into()))?;
+    if !password::verify(&body.current_password, stored) {
+        return Err(AppError::BadRequest("current password is incorrect".into()));
+    }
+
+    let new_hash = password::hash(&body.new_password).map_err(|_| AppError::Internal)?;
+    sqlx::query!("UPDATE users SET password_hash = $1 WHERE id = $2", new_hash, user.id)
+        .execute(&s.pool)
+        .await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn new_recovery_code(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<RecoveryCodeResponse>, AppError> {
+    let code = gen_recovery_code();
+    let hash = password::hash(&code).map_err(|_| AppError::Internal)?;
+    sqlx::query!("UPDATE users SET recovery_code_hash = $1 WHERE id = $2", hash, user.id)
+        .execute(&s.pool)
+        .await?;
+    Ok(Json(RecoveryCodeResponse { code }))
+}
+
+pub async fn update_security_question(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<SecurityQuestionBody>,
+) -> Result<StatusCode, AppError> {
+    match (&body.question, &body.answer) {
+        (Some(q), Some(a)) if !q.trim().is_empty() && !a.trim().is_empty() => {
+            let hash = password::hash(&normalize_answer(a)).map_err(|_| AppError::Internal)?;
+            sqlx::query!(
+                "UPDATE users SET security_question = $1, security_answer_hash = $2 WHERE id = $3",
+                q.trim(), hash, user.id
+            )
+            .execute(&s.pool)
+            .await?;
+        }
+        (None, None) => {
+            sqlx::query!(
+                "UPDATE users SET security_question = NULL, security_answer_hash = NULL WHERE id = $1",
+                user.id
+            )
+            .execute(&s.pool)
+            .await?;
+        }
+        _ => return Err(AppError::BadRequest("provide both question and answer, or neither to remove".into())),
+    }
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn update_me(
     State(s): State<AppState>,
     user: AuthUser,
@@ -270,7 +361,7 @@ pub async fn update_me(
         return Err(AppError::BadRequest("display_name must be 1–80 chars".into()));
     }
     let row = sqlx::query!(
-        "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING username, cas_id, verified",
+        "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING username, cas_id, verified, security_question, recovery_code_hash",
         name, user.id
     )
     .fetch_optional(&s.pool)
@@ -284,6 +375,8 @@ pub async fn update_me(
         verified: row.verified,
         username: row.username,
         auth_method: auth_method.to_string(),
+        security_question: row.security_question,
+        has_recovery_code: row.recovery_code_hash.is_some(),
     }))
 }
 

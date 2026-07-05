@@ -5,6 +5,9 @@
 	import { currentUser, searchOpen } from '$lib/stores';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { IconSearch } from '@tabler/icons-svelte';
+	import SettingsModal from './SettingsModal.svelte';
+
+	let settingsopen = $state(false);
 
 	const nav = [
 		{ id: 'courses', label: 'Courses', href: '/courses' },
@@ -143,6 +146,13 @@
 						</a>
 						<button
 							type="button"
+							onclick={() => { dropopen = false; settingsopen = true; }}
+							class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+						>
+							Settings
+						</button>
+						<button
+							type="button"
 							onclick={logout}
 							class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--danger)]"
 						>
@@ -161,3 +171,7 @@
 		{/if}
 	</div>
 </header>
+
+{#if settingsopen && $currentUser}
+	<SettingsModal user={$currentUser} onclose={() => (settingsopen = false)} />
+{/if}

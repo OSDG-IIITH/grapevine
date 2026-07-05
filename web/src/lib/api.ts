@@ -220,6 +220,18 @@ export async function updateLab(shortname: string, body: PatchLab): Promise<LabD
 	return apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
 }
 
+export async function changePassword(current_password: string, new_password: string): Promise<boolean> {
+	return apivoid('/me/password', json({ current_password, new_password }));
+}
+
+export async function newRecoveryCode(): Promise<{ code: string } | null> {
+	return apifetch<{ code: string }>('/me/recovery-code', { method: 'POST' });
+}
+
+export async function updateSecurityQuestion(question: string | null, answer: string | null): Promise<boolean> {
+	return apivoid('/me/security-question', json({ question, answer }, 'PATCH'));
+}
+
 export async function exportSeedData(): Promise<{ labs: unknown[]; faculty: unknown[]; courses: unknown[]; offerings: unknown[] } | null> {
 	return apifetch('/admin/export');
 }
