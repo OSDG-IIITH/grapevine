@@ -43,6 +43,11 @@ pub fn normalize_username(username: &str) -> Result<String, String> {
     Ok(normalized)
 }
 
+/// Normalize a security question answer: lowercase, alphanumeric only.
+pub fn normalize_answer(answer: &str) -> String {
+    answer.trim().to_lowercase().chars().filter(|c| c.is_alphanumeric()).collect()
+}
+
 /// Whether `email`'s domain is in `allowed_domains` (case-insensitive).
 pub fn is_allowed_email_domain(email: &str, allowed_domains: &[String]) -> bool {
     let email = email.trim().to_lowercase();

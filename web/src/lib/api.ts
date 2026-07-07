@@ -105,9 +105,26 @@ export async function getMe(): Promise<AuthUser | null> {
 	return apifetch<AuthUser>('/me');
 }
 
-export async function registerLocal(username: string, password: string): Promise<AuthUser | null> {
-	// silent: the login page shows these errors inline, no toast.
-	return apifetch<AuthUser>('/auth/register', json({ username, password }), true);
+export async function registerLocal(
+	username: string,
+	password: string,
+	recovery_code?: string,
+	security_question?: string,
+	security_answer?: string
+): Promise<AuthUser | null> {
+	return apifetch<AuthUser>('/auth/register', json({ username, password, recovery_code, security_question, security_answer }), true);
+}
+
+export async function recoveryInfo(username: string): Promise<{ has_recovery_code: boolean; security_question: string | null } | null> {
+	return apifetch(`/auth/recovery/${encodeURIComponent(username)}`, undefined, true);
+}
+
+export async function resetPassword(
+	username: string,
+	new_password: string,
+	opts: { recovery_code?: string; security_answer?: string }
+): Promise<{ new_recovery_code: string | null } | null> {
+	return apifetch('/auth/reset-password', json({ username, new_password, ...opts }), true);
 }
 
 export async function loginLocal(username: string, password: string): Promise<AuthUser | null> {
@@ -201,6 +218,18 @@ export async function updateFaculty(slug: string, body: PatchFaculty): Promise<F
 
 export async function updateLab(shortname: string, body: PatchLab): Promise<LabDetail | null> {
 	return apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
+}
+
+export async function changePassword(current_password: string, new_password: string): Promise<boolean> {
+	return apivoid('/me/password', json({ current_password, new_password }));
+}
+
+export async function newRecoveryCode(): Promise<{ code: string } | null> {
+	return apifetch<{ code: string }>('/me/recovery-code', { method: 'POST' });
+}
+
+export async function updateSecurityQuestion(question: string | null, answer: string | null): Promise<boolean> {
+	return apivoid('/me/security-question', json({ question, answer }, 'PATCH'));
 }
 
 export async function exportSeedData(): Promise<{ labs: unknown[]; faculty: unknown[]; courses: unknown[]; offerings: unknown[] } | null> {

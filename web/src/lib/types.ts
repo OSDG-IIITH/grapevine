@@ -150,6 +150,8 @@ export interface AuthUser {
 	verified: boolean;
 	username: string | null;
 	auth_method: 'cas' | 'local';
+	security_question: string | null;
+	has_recovery_code: boolean;
 }
 
 export interface CreateCourseReview {

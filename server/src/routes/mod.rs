@@ -5,7 +5,7 @@ pub mod labs;
 pub mod reviews;
 pub mod admin;
 
-use axum::{extract::{FromRequestParts, Request}, middleware::{self, Next}, response::Response, routing::{get, post}, Router};
+use axum::{extract::{FromRequestParts, Request}, middleware::{self, Next}, response::Response, routing::{get, patch, post}, Router};
 use axum::http::{HeaderValue, HeaderName, Method};
 use tower_http::cors::CorsLayer;
 use crate::{auth::{cas, session::VerifiedUser}, error::AppError, handlers, state::AppState};
@@ -34,6 +34,11 @@ pub fn app(state: AppState) -> Router {
         .route("/auth/callback", get(cas::callback))
         .route("/auth/register", post(handlers::auth::register))
         .route("/auth/login/local", post(handlers::auth::login_local))
+        .route("/auth/recovery/:username", get(handlers::auth::recovery_info))
+        .route("/auth/reset-password", post(handlers::auth::reset_password))
+        .route("/me/password", post(handlers::auth::change_password))
+        .route("/me/recovery-code", post(handlers::auth::new_recovery_code))
+        .route("/me/security-question", patch(handlers::auth::update_security_question))
         .route("/auth/verify", get(cas::verify_login))
         .route("/auth/verify/callback", get(cas::verify_callback))
         .route("/auth/logout", post(cas::logout))
