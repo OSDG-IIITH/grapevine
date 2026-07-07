@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE offerings SET approved = true WHERE id = $1 AND approved = false",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44c00f8af9b38f02bf5d4f93666e307511af7ecf1800a7ec65a8f56728f55c30"
+}

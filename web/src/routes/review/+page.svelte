@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
-	import { onMount } from 'svelte';
-	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview } from '$lib/api';
+	import { onMount, untrack } from 'svelte';
+	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview, proposeReview } from '$lib/api';
 	import type { CourseLean, FacultyLean, Offering } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import SegBar from '$lib/components/SegBar.svelte';
@@ -28,6 +28,33 @@
 	let submitted = $state(false);
 	let submitting = $state(false);
 
+	let proposeSeason = $state('M');
+	let proposeYear = $state('');
+	let proposeYearError = $state(false);
+	let proposeFaculty = $state<FacultyLean[]>([]);
+
+	function removeProposeFaculty(fid: string) {
+		proposeFaculty = proposeFaculty.filter((f) => f.id !== fid);
+	}
+
+	function addProposeFaculty(fid: string) {
+		const f = allfaculty.find((fac) => fac.id === fid);
+		if (f && !proposeFaculty.some((fac) => fac.id === fid)) {
+			proposeFaculty = [...proposeFaculty, f];
+		}
+	}
+
+	const availableProposeFaculty = $derived(
+		allfaculty.filter((f) => !proposeFaculty.some((pf) => pf.id === f.id))
+	);
+
+	function parseyear(s: string): number | null {
+		const t = s.trim();
+		if (/^\d{2}$/.test(t)) return parseInt(t, 10);
+		if (/^\d{4}$/.test(t)) { const y = parseInt(t, 10); return y >= 2000 && y <= 2099 ? y % 100 : null; }
+		return null;
+	}
+
 	onMount(async () => {
 		const [courses, faculty] = await Promise.all([getCourses(), getFaculty()]);
 		allcourses = courses ?? [];
@@ -42,7 +69,7 @@
 
 		if (allfaculty.length) {
 			const init = prefaculty
-				? allfaculty.find((f) => f.slug === prefaculty || f.id === prefaculty)
+				? allfaculty.find((f) => f.id === prefaculty || f.slug === prefaculty)
 				: allfaculty[0];
 			facultyid = init?.id ?? allfaculty[0].id;
 		}
@@ -52,7 +79,7 @@
 
 	let fetchseq = 0;
 	let loadingOfferings = false;
-	$effect((untrack) => {
+	$effect(() => {
 		const id = courseid;
 		if (!id || !allcourses.length) return;
 		const c = allcourses.find((co) => co.id === id);
@@ -68,12 +95,18 @@
 			if (seq !== fetchseq) return;
 			offerings = detail?.offerings ?? [];
 			if (offerings.length) offeringid = offerings[0].id;
+			else offeringid = 'propose';
 		});
 	});
 
 	const axisorder = $derived(kind === 'course' ? [...COURSE_AXIS_ORDER] : [...ADVISOR_AXIS_ORDER]);
 	const axislabels = $derived(kind === 'course' ? COURSE_AXIS_LABELS : ADVISOR_AXIS_LABELS);
-	const cansubmit = $derived(!submitting && body.trim().length > 20 && axisorder.every((a) => axes[a]));
+	const cansubmit = $derived(
+		!submitting &&
+		body.trim().length > 20 &&
+		axisorder.every((a) => axes[a]) &&
+		(kind !== 'course' || offeringid !== 'propose' || parseyear(proposeYear) !== null)
+	);
 	const selectedfaculty = $derived(allfaculty.find((f) => f.id === facultyid));
 	const selectedcourse = $derived(allcourses.find((c) => c.id === courseid));
 
@@ -88,15 +121,33 @@
 
 		let result;
 		if (kind === 'course') {
-			result = await createCourseReview(offeringid, {
-				anonymous: anon,
-				difficulty: axes.difficulty,
-				teaching: axes.teaching,
-				grading: axes.grading,
-				content: axes.content,
-				workload: axes.workload,
-				body
-			});
+			if (offeringid === 'propose') {
+				const year = parseyear(proposeYear);
+				if (year === null) { proposeYearError = true; submitting = false; return; }
+				proposeYearError = false;
+				result = await proposeReview(selectedcourse!.code, {
+					season: proposeSeason,
+					year,
+					anonymous: anon,
+					difficulty: axes.difficulty,
+					teaching: axes.teaching,
+					grading: axes.grading,
+					content: axes.content,
+					workload: axes.workload,
+					body,
+					faculty_ids: proposeFaculty.map((f) => f.id)
+				});
+			} else {
+				result = await createCourseReview(offeringid, {
+					anonymous: anon,
+					difficulty: axes.difficulty,
+					teaching: axes.teaching,
+					grading: axes.grading,
+					content: axes.content,
+					workload: axes.workload,
+					body
+				});
+			}
 		} else {
 			const fac = allfaculty.find((f) => f.id === facultyid);
 			if (fac) {
@@ -187,8 +238,9 @@
 								disabled={loadingOfferings}
 							>
 								{#each offerings as o (o.id)}
-									<option value={o.id}>{o.season} {o.year}</option>
+									<option value={o.id}>{o.season === 'M' ? 'Monsoon' : 'Spring'} 20{o.year}</option>
 								{/each}
+								<option value="propose">Other</option>
 							</select>
 							{#if loadingOfferings}
 								<div class="pointer-events-none absolute inset-y-0 right-6 flex items-center">
@@ -201,6 +253,68 @@
 								</svg>
 							</div>
 						</div>
+						{#if offeringid === 'propose'}
+							<div class="col-span-2 mt-3 flex flex-wrap items-center gap-[8px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-4 py-3" style="animation: fadeUp 200ms cubic-bezier(.2,.6,.2,1) both;">
+								<span class="text-[13px] font-medium text-[var(--fg-2)] mr-1">Proposed semester:</span>
+								<!-- season toggle -->
+								<div class="flex rounded-[6px] border border-[var(--border-strong)] p-[2px]" style="background: var(--bg-3);">
+									<button
+										type="button"
+										onclick={() => { proposeSeason = 'M'; }}
+										class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'M' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+										style="font-family: var(--mono); {proposeSeason === 'M' ? 'background: var(--bg-4);' : ''}"
+									>Monsoon</button>
+									<button
+										type="button"
+										onclick={() => { proposeSeason = 'S'; }}
+										class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'S' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+										style="font-family: var(--mono); {proposeSeason === 'S' ? 'background: var(--bg-4);' : ''}"
+									>Spring</button>
+								</div>
+								<!-- year input -->
+								<input
+									bind:value={proposeYear}
+									placeholder="2026"
+									oninput={() => { proposeYearError = false; }}
+									class="rounded-[5px] border bg-transparent px-[8px] py-[4px] text-[12px] outline-none transition-colors duration-[100ms] {proposeYearError ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-strong)] text-[var(--fg-2)] focus:border-[var(--accent-2)]'}"
+									style="font-family: var(--mono); width: 64px;"
+								/>
+
+								<!-- instructors list -->
+								{#each proposeFaculty as f (f.id)}
+									<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
+										{f.name}
+										<button
+											type="button"
+											onclick={() => removeProposeFaculty(f.id)}
+											aria-label="Remove {f.name}"
+											class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+										>
+											<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+												<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+											</svg>
+										</button>
+									</span>
+								{/each}
+
+								{#if availableProposeFaculty.length > 0}
+									<select
+										onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) { addProposeFaculty(v); (e.target as HTMLSelectElement).value = ''; } }}
+										class="appearance-none rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
+										style="font-family: var(--mono); width: 110px;"
+									>
+										<option value="">+ instructor</option>
+										{#each availableProposeFaculty as f (f.id)}
+											<option value={f.id}>{f.name}</option>
+										{/each}
+									</select>
+								{/if}
+
+								{#if proposeYearError}
+									<span class="text-[11px] text-[var(--danger)] ml-2">Enter valid year</span>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				</div>
 			{:else}

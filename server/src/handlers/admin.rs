@@ -207,3 +207,128 @@ pub async fn delete_review(
 
     Err(AppError::NotFound)
 }
+
+use crate::models::offering::Season;
+
+#[derive(Serialize)]
+pub struct ProposedOfferingResponse {
+    pub id: String,
+    pub course_code: String,
+    pub course_name: String,
+    pub season: String,
+    pub year: i16,
+    pub faculty: Vec<String>,
+    pub reviews: Vec<ProposedReviewResponse>,
+}
+
+#[derive(Serialize)]
+pub struct ProposedReviewResponse {
+    pub id: String,
+    pub body: String,
+    pub difficulty: i16,
+    pub teaching: i16,
+    pub grading: i16,
+    pub content: i16,
+    pub workload: i16,
+    pub author_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+pub async fn list_proposed(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<ProposedOfferingResponse>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let offerings = sqlx::query!(
+        r#"SELECT o.id, o.season as "season: Season", o.year,
+                  c.code as course_code, c.name as course_name,
+                  COALESCE(array_remove(array_agg(f.name ORDER BY f.name), NULL), '{}') as "faculty!: Vec<String>"
+           FROM offerings o
+           JOIN courses c ON c.id = o.course_id
+           LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id
+           LEFT JOIN faculty f ON f.id = ofac.faculty_id
+           WHERE o.approved = false
+           GROUP BY o.id, c.code, c.name, o.season, o.year, o.created_at
+           ORDER BY o.created_at DESC"#
+    )
+    .fetch_all(&s.pool)
+    .await?;
+
+    let mut result = Vec::new();
+    for o in offerings {
+        let reviews = sqlx::query!(
+            r#"SELECT cr.id, cr.body, cr.difficulty, cr.teaching, cr.grading,
+                      cr.content, cr.workload,
+                      cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
+                      cr.anonymous,
+                      u.display_name
+               FROM course_reviews cr
+               JOIN users u ON u.id = cr.user_id
+               WHERE cr.offering_id = $1
+               ORDER BY cr.created_at DESC"#,
+            o.id
+        )
+        .fetch_all(&s.pool)
+        .await?;
+
+        let mapped_reviews = reviews.into_iter().map(|r| ProposedReviewResponse {
+            id: r.id,
+            body: r.body,
+            difficulty: r.difficulty,
+            teaching: r.teaching,
+            grading: r.grading,
+            content: r.content,
+            workload: r.workload,
+            author_name: if r.anonymous { None } else { Some(r.display_name) },
+            created_at: r.created_at,
+        }).collect();
+
+        result.push(ProposedOfferingResponse {
+            id: o.id,
+            course_code: o.course_code,
+            course_name: o.course_name,
+            season: match o.season { Season::M => "M".to_string(), Season::S => "S".to_string() },
+            year: o.year,
+            faculty: o.faculty,
+            reviews: mapped_reviews,
+        });
+    }
+
+    Ok(Json(result))
+}
+
+pub async fn approve_proposed(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let rows = sqlx::query!(
+        "UPDATE offerings SET approved = true WHERE id = $1 AND approved = false",
+        id
+    )
+    .execute(&s.pool)
+    .await?
+    .rows_affected();
+
+    if rows == 0 { return Err(AppError::NotFound); }
+    Ok(StatusCode::OK)
+}
+
+pub async fn reject_proposed(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let rows = sqlx::query!("DELETE FROM offerings WHERE id = $1 AND approved = false", id)
+        .execute(&s.pool)
+        .await?
+        .rows_affected();
+
+    if rows == 0 { return Err(AppError::NotFound); }
+    Ok(StatusCode::NO_CONTENT)
+}

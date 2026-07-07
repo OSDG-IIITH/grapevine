@@ -7,6 +7,7 @@ use super::offering::Season;
 pub struct CreateOffering {
     pub season: Season,
     pub year: i16,
+    pub faculty_ids: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -63,6 +64,13 @@ pub struct OfferingDetail {
 }
 
 #[derive(Debug, Serialize)]
+pub struct ProposedOfferingLean {
+    pub id: String,
+    pub season: Season,
+    pub year: i16,
+}
+
+#[derive(Debug, Serialize)]
 pub struct CourseDetail {
     pub id: String,
     pub code: String,
@@ -72,6 +80,7 @@ pub struct CourseDetail {
     pub kind: CourseType,
     pub overall: f64,
     pub offerings: Vec<OfferingDetail>,
+    pub proposed_offerings: Vec<ProposedOfferingLean>,
 }
 
 pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort: Option<&str>) -> Result<Vec<CourseLean>, AppError> {
@@ -80,14 +89,14 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
         r#"SELECT c.id, c.code, c.name, c.type as "kind: CourseType",
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
-           LEFT JOIN offerings o ON o.course_id = c.id
+           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
            LEFT JOIN course_reviews r ON r.offering_id = o.id
            WHERE ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
              AND ($2::text IS NULL OR EXISTS (
                SELECT 1 FROM offerings oi
                JOIN offering_faculty ofac ON ofac.offering_id = oi.id
                JOIN faculty f ON f.id = ofac.faculty_id
-               WHERE oi.course_id = c.id AND f.slug = $2
+               WHERE oi.course_id = c.id AND oi.approved = true AND f.slug = $2
              ))
            GROUP BY c.id, c.code, c.name, c.type
            ORDER BY c.name"#,
@@ -139,13 +148,70 @@ pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Re
 
 pub async fn create_offering(pool: &PgPool, course_code: &str, body: &CreateOffering) -> Result<OfferingDetail, AppError> {
     let course_id = id_by_code(pool, course_code).await?;
+    let mut tx = pool.begin().await?;
     let id = sqlx::query_scalar!(
-        r#"INSERT INTO offerings (course_id, season, year) VALUES ($1, $2, $3) RETURNING id"#,
+        r#"INSERT INTO offerings (course_id, season, year, approved) VALUES ($1, $2, $3, true) RETURNING id"#,
         course_id, body.season.clone() as Season, body.year
     )
-    .fetch_one(pool).await?;
+    .fetch_one(&mut *tx).await?;
+
+    if let Some(ref fids) = body.faculty_ids {
+        for fid in fids {
+            sqlx::query!(
+                "INSERT INTO offering_faculty (offering_id, faculty_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                id, fid
+            )
+            .execute(&mut *tx).await?;
+        }
+    }
+
+    tx.commit().await?;
+
+    let frows = sqlx::query!(
+        "SELECT f.id, f.slug, f.name FROM offering_faculty ofac JOIN faculty f ON f.id = ofac.faculty_id WHERE ofac.offering_id = $1",
+        id
+    )
+    .fetch_all(pool).await?;
+
     let code = format!("{}{}", match &body.season { Season::M => "M", Season::S => "S" }, body.year);
-    Ok(OfferingDetail { id, code, season: body.season.clone(), year: body.year, faculty: vec![] })
+    Ok(OfferingDetail {
+        id, code, season: body.season.clone(), year: body.year,
+        faculty: frows.into_iter().map(|f| FacultyRef { id: f.id, slug: f.slug, name: f.name }).collect(),
+    })
+}
+
+pub async fn propose_offering(pool: &PgPool, course_code: &str, body: &CreateOffering) -> Result<OfferingDetail, AppError> {
+    let course_id = id_by_code(pool, course_code).await?;
+    let mut tx = pool.begin().await?;
+    let id = sqlx::query_scalar!(
+        r#"INSERT INTO offerings (course_id, season, year, approved) VALUES ($1, $2, $3, false) RETURNING id"#,
+        course_id, body.season.clone() as Season, body.year
+    )
+    .fetch_one(&mut *tx).await?;
+
+    if let Some(ref fids) = body.faculty_ids {
+        for fid in fids {
+            sqlx::query!(
+                "INSERT INTO offering_faculty (offering_id, faculty_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                id, fid
+            )
+            .execute(&mut *tx).await?;
+        }
+    }
+
+    tx.commit().await?;
+
+    let frows = sqlx::query!(
+        "SELECT f.id, f.slug, f.name FROM offering_faculty ofac JOIN faculty f ON f.id = ofac.faculty_id WHERE ofac.offering_id = $1",
+        id
+    )
+    .fetch_all(pool).await?;
+
+    let code = format!("{}{}", match &body.season { Season::M => "M", Season::S => "S" }, body.year);
+    Ok(OfferingDetail {
+        id, code, season: body.season.clone(), year: body.year,
+        faculty: frows.into_iter().map(|f| FacultyRef { id: f.id, slug: f.slug, name: f.name }).collect(),
+    })
 }
 
 pub async fn delete_offering(pool: &PgPool, offering_id: &str) -> Result<(), AppError> {
@@ -197,7 +263,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
                   c.type as "kind: CourseType",
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
-           LEFT JOIN offerings o ON o.course_id = c.id
+           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
            LEFT JOIN course_reviews r ON r.offering_id = o.id
            WHERE c.code = $1
            GROUP BY c.id, c.code, c.name, c.description, c.type"#,
@@ -213,7 +279,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
            FROM offerings o
            LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id
            LEFT JOIN faculty f ON f.id = ofac.faculty_id
-           WHERE o.course_id = $1
+           WHERE o.course_id = $1 AND o.approved = true
            ORDER BY o.year DESC, o.season"#,
         row.id
     )
@@ -238,9 +304,20 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
         }
     }
 
+    let proposed_rows = sqlx::query!(
+        r#"SELECT id, season as "season: Season", year FROM offerings WHERE course_id = $1 AND approved = false ORDER BY year DESC, season"#,
+        row.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let proposed_offerings: Vec<ProposedOfferingLean> = proposed_rows.into_iter().map(|pr| ProposedOfferingLean {
+        id: pr.id, season: pr.season, year: pr.year
+    }).collect();
+
     Ok(CourseDetail {
         id: row.id, code: row.code, name: row.name,
         description: row.description.unwrap_or_default(),
-        kind: row.kind, overall: row.overall, offerings,
+        kind: row.kind, overall: row.overall, offerings, proposed_offerings,
     })
 }

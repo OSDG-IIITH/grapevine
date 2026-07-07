@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
-	import { getCourse, getCourseReviews, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty } from '$lib/api';
+	import { getCourse, getCourseReviews, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering } from '$lib/api';
 	import type { CourseDetail, CourseReview, Offering, FacultyLean } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, COURSE_TYPES } from '$lib/types';
 	import { currentUser } from '$lib/stores';
+	import { toast } from 'svelte-sonner';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
@@ -16,6 +17,7 @@
 
 	let course = $state<CourseDetail | null>(null);
 	let reviews = $state<CourseReview[]>([]);
+	let proposedReviews = $state<CourseReview[]>([]);
 	let tab = $state('all');
 	let error = $state('');
 
@@ -32,22 +34,69 @@
 	let cryear = $state('');
 	let cryearerror = $state(false);
 
+	let proposing = $state(false);
+	let proposeSeason = $state('M');
+	let proposeYear = $state('');
+	let proposeYearError = $state(false);
+	let proposeFaculty = $state<FacultyLean[]>([]);
+
+	function removeProposeFaculty(fid: string) {
+		proposeFaculty = proposeFaculty.filter((f) => f.id !== fid);
+	}
+
+	function addProposeFaculty(fid: string) {
+		const f = allfaculty.find((fac) => fac.id === fid);
+		if (f && !proposeFaculty.some((fac) => fac.id === fid)) {
+			proposeFaculty = [...proposeFaculty, f];
+		}
+	}
+
+	const availableProposeFaculty = $derived(
+		allfaculty.filter((f) => !proposeFaculty.some((pf) => pf.id === f.id))
+	);
+
+	async function submitProposal() {
+		if (!course) return;
+		const year = parseyear(proposeYear);
+		if (year === null) { proposeYearError = true; return; }
+		proposeYearError = false;
+		const fids = proposeFaculty.map((f) => f.id);
+		const res = await proposeOffering(course.code, proposeSeason, year, fids);
+		if (res) {
+			toast.success('Semester proposal submitted to moderators.');
+			proposing = false;
+			proposeYear = '';
+			proposeFaculty = [];
+			const d = await getCourse(course.code);
+			if (d) course = d;
+		}
+	}
+
 	$effect(() => {
 		const c = code;
 		if (!c) return;
 		error = '';
 		course = null;
 		reviews = [];
+		proposedReviews = [];
 		tab = 'all';
 		editing = false;
 
 		const decoded = decodeURIComponent(c);
-		Promise.all([getCourse(decoded), getCourseReviews(decoded)])
-			.then(([d, r]) => {
+		Promise.all([getCourse(decoded), getCourseReviews(decoded), getProposedReviews(decoded)])
+			.then(([d, r, pr]) => {
 				if (!d) { error = 'Course not found.'; return; }
 				course = d;
 				reviews = r ?? [];
+				proposedReviews = pr ?? [];
 			});
+
+		if (!facultyloaded) {
+			getFaculty().then((all) => {
+				allfaculty = all ?? [];
+				facultyloaded = true;
+			});
+		}
 	});
 
 	async function startEdit() {
@@ -154,22 +203,32 @@
 	})());
 
 	const offeringmap = $derived(
-		course ? Object.fromEntries(course.offerings.map((o) => [o.id, o.code])) : {}
+		course ? Object.fromEntries([
+			...course.offerings.map((o) => [o.id, o.code]),
+			...course.proposed_offerings.map((o) => [o.id, `${o.season === 'M' ? 'Monsoon' : 'Spring'} ${fullyear(o.year)}`])
+		]) : {}
 	);
 
 	const tabs = $derived(
 		course ? [
-			{ id: 'all', label: 'All', count: reviews.length },
+			{ id: 'all', label: 'All', count: reviews.length + proposedReviews.length },
 			...course.offerings.map((o) => ({
 				id: o.id,
 				label: o.code,
 				count: reviews.filter((r) => r.offering_id === o.id).length
-			}))
+			})),
+			...(course.proposed_offerings.length > 0 || proposedReviews.length > 0 ? [
+				{ id: 'other', label: 'Other', count: proposedReviews.length }
+			] : [])
 		] : []
 	);
 
-	const shown = $derived(tab === 'all' ? reviews : reviews.filter((r) => r.offering_id === tab));
-	const selectedoffering = $derived(course && tab !== 'all' ? course.offerings.find((o) => o.id === tab) : null);
+	const shown = $derived(
+		tab === 'all' ? [...reviews, ...proposedReviews].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) :
+		tab === 'other' ? proposedReviews :
+		reviews.filter((r) => r.offering_id === tab)
+	);
+	const selectedoffering = $derived(course && tab !== 'all' && tab !== 'other' ? course.offerings.find((o) => o.id === tab) : null);
 
 	const PER_PAGE = 10;
 	let reviewpage = $state(1);
@@ -261,6 +320,7 @@
 				{/if}
 			</div>
 		</div>
+
 
 		{#if editing}
 			<Textarea
@@ -416,7 +476,84 @@
 			bar="continuous"
 		/>
 
-		<Tabs items={tabs} active={tab} onchange={(id) => { tab = id; reviewpage = 1; }} />
+		<Tabs
+			items={tabs}
+			active={tab}
+			onchange={(id) => { tab = id; reviewpage = 1; }}
+			onadd={() => (proposing = !proposing)}
+			addtitle="Propose semester"
+		/>
+
+		{#if proposing}
+			<div class="mb-6 flex flex-wrap items-center gap-[8px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-4 py-3" style="animation: fadeUp 200ms cubic-bezier(.2,.6,.2,1) both;">
+				<span class="text-[13px] font-medium text-[var(--fg-2)] mr-1">Propose semester:</span>
+				<!-- season toggle -->
+				<div class="flex rounded-[6px] border border-[var(--border-strong)] p-[2px]" style="background: var(--bg-3);">
+					<button
+						type="button"
+						onclick={() => { proposeSeason = 'M'; }}
+						class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'M' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+						style="font-family: var(--mono); {proposeSeason === 'M' ? 'background: var(--bg-4);' : ''}"
+					>Monsoon</button>
+					<button
+						type="button"
+						onclick={() => { proposeSeason = 'S'; }}
+						class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'S' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+						style="font-family: var(--mono); {proposeSeason === 'S' ? 'background: var(--bg-4);' : ''}"
+					>Spring</button>
+				</div>
+				<!-- year input -->
+				<input
+					bind:value={proposeYear}
+					placeholder="2026"
+					oninput={() => { proposeYearError = false; }}
+					class="rounded-[5px] border bg-transparent px-[8px] py-[4px] text-[12px] outline-none transition-colors duration-[100ms] {proposeYearError ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-strong)] text-[var(--fg-2)] focus:border-[var(--accent-2)]'}"
+					style="font-family: var(--mono); width: 64px;"
+				/>
+
+				<!-- instructors list -->
+				{#each proposeFaculty as f (f.id)}
+					<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
+						{f.name}
+						<button
+							type="button"
+							onclick={() => removeProposeFaculty(f.id)}
+							aria-label="Remove {f.name}"
+							class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+						>
+							<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+								<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+							</svg>
+						</button>
+					</span>
+				{/each}
+
+				{#if availableProposeFaculty.length > 0}
+					<select
+						onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) { addProposeFaculty(v); (e.target as HTMLSelectElement).value = ''; } }}
+						class="appearance-none rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
+						style="font-family: var(--mono); width: 110px;"
+					>
+						<option value="">+ instructor</option>
+						{#each availableProposeFaculty as f (f.id)}
+							<option value={f.id}>{f.name}</option>
+						{/each}
+					</select>
+				{/if}
+
+				<button
+					type="button"
+					onclick={submitProposal}
+					class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium transition-colors duration-[120ms] ml-auto"
+					style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
+				>Propose</button>
+				<button
+					type="button"
+					onclick={() => { proposing = false; proposeYear = ''; proposeYearError = false; proposeFaculty = []; }}
+					class="text-[13px] text-[var(--fg-3)] hover:text-[var(--fg)] transition-colors px-2 py-1"
+				>Cancel</button>
+			</div>
+		{/if}
 
 		<!-- taught-by banner -->
 		{#if selectedoffering}
@@ -433,7 +570,11 @@
 		<!-- reviews -->
 		{#if shown.length === 0}
 			<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
-				No reviews for this offering yet.
+				{#if tab === 'other'}
+					No reviews yet.
+				{:else}
+					No reviews for this offering yet.
+				{/if}
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
@@ -442,10 +583,16 @@
 						review={r}
 						axisorder={[...COURSE_AXIS_ORDER]}
 						axislabels={COURSE_AXIS_LABELS}
-						showoffering={tab === 'all'}
+						showoffering={tab === 'all' || tab === 'other'}
 						offeringcode={offeringmap[r.offering_id]}
-						ondelete={(id) => (reviews = reviews.filter((item) => item.id !== id))}
-						onedit={(updated) => (reviews = reviews.map((item) => item.id === updated.id ? updated : item))}
+						ondelete={(id) => {
+							reviews = reviews.filter((item) => item.id !== id);
+							proposedReviews = proposedReviews.filter((item) => item.id !== id);
+						}}
+						onedit={(updated) => {
+							reviews = reviews.map((item) => item.id === updated.id ? updated as CourseReview : item);
+							proposedReviews = proposedReviews.map((item) => item.id === updated.id ? updated as CourseReview : item);
+						}}
 					/>
 				{/each}
 			</div>

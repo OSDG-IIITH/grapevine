@@ -6,6 +6,7 @@ CREATE TABLE offerings (
   season offering_season NOT NULL,
   year SMALLINT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  approved BOOLEAN NOT NULL DEFAULT true,
   UNIQUE (course_id, season, year)
 );
 

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT o.id as oid, o.season as \"season: Season\", o.year,\n                  f.id as \"fid?\", f.slug as \"fslug?\", f.name as \"fname?\"\n           FROM offerings o\n           LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id\n           LEFT JOIN faculty f ON f.id = ofac.faculty_id\n           WHERE o.course_id = $1\n           ORDER BY o.year DESC, o.season",
+  "query": "SELECT o.id as oid, o.season as \"season: Season\", o.year,\n                  f.id as \"fid?\", f.slug as \"fslug?\", f.name as \"fname?\"\n           FROM offerings o\n           LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id\n           LEFT JOIN faculty f ON f.id = ofac.faculty_id\n           WHERE o.course_id = $1 AND o.approved = true\n           ORDER BY o.year DESC, o.season",
   "describe": {
     "columns": [
       {
@@ -58,5 +58,5 @@
       false
     ]
   },
-  "hash": "994d180bf5d2c272e92b89124a8653dd091bc1e1db1fdb6b41ec8818d1d72c17"
+  "hash": "9f3b138607648caf8ee15df6f70c33553c195d2b4dab5b7d8f2f565951f0cd7a"
 }

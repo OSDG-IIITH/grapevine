@@ -53,6 +53,12 @@ export interface Offering {
 	faculty: { id: string; name: string; slug?: string }[];
 }
 
+export interface ProposedOfferingLean {
+	id: string;
+	season: string;
+	year: number;
+}
+
 export interface CourseDetail {
 	id: string;
 	code: string;
@@ -61,6 +67,29 @@ export interface CourseDetail {
 	type: string;
 	overall: number;
 	offerings: Offering[];
+	proposed_offerings: ProposedOfferingLean[];
+}
+
+export interface ProposedOfferingResponse {
+	id: string;
+	course_code: string;
+	course_name: string;
+	season: string;
+	year: number;
+	faculty: string[];
+	reviews: ProposedReviewResponse[];
+}
+
+export interface ProposedReviewResponse {
+	id: string;
+	body: string;
+	difficulty: number;
+	teaching: number;
+	grading: number;
+	content: number;
+	workload: number;
+	author_name: string | null;
+	created_at: string;
 }
 
 export interface CourseReview {
