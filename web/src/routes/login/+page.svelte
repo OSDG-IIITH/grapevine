@@ -220,7 +220,7 @@
 </script>
 
 <svelte:head>
-	<title>grapevine — sign in</title>
+	<title>Sign In · grapevine</title>
 </svelte:head>
 
 {#if !checking}

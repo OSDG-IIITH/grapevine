@@ -52,6 +52,10 @@
 	const shown = $derived(tab === 'course' ? (reviews?.course ?? []) : (reviews?.advisor ?? []));
 </script>
 
+<svelte:head>
+	<title>Profile · grapevine</title>
+</svelte:head>
+
 <div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 	<Crumbs items={[{ label: 'grapevine', href: '/' }, { label: 'profile' }]} />
 

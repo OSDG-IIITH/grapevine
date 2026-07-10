@@ -2,6 +2,10 @@
 	import SearchBox from '$lib/components/SearchBox.svelte';
 </script>
 
+<svelte:head>
+	<title>grapevine</title>
+</svelte:head>
+
 <div
 	class="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-8 text-center"
 	style="transform: translateY(-54px);"

@@ -59,6 +59,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{lab ? `${lab.name} · grapevine` : 'Lab · grapevine'}</title>
+</svelte:head>
+
 <div class="mx-auto w-full max-w-[1180px] px-4 pb-[120px] pt-10 sm:px-8" style="animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 
 	{#if error}

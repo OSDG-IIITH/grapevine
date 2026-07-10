@@ -168,6 +168,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Write Review · grapevine</title>
+</svelte:head>
+
 {#if submitted}
 	<div class="mx-auto w-full px-6 pb-[120px] pt-10 sm:px-8" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 		<div
@@ -339,7 +343,7 @@
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Ratings
 					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						1 is bad. 5 is good.
+						1 is bad, 5 is good.<br />For difficulty and workload, 5 means easy or light.
 					</span>
 				</div>
 				<div class="min-w-0" style="display: grid; grid-template-columns: 110px 1fr 30px; gap: 16px 18px; align-items: center;">

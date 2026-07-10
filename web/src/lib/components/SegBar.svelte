@@ -22,6 +22,14 @@
 		return 'bg-[var(--bg-inset)] border border-[var(--border)]';
 	}
 
+	function numcolor(i: number): string {
+		const cls = segcls(i);
+		if (cls.includes('bg-[var(--accent)]')) return 'rgba(14,20,16,0.8)';
+		if (cls.includes('bg-[var(--accent-dim)]')) return 'var(--accent-2)';
+		if (cls.includes('rgba(107,143,111,0.32)')) return 'var(--accent)';
+		return 'var(--fg-3)';
+	}
+
 	function segcls(i: number): string {
 		if (!hovered) return basecls(i);
 		if (!hasrating) return i <= hovered ? dimcls : basecls(i);
@@ -42,13 +50,13 @@
 
 
 <div
-	style="display: grid; grid-template-columns: repeat(5, 1fr); gap: {size === 'sm' ? '3px' : '4px'}; height: {size === 'sm' ? '5px' : '10px'};"
+	style="display: grid; grid-template-columns: repeat(5, 1fr); gap: {size === 'sm' ? '3px' : '5px'}; height: {size === 'sm' ? '5px' : '20px'};"
 	role={interactive ? 'group' : undefined}
 >
 	{#each [1, 2, 3, 4, 5] as i (i)}
 		<button
 			type="button"
-			class="rounded-[2px] transition-[background,border-color,box-shadow] duration-[140ms] {segcls(i)} {interactive ? 'cursor-pointer' : 'cursor-default'}"
+			class="rounded-[2px] transition-[background,border-color,box-shadow] duration-[140ms] {segcls(i)} {interactive ? 'cursor-pointer' : 'cursor-default'} flex items-center justify-center"
 			style="height: 100%;"
 			tabindex={interactive ? 0 : -1}
 			aria-label="{i} of 5"
@@ -57,6 +65,6 @@
 			onmouseleave={interactive ? () => (hovered = 0) : undefined}
 			onfocus={interactive ? () => (hovered = i) : undefined}
 			onblur={interactive ? () => (hovered = 0) : undefined}
-		></button>
+		>{#if size !== 'sm'}<span style="font-size: 11px; font-family: var(--mono); font-weight: 500; line-height: 1; pointer-events: none; user-select: none; color: {numcolor(i)}; transition: color 140ms;">{i}</span>{/if}</button>
 	{/each}
 </div>

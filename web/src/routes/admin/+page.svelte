@@ -69,6 +69,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Admin · grapevine</title>
+</svelte:head>
+
 <div class="mx-auto w-full px-8 pb-[120px] pt-10" style="max-width: 920px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
 	<Crumbs items={[{ label: 'grapevine', href: '/' }, { label: 'admin' }, { label: 'flagged' }]} />
 

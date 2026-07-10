@@ -62,7 +62,7 @@
 </script>
 
 <svelte:head>
-	<title>grapevine — verify your account</title>
+	<title>Verify Account · grapevine</title>
 </svelte:head>
 
 {#if !checking}
