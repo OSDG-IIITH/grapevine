@@ -1,22 +1,22 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, display_name, is_admin, verified, username, password_hash\n        FROM users WHERE username = $1\n        ",
+  "query": "SELECT display_name, username, cas_id, verified, security_question, recovery_code_hash FROM users WHERE id = $1",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "id",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 1,
         "name": "display_name",
         "type_info": "Text"
       },
       {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
         "ordinal": 2,
-        "name": "is_admin",
-        "type_info": "Bool"
+        "name": "cas_id",
+        "type_info": "Text"
       },
       {
         "ordinal": 3,
@@ -25,12 +25,12 @@
       },
       {
         "ordinal": 4,
-        "name": "username",
+        "name": "security_question",
         "type_info": "Text"
       },
       {
         "ordinal": 5,
-        "name": "password_hash",
+        "name": "recovery_code_hash",
         "type_info": "Text"
       }
     ],
@@ -41,12 +41,12 @@
     },
     "nullable": [
       false,
-      false,
-      false,
+      true,
+      true,
       false,
       true,
       true
     ]
   },
-  "hash": "5a1b02c0c66611670ba5a58431621ece7e4b42a8c866f67cb36502e7b90e6b99"
+  "hash": "0778e4fe0e23d6ec50efc2bf07df2e9f48a1018e3e4697372176158a65b874ff"
 }

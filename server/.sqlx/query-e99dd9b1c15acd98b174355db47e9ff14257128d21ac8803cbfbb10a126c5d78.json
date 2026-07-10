@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.body,\n                  cr.edited_at as \"edited_at?: chrono::DateTime<chrono::Utc>\",\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name,\n                  COALESCE(SUM(v.vote), 0)::bigint as \"score!\",\n                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as \"upvotes!\",\n                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as \"downvotes!\",\n                  uv.vote as \"user_vote?\"\n           FROM course_reviews cr\n           JOIN offerings o ON o.id = cr.offering_id\n           JOIN users u ON u.id = cr.user_id\n           LEFT JOIN course_review_votes v ON v.review_id = cr.id\n           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2\n           WHERE o.course_id = $1\n           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote\n           ORDER BY \"score!\" DESC, cr.created_at DESC",
+  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.body,\n                  cr.edited_at as \"edited_at?: chrono::DateTime<chrono::Utc>\",\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name,\n                  COALESCE(SUM(v.vote), 0)::bigint as \"score!\",\n                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as \"upvotes!\",\n                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as \"downvotes!\",\n                  uv.vote as \"user_vote?\"\n           FROM course_reviews cr\n           JOIN offerings o ON o.id = cr.offering_id\n           JOIN users u ON u.id = cr.user_id\n           LEFT JOIN course_review_votes v ON v.review_id = cr.id\n           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2\n           WHERE o.course_id = $1 AND o.approved = true\n           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote\n           ORDER BY \"score!\" DESC, cr.created_at DESC",
   "describe": {
     "columns": [
       {
@@ -115,5 +115,5 @@
       false
     ]
   },
-  "hash": "1db61739b20b3b3109e5053ec596db3087d14e4f8b67464d597a647cd265ef94"
+  "hash": "e99dd9b1c15acd98b174355db47e9ff14257128d21ac8803cbfbb10a126c5d78"
 }

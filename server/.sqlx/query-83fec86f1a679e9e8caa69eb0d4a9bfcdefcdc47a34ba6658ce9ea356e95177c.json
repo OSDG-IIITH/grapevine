@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.body,\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name\n           FROM course_reviews cr\n           JOIN users u ON u.id = cr.user_id\n           WHERE cr.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "offering_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "anonymous",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "difficulty",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 5,
+        "name": "teaching",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 6,
+        "name": "grading",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 7,
+        "name": "content",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 8,
+        "name": "workload",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 9,
+        "name": "body",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "display_name",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "83fec86f1a679e9e8caa69eb0d4a9bfcdefcdc47a34ba6658ce9ea356e95177c"
+}

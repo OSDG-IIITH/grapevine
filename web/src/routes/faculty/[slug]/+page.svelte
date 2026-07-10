@@ -307,7 +307,7 @@
 							axisorder={[...ADVISOR_AXIS_ORDER]}
 							axislabels={ADVISOR_AXIS_LABELS}
 							ondelete={(id) => (advisorreviews = advisorreviews.filter((item) => item.id !== id))}
-							onedit={(updated) => (advisorreviews = advisorreviews.map((item) => item.id === updated.id ? updated : item))}
+							onedit={(updated) => (advisorreviews = advisorreviews.map((item) => item.id === updated.id ? updated as AdvisorReview : item))}
 						/>
 					{/each}
 				</div>

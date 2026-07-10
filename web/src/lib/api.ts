@@ -7,7 +7,8 @@ import type {
 	SearchResult, MyReviews,
 	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview,
-	PatchCourse, PatchFaculty, PatchLab
+	PatchCourse, PatchFaculty, PatchLab,
+	ProposedOfferingResponse, ProposedOfferingLean
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -246,4 +247,42 @@ export async function dismissFlag(id: string): Promise<boolean> {
 
 export async function deleteFlaggedReview(id: string): Promise<boolean> {
 	return apivoid(`/admin/flags/${id}/delete-review`, { method: 'POST' });
+}
+
+export async function getProposedReviews(code: string): Promise<CourseReview[] | null> {
+	return apifetch<CourseReview[]>(`/courses/${encodeURIComponent(code)}/proposed-reviews`);
+}
+
+export async function proposeOffering(code: string, season: string, year: number, faculty_ids?: string[]): Promise<Offering | null> {
+	return apifetch<Offering>(`/courses/${encodeURIComponent(code)}/propose-offering`, json({ season, year, faculty_ids }));
+}
+
+export async function proposeReview(
+	code: string,
+	body: {
+		season: string;
+		year: number;
+		anonymous: boolean;
+		difficulty: number;
+		teaching: number;
+		grading: number;
+		content: number;
+		workload: number;
+		body: string;
+		faculty_ids?: string[];
+	}
+): Promise<CourseReview | null> {
+	return apifetch<CourseReview>(`/courses/${encodeURIComponent(code)}/propose-review`, json(body));
+}
+
+export async function getProposedOfferings(): Promise<ProposedOfferingResponse[] | null> {
+	return apifetch<ProposedOfferingResponse[]>('/admin/proposed');
+}
+
+export async function approveProposedOffering(id: string): Promise<boolean> {
+	return apivoid(`/admin/proposed/${id}/approve`, { method: 'POST' });
+}
+
+export async function rejectProposedOffering(id: string): Promise<boolean> {
+	return apivoid(`/admin/proposed/${id}/reject`, { method: 'POST' });
 }

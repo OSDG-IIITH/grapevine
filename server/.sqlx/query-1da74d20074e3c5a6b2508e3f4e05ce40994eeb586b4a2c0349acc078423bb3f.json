@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, season as \"season: Season\", year FROM offerings WHERE course_id = $1 AND approved = false ORDER BY year DESC, season",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "season: Season",
+        "type_info": {
+          "Custom": {
+            "name": "offering_season",
+            "kind": {
+              "Enum": [
+                "M",
+                "S"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "year",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1da74d20074e3c5a6b2508e3f4e05ce40994eeb586b4a2c0349acc078423bb3f"
+}
