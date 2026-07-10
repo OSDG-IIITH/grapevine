@@ -45,13 +45,32 @@ function json(body: unknown, method = 'POST'): RequestInit {
 	return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
 
+const listCache = {
+	courses: new Map<string, CourseLean[]>(),
+	faculty: new Map<string, FacultyLean[]>(),
+	labs: null as LabLean[] | null,
+	clear() {
+		this.courses.clear();
+		this.faculty.clear();
+		this.labs = null;
+	}
+};
+
 export async function getCourses(params?: { q?: string; instructor?: string; sort?: 'rating_asc' | 'rating_desc' }): Promise<CourseLean[] | null> {
 	const p = new URLSearchParams();
 	if (params?.q?.trim()) p.set('q', params.q.trim());
 	if (params?.instructor) p.set('instructor', params.instructor);
 	if (params?.sort) p.set('sort', params.sort);
 	const qs = p.size ? `?${p}` : '';
-	return apifetch<CourseLean[]>(`/courses${qs}`);
+
+	if (listCache.courses.has(qs)) {
+		return listCache.courses.get(qs)!;
+	}
+	const data = await apifetch<CourseLean[]>(`/courses${qs}`);
+	if (data) {
+		listCache.courses.set(qs, data);
+	}
+	return data;
 }
 
 export async function getCourse(code: string): Promise<CourseDetail | null> {
@@ -67,7 +86,15 @@ export async function getFaculty(params?: { q?: string; sort?: 'rating_asc' | 'r
 	if (params?.q?.trim()) p.set('q', params.q.trim());
 	if (params?.sort) p.set('sort', params.sort);
 	const qs = p.size ? `?${p}` : '';
-	return apifetch<FacultyLean[]>(`/faculty${qs}`);
+
+	if (listCache.faculty.has(qs)) {
+		return listCache.faculty.get(qs)!;
+	}
+	const data = await apifetch<FacultyLean[]>(`/faculty${qs}`);
+	if (data) {
+		listCache.faculty.set(qs, data);
+	}
+	return data;
 }
 
 export async function getFacultyMember(slug: string): Promise<FacultyDetail | null> {
@@ -80,6 +107,12 @@ export async function getAdvisorReviews(slug: string): Promise<AdvisorReview[] |
 
 export async function getLabs(q?: string): Promise<LabLean[] | null> {
 	const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+	if (!qs) {
+		if (listCache.labs) return listCache.labs;
+		const data = await apifetch<LabLean[]>(`/labs${qs}`);
+		if (data) listCache.labs = data;
+		return data;
+	}
 	return apifetch<LabLean[]>(`/labs${qs}`);
 }
 
@@ -150,43 +183,63 @@ export async function getMyReviews(): Promise<MyReviews | null> {
 }
 
 export async function createCourseReview(offeringId: string, body: CreateCourseReview): Promise<CourseReview | null> {
-	return apifetch<CourseReview>(`/offerings/${offeringId}/reviews`, json(body));
+	const res = await apifetch<CourseReview>(`/offerings/${offeringId}/reviews`, json(body));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function editCourseReview(id: string, body: EditCourseReview): Promise<CourseReview | null> {
-	return apifetch<CourseReview>(`/reviews/course/${id}`, json(body, 'PATCH'));
+	const res = await apifetch<CourseReview>(`/reviews/course/${id}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function deleteCourseReview(id: string): Promise<boolean> {
-	return apivoid(`/reviews/course/${id}`, { method: 'DELETE' });
+	const res = await apivoid(`/reviews/course/${id}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function createAdvisorReview(slug: string, body: CreateAdvisorReview): Promise<AdvisorReview | null> {
-	return apifetch<AdvisorReview>(`/faculty/${slug}/reviews`, json(body));
+	const res = await apifetch<AdvisorReview>(`/faculty/${slug}/reviews`, json(body));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function editAdvisorReview(id: string, body: EditAdvisorReview): Promise<AdvisorReview | null> {
-	return apifetch<AdvisorReview>(`/reviews/advisor/${id}`, json(body, 'PATCH'));
+	const res = await apifetch<AdvisorReview>(`/reviews/advisor/${id}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function deleteAdvisorReview(id: string): Promise<boolean> {
-	return apivoid(`/reviews/advisor/${id}`, { method: 'DELETE' });
+	const res = await apivoid(`/reviews/advisor/${id}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function voteCourseReview(id: string, value: 1 | -1): Promise<boolean> {
-	return apivoid(`/reviews/course/${id}/vote`, json({ value }));
+	const res = await apivoid(`/reviews/course/${id}/vote`, json({ value }));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function unvoteCourseReview(id: string): Promise<boolean> {
-	return apivoid(`/reviews/course/${id}/vote`, { method: 'DELETE' });
+	const res = await apivoid(`/reviews/course/${id}/vote`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function voteAdvisorReview(id: string, value: 1 | -1): Promise<boolean> {
-	return apivoid(`/reviews/advisor/${id}/vote`, json({ value }));
+	const res = await apivoid(`/reviews/advisor/${id}/vote`, json({ value }));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function unvoteAdvisorReview(id: string): Promise<boolean> {
-	return apivoid(`/reviews/advisor/${id}/vote`, { method: 'DELETE' });
+	const res = await apivoid(`/reviews/advisor/${id}/vote`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function flagCourseReview(id: string, reason: string): Promise<boolean> {
@@ -198,27 +251,39 @@ export async function flagAdvisorReview(id: string, reason: string): Promise<boo
 }
 
 export async function createOffering(code: string, body: { season: string; year: number }): Promise<Offering | null> {
-	return apifetch<Offering>(`/courses/${encodeURIComponent(code)}/offerings`, json(body));
+	const res = await apifetch<Offering>(`/courses/${encodeURIComponent(code)}/offerings`, json(body));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function deleteOffering(id: string): Promise<boolean> {
-	return apivoid(`/offerings/${id}`, { method: 'DELETE' });
+	const res = await apivoid(`/offerings/${id}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function updateOfferingFaculty(id: string, faculty_ids: string[]): Promise<Offering | null> {
-	return apifetch<Offering>(`/offerings/${id}`, json({ faculty_ids }, 'PATCH'));
+	const res = await apifetch<Offering>(`/offerings/${id}`, json({ faculty_ids }, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function updateCourse(code: string, body: PatchCourse): Promise<CourseDetail | null> {
-	return apifetch<CourseDetail>(`/courses/${encodeURIComponent(code)}`, json(body, 'PATCH'));
+	const res = await apifetch<CourseDetail>(`/courses/${encodeURIComponent(code)}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function updateFaculty(slug: string, body: PatchFaculty): Promise<FacultyDetail | null> {
-	return apifetch<FacultyDetail>(`/faculty/${slug}`, json(body, 'PATCH'));
+	const res = await apifetch<FacultyDetail>(`/faculty/${slug}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function updateLab(shortname: string, body: PatchLab): Promise<LabDetail | null> {
-	return apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
+	const res = await apifetch<LabDetail>(`/labs/${shortname}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function changePassword(current_password: string, new_password: string): Promise<boolean> {
@@ -246,7 +311,9 @@ export async function dismissFlag(id: string): Promise<boolean> {
 }
 
 export async function deleteFlaggedReview(id: string): Promise<boolean> {
-	return apivoid(`/admin/flags/${id}/delete-review`, { method: 'POST' });
+	const res = await apivoid(`/admin/flags/${id}/delete-review`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function getProposedReviews(code: string): Promise<CourseReview[] | null> {
@@ -254,7 +321,9 @@ export async function getProposedReviews(code: string): Promise<CourseReview[] |
 }
 
 export async function proposeOffering(code: string, season: string, year: number, faculty_ids?: string[]): Promise<Offering | null> {
-	return apifetch<Offering>(`/courses/${encodeURIComponent(code)}/propose-offering`, json({ season, year, faculty_ids }));
+	const res = await apifetch<Offering>(`/courses/${encodeURIComponent(code)}/propose-offering`, json({ season, year, faculty_ids }));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function proposeReview(
@@ -272,7 +341,9 @@ export async function proposeReview(
 		faculty_ids?: string[];
 	}
 ): Promise<CourseReview | null> {
-	return apifetch<CourseReview>(`/courses/${encodeURIComponent(code)}/propose-review`, json(body));
+	const res = await apifetch<CourseReview>(`/courses/${encodeURIComponent(code)}/propose-review`, json(body));
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function getProposedOfferings(): Promise<ProposedOfferingResponse[] | null> {
@@ -280,9 +351,13 @@ export async function getProposedOfferings(): Promise<ProposedOfferingResponse[]
 }
 
 export async function approveProposedOffering(id: string): Promise<boolean> {
-	return apivoid(`/admin/proposed/${id}/approve`, { method: 'POST' });
+	const res = await apivoid(`/admin/proposed/${id}/approve`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
 }
 
 export async function rejectProposedOffering(id: string): Promise<boolean> {
-	return apivoid(`/admin/proposed/${id}/reject`, { method: 'POST' });
+	const res = await apivoid(`/admin/proposed/${id}/reject`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
 }
