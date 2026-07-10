@@ -66,7 +66,7 @@
 	});
 </script>
 
-<Toaster richColors />
+<Toaster theme="dark" position="bottom-right" />
 
 {#if isPublicRoute}
 	<!-- Public front-door routes (/login, /verify): no app chrome. -->
