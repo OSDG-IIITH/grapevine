@@ -5,6 +5,12 @@ use crate::error::AppError;
 use super::offering::Season;
 
 #[derive(Debug, Deserialize)]
+pub struct CreateFaculty {
+    pub name: String,
+    pub slug: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct PatchFaculty {
     pub name: String,
     pub slug: String,
@@ -63,7 +69,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
-           WHERE ($1::text IS NULL OR f.name ILIKE $1)
+           WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)
            GROUP BY f.id, f.slug, f.name
            ORDER BY f.name"#,
         pattern
@@ -75,7 +81,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
     let lab_rows = sqlx::query!(
         r#"SELECT fl.faculty_id, l.id, l.shortname, l.name
            FROM faculty_labs fl
-           JOIN labs l ON l.id = fl.lab_id
+           JOIN labs l ON l.id = fl.lab_id AND l.deleted_at IS NULL
            WHERE fl.faculty_id = ANY($1)"#,
         &ids as &[String]
     )
@@ -142,10 +148,38 @@ pub async fn update_faculty(pool: &PgPool, current_slug: &str, patch: &PatchFacu
 }
 
 pub async fn id_by_slug(pool: &PgPool, slug: &str) -> Result<String, AppError> {
-    sqlx::query_scalar!("SELECT id FROM faculty WHERE slug = $1", slug)
+    sqlx::query_scalar!("SELECT id FROM faculty WHERE slug = $1 AND deleted_at IS NULL", slug)
         .fetch_optional(pool)
         .await?
         .ok_or(AppError::NotFound)
+}
+
+pub async fn soft_delete(pool: &PgPool, slug: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE faculty SET deleted_at = NOW() WHERE slug = $1 AND deleted_at IS NULL", slug)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+pub async fn restore(pool: &PgPool, slug: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE faculty SET deleted_at = NULL WHERE slug = $1 AND deleted_at IS NOT NULL", slug)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeletedFaculty {
+    pub slug: String,
+    pub name: String,
+    pub deleted_at: chrono::DateTime<chrono::Utc>,
+}
+
+pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedFaculty>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT slug, name, deleted_at as "deleted_at!: chrono::DateTime<chrono::Utc>"
+           FROM faculty WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC"#
+    )
+    .fetch_all(pool).await?;
+    Ok(rows.into_iter().map(|r| DeletedFaculty { slug: r.slug, name: r.name, deleted_at: r.deleted_at }).collect())
 }
 
 pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, AppError> {
@@ -154,7 +188,7 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
-           WHERE f.slug = $1
+           WHERE f.slug = $1 AND f.deleted_at IS NULL
            GROUP BY f.id, f.slug, f.name, f.bio"#,
         slug
     )
@@ -165,7 +199,7 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
     let lab_rows = sqlx::query!(
         r#"SELECT l.id, l.shortname, l.name
            FROM faculty_labs fl
-           JOIN labs l ON l.id = fl.lab_id
+           JOIN labs l ON l.id = fl.lab_id AND l.deleted_at IS NULL
            WHERE fl.faculty_id = $1"#,
         row.id
     )
@@ -202,4 +236,14 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
         overall: row.overall,
         labs, offerings,
     })
+}
+
+pub async fn create_faculty(pool: &PgPool, body: &CreateFaculty) -> Result<FacultyDetail, AppError> {
+    let id = ulid::Ulid::new().to_string();
+    sqlx::query!(
+        "INSERT INTO faculty (id, name, slug) VALUES ($1, $2, $3)",
+        id, body.name, body.slug
+    )
+    .execute(pool).await?;
+    get_by_slug(pool, &body.slug).await
 }

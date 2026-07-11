@@ -12,4 +12,8 @@ pub fn router() -> Router<AppState> {
         .route("/admin/proposed/:id/reject", post(admin::reject_proposed))
         .route("/admin/deleted-courses", get(admin::deleted_courses))
         .route("/admin/deleted-courses/:code/restore", post(admin::restore_course))
+        .route("/admin/deleted-faculty", get(admin::deleted_faculty))
+        .route("/admin/deleted-faculty/:slug/restore", post(admin::restore_faculty))
+        .route("/admin/deleted-labs", get(admin::deleted_labs))
+        .route("/admin/deleted-labs/:shortname/restore", post(admin::restore_lab))
 }

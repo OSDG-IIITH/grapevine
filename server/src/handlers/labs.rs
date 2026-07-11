@@ -1,9 +1,19 @@
 use axum::{
     extract::{Path, Query, State},
+    http::StatusCode,
     Json,
 };
 use serde::Deserialize;
 use crate::{auth::session::AuthUser, error::AppError, models::lab, state::AppState};
+
+pub async fn create(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<lab::CreateLab>,
+) -> Result<(StatusCode, Json<lab::LabDetail>), AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok((StatusCode::CREATED, Json(lab::create_lab(&s.pool, &body).await?)))
+}
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
@@ -25,6 +35,16 @@ pub async fn update(
 ) -> Result<Json<lab::LabDetail>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     Ok(Json(lab::update_lab(&s.pool, &shortname, &body).await?))
+}
+
+pub async fn delete(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(shortname): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    lab::soft_delete(&s.pool, &shortname).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn get(

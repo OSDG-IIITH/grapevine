@@ -5,7 +5,8 @@ import type {
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, AuthUser,
 	SearchResult, MyReviews,
-	CreateCourse, CreateCourseReview, EditCourseReview,
+	CreateCourse, CreateFaculty, CreateLab,
+	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
 	ProposedOfferingResponse, ProposedOfferingLean
@@ -280,8 +281,20 @@ export async function updateCourse(code: string, body: PatchCourse): Promise<Cou
 	return res;
 }
 
+export async function createFaculty(body: CreateFaculty): Promise<FacultyDetail | null> {
+	const res = await apifetch<FacultyDetail>('/faculty', json(body));
+	if (res) listCache.clear();
+	return res;
+}
+
 export async function updateFaculty(slug: string, body: PatchFaculty): Promise<FacultyDetail | null> {
 	const res = await apifetch<FacultyDetail>(`/faculty/${slug}`, json(body, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function createLab(body: CreateLab): Promise<LabDetail | null> {
+	const res = await apifetch<LabDetail>('/labs', json(body));
 	if (res) listCache.clear();
 	return res;
 }
@@ -364,6 +377,38 @@ export async function getDeletedCourses(): Promise<{ code: string; name: string;
 
 export async function restoreCourse(code: string): Promise<boolean> {
 	const res = await apivoid(`/admin/deleted-courses/${encodeURIComponent(code)}/restore`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function deleteFaculty(slug: string): Promise<boolean> {
+	const res = await apivoid(`/faculty/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function getDeletedFaculty(): Promise<{ slug: string; name: string; deleted_at: string }[] | null> {
+	return apifetch('/admin/deleted-faculty');
+}
+
+export async function restoreFaculty(slug: string): Promise<boolean> {
+	const res = await apivoid(`/admin/deleted-faculty/${encodeURIComponent(slug)}/restore`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function deleteLab(shortname: string): Promise<boolean> {
+	const res = await apivoid(`/labs/${encodeURIComponent(shortname)}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function getDeletedLabs(): Promise<{ shortname: string; name: string; deleted_at: string }[] | null> {
+	return apifetch('/admin/deleted-labs');
+}
+
+export async function restoreLab(shortname: string): Promise<boolean> {
+	const res = await apivoid(`/admin/deleted-labs/${encodeURIComponent(shortname)}/restore`, { method: 'POST' });
 	if (res) listCache.clear();
 	return res;
 }

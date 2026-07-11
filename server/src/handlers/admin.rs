@@ -208,7 +208,7 @@ pub async fn delete_review(
     Err(AppError::NotFound)
 }
 
-use crate::models::{course, offering::Season};
+use crate::models::{course, faculty, lab, offering::Season};
 
 #[derive(Serialize)]
 pub struct ProposedOfferingResponse {
@@ -339,6 +339,42 @@ pub async fn deleted_courses(
 ) -> Result<Json<Vec<course::DeletedCourse>>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     Ok(Json(course::list_deleted(&s.pool).await?))
+}
+
+pub async fn deleted_faculty(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<faculty::DeletedFaculty>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(faculty::list_deleted(&s.pool).await?))
+}
+
+pub async fn restore_faculty(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(slug): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    faculty::restore(&s.pool, &slug).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn deleted_labs(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<lab::DeletedLab>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(lab::list_deleted(&s.pool).await?))
+}
+
+pub async fn restore_lab(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(shortname): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    lab::restore(&s.pool, &shortname).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn restore_course(

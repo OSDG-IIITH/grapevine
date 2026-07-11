@@ -3,6 +3,12 @@ use sqlx::PgPool;
 use crate::error::AppError;
 
 #[derive(Debug, Deserialize)]
+pub struct CreateLab {
+    pub name: String,
+    pub short: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct PatchLab {
     pub name: String,
     pub short: String,
@@ -59,7 +65,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<LabLean>, AppErr
            LEFT JOIN faculty_labs fl ON fl.lab_id = l.id
            LEFT JOIN faculty f ON f.id = fl.faculty_id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
-           WHERE ($1::text IS NULL OR l.shortname ILIKE $1 OR l.name ILIKE $1)
+           WHERE l.deleted_at IS NULL AND ($1::text IS NULL OR l.shortname ILIKE $1 OR l.name ILIKE $1)
            GROUP BY l.id, l.shortname, l.name, l.description
            ORDER BY l.name"#,
         pattern
@@ -94,7 +100,7 @@ pub async fn update_lab(pool: &PgPool, current_short: &str, patch: &PatchLab) ->
 
 pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetail, AppError> {
     let row = sqlx::query!(
-        "SELECT id, shortname, name, description FROM labs WHERE shortname = $1",
+        "SELECT id, shortname, name, description FROM labs WHERE shortname = $1 AND deleted_at IS NULL",
         shortname
     )
     .fetch_optional(pool)
@@ -124,7 +130,7 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
            FROM faculty f
            JOIN faculty_labs fl ON fl.faculty_id = f.id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
-           WHERE fl.lab_id = $1
+           WHERE fl.lab_id = $1 AND f.deleted_at IS NULL
            GROUP BY f.id, f.slug, f.name
            ORDER BY f.name"#,
         row.id
@@ -148,4 +154,42 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
         },
         faculty,
     })
+}
+
+pub async fn soft_delete(pool: &PgPool, shortname: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE labs SET deleted_at = NOW() WHERE shortname = $1 AND deleted_at IS NULL", shortname)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+pub async fn restore(pool: &PgPool, shortname: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE labs SET deleted_at = NULL WHERE shortname = $1 AND deleted_at IS NOT NULL", shortname)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeletedLab {
+    pub shortname: String,
+    pub name: String,
+    pub deleted_at: chrono::DateTime<chrono::Utc>,
+}
+
+pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedLab>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT shortname, name, deleted_at as "deleted_at!: chrono::DateTime<chrono::Utc>"
+           FROM labs WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC"#
+    )
+    .fetch_all(pool).await?;
+    Ok(rows.into_iter().map(|r| DeletedLab { shortname: r.shortname, name: r.name, deleted_at: r.deleted_at }).collect())
+}
+
+pub async fn create_lab(pool: &PgPool, body: &CreateLab) -> Result<LabDetail, AppError> {
+    let id = ulid::Ulid::new().to_string();
+    sqlx::query!(
+        "INSERT INTO labs (id, name, shortname) VALUES ($1, $2, $3)",
+        id, body.name, body.short
+    )
+    .execute(pool).await?;
+    get_by_shortname(pool, &body.short).await
 }

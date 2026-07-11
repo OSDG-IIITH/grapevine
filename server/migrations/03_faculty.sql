@@ -2,7 +2,8 @@ CREATE TABLE faculty (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   slug TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  bio TEXT
+  bio TEXT,
+  deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
 CREATE TABLE faculty_labs (

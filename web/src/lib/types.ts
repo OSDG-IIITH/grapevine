@@ -197,6 +197,16 @@ export interface CreateCourse {
 	description: string;
 }
 
+export interface CreateFaculty {
+	name: string;
+	slug: string;
+}
+
+export interface CreateLab {
+	name: string;
+	short: string;
+}
+
 export interface CreateCourseReview {
 	anonymous: boolean;
 	difficulty: number;

@@ -75,7 +75,7 @@ async fn search_faculty(pool: &PgPool, q: &str) -> Result<Vec<(f32, String, Stri
     Ok(sqlx::query_as(
         "SELECT similarity(name, $1)::real AS score, name, slug
          FROM faculty
-         WHERE similarity(name, $1) > 0.1
+         WHERE similarity(name, $1) > 0.1 AND deleted_at IS NULL
          ORDER BY score DESC LIMIT 10"
     )
     .bind(q)
@@ -87,7 +87,7 @@ async fn search_labs(pool: &PgPool, q: &str) -> Result<Vec<(f32, String, String)
     Ok(sqlx::query_as(
         "SELECT GREATEST(similarity(name, $1), similarity(shortname, $1))::real AS score, name, shortname
          FROM labs
-         WHERE similarity(name, $1) > 0.1 OR similarity(shortname, $1) > 0.1
+         WHERE (similarity(name, $1) > 0.1 OR similarity(shortname, $1) > 0.1) AND deleted_at IS NULL
          ORDER BY score DESC LIMIT 10"
     )
     .bind(q)

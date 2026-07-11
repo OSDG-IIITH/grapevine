@@ -1,9 +1,19 @@
 use axum::{
     extract::{Path, Query, State},
+    http::StatusCode,
     Json,
 };
 use serde::Deserialize;
 use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{faculty, review}, state::AppState};
+
+pub async fn create(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<faculty::CreateFaculty>,
+) -> Result<(StatusCode, Json<faculty::FacultyDetail>), AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok((StatusCode::CREATED, Json(faculty::create_faculty(&s.pool, &body).await?)))
+}
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
@@ -33,6 +43,16 @@ pub async fn update(
 ) -> Result<Json<faculty::FacultyDetail>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     Ok(Json(faculty::update_faculty(&s.pool, &slug, &body).await?))
+}
+
+pub async fn delete(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(slug): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    faculty::soft_delete(&s.pool, &slug).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn reviews(

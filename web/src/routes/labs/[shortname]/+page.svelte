@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getLab, updateLab } from '$lib/api';
+	import { getLab, updateLab, deleteLab } from '$lib/api';
+	import { toast } from 'svelte-sonner';
 	import type { LabDetail } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
@@ -43,6 +44,20 @@
 	}
 
 	function cancelEdit() { editing = false; }
+
+	let confirmdel = $state(false);
+	let deleting = $state(false);
+
+	async function doDelete() {
+		if (!lab) return;
+		deleting = true;
+		const ok = await deleteLab(lab.short);
+		deleting = false;
+		if (ok) {
+			toast.success('Lab removed.');
+			goto(`${base}/labs`);
+		}
+	}
 
 	async function saveEdit() {
 		if (!lab) return;
@@ -124,6 +139,16 @@
 					{#if $currentUser?.is_admin}
 						<button
 							type="button"
+							onclick={() => { confirmdel = true; }}
+							class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+							</svg>
+							Delete
+						</button>
+						<button
+							type="button"
 							onclick={startEdit}
 							class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
 						>
@@ -195,3 +220,26 @@
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 	{/if}
 </div>
+
+{#if confirmdel}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
+		<div class="w-full max-w-[340px] rounded-[12px] border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-xl">
+			<p class="mb-1 text-[15px] font-medium text-[var(--fg)]">Delete lab?</p>
+			<p class="mb-5 text-[13px] text-[var(--fg-3)]">The lab will be hidden from all listings and can be restored later.</p>
+			<div class="flex justify-end gap-2">
+				<button
+					type="button"
+					onclick={() => { confirmdel = false; }}
+					class="rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-4)]"
+				>Cancel</button>
+				<button
+					type="button"
+					onclick={doDelete}
+					disabled={deleting}
+					class="rounded-[7px] px-[14px] py-2 text-[13px] font-medium text-white transition-colors disabled:opacity-60"
+					style="background: var(--danger);"
+				>{deleting ? 'Deleting…' : 'Delete'}</button>
+			</div>
+		</div>
+	</div>
+{/if}
