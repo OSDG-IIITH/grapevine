@@ -109,6 +109,10 @@
 	);
 	const selectedfaculty = $derived(allfaculty.find((f) => f.id === facultyid));
 	const selectedcourse = $derived(allcourses.find((c) => c.id === courseid));
+	const overall = $derived.by(() => {
+		const filled = axisorder.filter((k) => axes[k]);
+		return filled.length ? filled.reduce((s, k) => s + axes[k], 0) / filled.length : null;
+	});
 
 	function setkind(k: 'course' | 'advisor') {
 		kind = k;
@@ -229,7 +233,7 @@
 					</div>
 					<div class="min-w-0" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
 						<Combobox
-							items={allcourses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+							items={allcourses.map((c) => ({ value: c.id, label: c.name }))}
 							bind:value={courseid}
 							placeholder="Select course…"
 							searchplaceholder="Search courses…"
@@ -354,6 +358,12 @@
 							{axes[k] ? axes[k].toFixed(1) : '—'}
 						</div>
 					{/each}
+					<div class="col-span-3 mt-1 flex items-center justify-end gap-3">
+						<div class="text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">overall</div>
+						<div class="text-[13px] font-medium text-[var(--fg)]" style="font-family: var(--mono);">
+							{overall !== null ? overall.toFixed(1) : '—'}
+						</div>
+					</div>
 				</div>
 			</div>
 
