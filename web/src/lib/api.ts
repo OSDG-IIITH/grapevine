@@ -5,7 +5,7 @@ import type {
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, AuthUser,
 	SearchResult, MyReviews,
-	CreateCourseReview, EditCourseReview,
+	CreateCourse, CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
 	ProposedOfferingResponse, ProposedOfferingLean
@@ -264,6 +264,12 @@ export async function deleteOffering(id: string): Promise<boolean> {
 
 export async function updateOfferingFaculty(id: string, faculty_ids: string[]): Promise<Offering | null> {
 	const res = await apifetch<Offering>(`/offerings/${id}`, json({ faculty_ids }, 'PATCH'));
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function createCourse(body: CreateCourse): Promise<CourseDetail | null> {
+	const res = await apifetch<CourseDetail>('/courses', json(body));
 	if (res) listCache.clear();
 	return res;
 }

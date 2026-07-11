@@ -193,6 +193,12 @@ export interface AuthUser {
 	has_recovery_code: boolean;
 }
 
+export interface CreateCourse {
+	code: string;
+	name: string;
+	description: string;
+}
+
 export interface CreateCourseReview {
 	anonymous: boolean;
 	difficulty: number;

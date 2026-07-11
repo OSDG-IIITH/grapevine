@@ -3,7 +3,7 @@ use crate::{handlers::courses, state::AppState};
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/courses", get(courses::list))
+        .route("/courses", get(courses::list).post(courses::create))
         .route("/courses/:code", get(courses::get).patch(courses::update).delete(courses::delete))
         .route("/courses/:code/reviews", get(courses::reviews))
         .route("/courses/:code/proposed-reviews", get(courses::proposed_reviews))

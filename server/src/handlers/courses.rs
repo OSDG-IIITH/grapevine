@@ -11,6 +11,15 @@ use crate::{
     state::AppState,
 };
 
+pub async fn create(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<course::CreateCourse>,
+) -> Result<(StatusCode, Json<course::CourseDetail>), AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok((StatusCode::CREATED, Json(course::create_course(&s.pool, &body).await?)))
+}
+
 #[derive(Deserialize)]
 pub struct SearchQuery {
     q: Option<String>,

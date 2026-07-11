@@ -16,6 +16,13 @@ pub struct PatchOffering {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct CreateCourse {
+    pub code: String,
+    pub name: String,
+    pub description: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct PatchCourse {
     pub code: Option<String>,
     pub name: String,
@@ -411,4 +418,14 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
         shortnames: row.shortnames,
         predecessors, successors, offerings, proposed_offerings,
     })
+}
+
+pub async fn create_course(pool: &PgPool, body: &CreateCourse) -> Result<CourseDetail, AppError> {
+    let id = ulid::Ulid::new().to_string();
+    sqlx::query!(
+        r#"INSERT INTO courses (id, code, name, description, type, shortnames) VALUES ($1, $2, $3, $4, 'open'::course_type, '{}')"#,
+        id, body.code, body.name, body.description
+    )
+    .execute(pool).await?;
+    get_by_code(pool, &body.code).await
 }

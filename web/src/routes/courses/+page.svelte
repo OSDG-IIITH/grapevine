@@ -1,19 +1,27 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { getCourses, getFaculty } from '$lib/api';
+	import { goto } from '$app/navigation';
+	import { getCourses, getFaculty, createCourse } from '$lib/api';
 	import type { CourseLean, FacultyLean } from '$lib/types';
+	import { currentUser } from '$lib/stores';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
+	import { toast } from 'svelte-sonner';
 
 	const PER_PAGE = 9;
-
 	let all = $state<CourseLean[]>([]);
 	let allfaculty = $state<FacultyLean[]>([]);
 	let instructor = $state('');
 	let sort = $state<'' | 'rating_asc' | 'rating_desc'>('');
 	let q = $state('');
 	let page = $state(1);
+
+	let adding = $state(false);
+	let newcode = $state('');
+	let newname = $state('');
+	let newdesc = $state('');
+	let saving = $state(false);
 
 	$effect(() => {
 		getFaculty().then((data) => { if (Array.isArray(data)) allfaculty = data; });
@@ -47,6 +55,26 @@
 		else if (sort === 'rating_desc') sort = 'rating_asc';
 		else sort = '';
 	}
+
+	function openadding() {
+		newcode = '';
+		newname = '';
+		newdesc = '';
+		adding = true;
+	}
+
+	async function submitnew(e: SubmitEvent) {
+		e.preventDefault();
+		if (!newcode.trim() || !newname.trim()) return;
+		saving = true;
+		const res = await createCourse({ code: newcode.trim().toUpperCase(), name: newname.trim(), description: newdesc.trim() });
+		saving = false;
+		if (res) {
+			toast.success('Course created.');
+			adding = false;
+			goto(`${base}/courses/${res.code}`);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -74,16 +102,30 @@
 				<span>browse, filter, or search</span>
 			</div>
 		</div>
-		<a
-			href="{base}/review"
-			class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
-			style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
-		>
-			<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M5 12h14M12 5v14" />
-			</svg>
-			Write a review
-		</a>
+		<div class="flex items-center gap-2 self-start">
+			{#if $currentUser?.is_admin}
+				<button
+					type="button"
+					onclick={openadding}
+					class="inline-flex items-center gap-2 whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+				>
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M5 12h14M12 5v14" />
+					</svg>
+					Add course
+				</button>
+			{/if}
+			<a
+				href="{base}/review"
+				class="inline-flex items-center gap-2 whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
+				style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+			>
+				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M5 12h14M12 5v14" />
+				</svg>
+				Write a review
+			</a>
+		</div>
 	</div>
 
 	<!-- toolbar -->
@@ -137,3 +179,80 @@
 
 	<Pager {page} totalpages={totalpages} totalitems={filtered.length} onchange={(p) => (page = p)} />
 </div>
+
+<!-- add course modal -->
+{#if adding}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
+		onkeydown={(e) => { if (e.key === 'Escape') adding = false; }}
+		onclick={(e) => { if (e.target === e.currentTarget) adding = false; }}
+	>
+		<div class="w-full max-w-[480px] rounded-[12px] border border-[var(--border-strong)] bg-[var(--bg-2)] p-6 shadow-2xl">
+			<div class="mb-5 flex items-center justify-between">
+				<h2 class="m-0 text-[16px] font-medium text-[var(--fg)]">Add course</h2>
+				<button
+					type="button"
+					onclick={() => (adding = false)}
+					aria-label="Close"
+					class="flex h-7 w-7 items-center justify-center rounded-[5px] text-[var(--fg-3)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+				>
+					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+						<path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+					</svg>
+				</button>
+			</div>
+
+			<form onsubmit={submitnew} class="flex flex-col gap-[14px]">
+				<div class="flex flex-col gap-[6px]">
+					<label class="text-[11px] text-[var(--fg-3)]" for="newcode">Code</label>
+					<input
+						id="newcode"
+						bind:value={newcode}
+						required
+						class="rounded-[6px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg)] outline-none placeholder:text-[var(--fg-4)] focus:border-[var(--accent-dim)] focus:ring-0"
+						style="font-family: var(--mono);"
+					/>
+				</div>
+
+				<div class="flex flex-col gap-[6px]">
+					<label class="text-[11px] text-[var(--fg-3)]" for="newname">Name</label>
+					<input
+						id="newname"
+						bind:value={newname}
+						required
+						class="rounded-[6px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg)] outline-none placeholder:text-[var(--fg-4)] focus:border-[var(--accent-dim)]"
+					/>
+				</div>
+
+				<div class="flex flex-col gap-[6px]">
+					<label class="text-[11px] text-[var(--fg-3)]" for="newdesc">Description <span class="text-[var(--fg-4)]">(optional)</span></label>
+					<textarea
+						id="newdesc"
+						bind:value={newdesc}
+						rows="3"
+						class="resize-none rounded-[6px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] text-[13px] text-[var(--fg)] outline-none placeholder:text-[var(--fg-4)] focus:border-[var(--accent-dim)]"
+					></textarea>
+				</div>
+
+				<div class="mt-1 flex justify-end gap-2">
+					<button
+						type="button"
+						onclick={() => (adding = false)}
+						class="rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>
+						Cancel
+					</button>
+					<button
+						type="submit"
+						disabled={saving || !newcode.trim() || !newname.trim()}
+						class="inline-flex items-center gap-2 rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms] disabled:opacity-60"
+						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+					>
+						{saving ? 'Creating…' : 'Create course'}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
