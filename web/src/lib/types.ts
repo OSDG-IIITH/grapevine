@@ -4,6 +4,7 @@ export interface CourseLean {
 	name: string;
 	type: string;
 	overall: number;
+	shortnames: string[];
 }
 
 export interface FacultyLean {
@@ -72,6 +73,7 @@ export interface CourseDetail {
 	description: string;
 	type: string;
 	overall: number;
+	shortnames: string[];
 	predecessors: CourseRef[];
 	successors: CourseRef[];
 	offerings: Offering[];
@@ -226,6 +228,7 @@ export interface PatchCourse {
 	type: string;
 	predecessor_ids?: string[];
 	successor_ids?: string[];
+	shortnames?: string[];
 }
 
 export interface PatchFaculty {

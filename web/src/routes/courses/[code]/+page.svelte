@@ -27,6 +27,8 @@
 	let saving = $state(false);
 	let editname = $state('');
 	let editdesc = $state('');
+	let editshortnames = $state<string[]>([]);
+	let shortnamesinput = $state('');
 	let editofferings = $state<Offering[]>([]);
 	let editpredecessors = $state<CourseRef[]>([]);
 	let editsuccessors = $state<CourseRef[]>([]);
@@ -122,6 +124,8 @@
 		if (!course) return;
 		editname = course.name;
 		editdesc = course.description;
+		editshortnames = [...(course.shortnames ?? [])];
+		shortnamesinput = '';
 		editofferings = course.offerings.map((o) => ({ ...o, faculty: [...o.faculty] }));
 		editpredecessors = [...course.predecessors];
 		editsuccessors = [...course.successors];
@@ -208,6 +212,7 @@
 			type: course.type,
 			predecessor_ids: editpredecessors.map((c) => c.id),
 			successor_ids: editsuccessors.map((c) => c.id),
+			shortnames: editshortnames,
 		});
 		saving = false;
 		if (updated) {
@@ -297,8 +302,11 @@
 						{course.name}
 					</h1>
 				{/if}
-				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
+				<div class="mb-[22px] flex flex-wrap items-center gap-[8px] text-[13px] text-[var(--fg-2)]">
 					<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.code}</span>
+					{#each course.shortnames ?? [] as sn (sn)}
+						<span class="rounded-[5px] border border-[var(--border)] px-2 py-[3px] text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">{sn}</span>
+					{/each}
 				</div>
 			</div>
 			<div class="flex shrink-0 items-center gap-2">
@@ -359,10 +367,43 @@
 
 
 		{#if editing}
+			<!-- shortnames -->
+			<div class="mb-4 mt-[14px] flex flex-wrap items-center gap-[6px]">
+				<span class="mr-1 shrink-0 text-[12px] text-[var(--fg-3)]">Aliases</span>
+				{#each editshortnames as sn (sn)}
+					<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">
+						{sn}
+						<button
+							type="button"
+							onclick={() => { editshortnames = editshortnames.filter((x) => x !== sn); }}
+							aria-label="Remove {sn}"
+							class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+						>
+							<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+								<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+							</svg>
+						</button>
+					</span>
+				{/each}
+				<input
+					bind:value={shortnamesinput}
+					placeholder="+ alias"
+					onkeydown={(e) => {
+						if ((e.key === 'Enter' || e.key === ',') && shortnamesinput.trim()) {
+							e.preventDefault();
+							const v = shortnamesinput.trim().toUpperCase();
+							if (!editshortnames.includes(v)) editshortnames = [...editshortnames, v];
+							shortnamesinput = '';
+						}
+					}}
+					class="rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none transition-colors hover:border-[var(--fg-4)] focus:border-[var(--accent-2)] focus:text-[var(--fg-2)]"
+					style="font-family: var(--mono); width: 90px;"
+				/>
+			</div>
 			<Textarea
 				bind:value={editdesc}
 				rows={4}
-				class="mb-7 mt-[14px] w-full resize-none border-[var(--border-strong)] text-[var(--fg-2)] focus-visible:border-[var(--accent-2)] focus-visible:ring-0 dark:bg-input/10"
+				class="mb-7 w-full resize-none border-[var(--border-strong)] text-[var(--fg-2)] focus-visible:border-[var(--accent-2)] focus-visible:ring-0 dark:bg-input/10"
 				style="font-size: 15px; line-height: 1.65;"
 			/>
 

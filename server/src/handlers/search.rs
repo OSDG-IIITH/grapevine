@@ -57,9 +57,13 @@ pub async fn search(
 
 async fn search_courses(pool: &PgPool, q: &str) -> Result<Vec<(f32, String, String)>, AppError> {
     Ok(sqlx::query_as(
-        "SELECT GREATEST(similarity(name, $1), similarity(code, $1))::real AS score, name, code
+        "SELECT GREATEST(similarity(name, $1), similarity(code, $1),
+                COALESCE((SELECT MAX(similarity(s, $1)) FROM unnest(shortnames) s), 0))::real AS score,
+                name, code
          FROM courses
-         WHERE (similarity(name, $1) > 0.1 OR similarity(code, $1) > 0.1) AND deleted_at IS NULL
+         WHERE (similarity(name, $1) > 0.1 OR similarity(code, $1) > 0.1
+             OR EXISTS (SELECT 1 FROM unnest(shortnames) s WHERE similarity(s, $1) > 0.1))
+           AND deleted_at IS NULL
          ORDER BY score DESC LIMIT 10"
     )
     .bind(q)

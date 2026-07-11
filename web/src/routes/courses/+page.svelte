@@ -31,7 +31,9 @@
 		all.filter((c) => {
 			if (q.trim()) {
 				const s = q.toLowerCase();
-				if (!c.name.toLowerCase().includes(s) && !c.code.toLowerCase().includes(s)) return false;
+				if (!c.name.toLowerCase().includes(s) &&
+					!c.code.toLowerCase().includes(s) &&
+					!(c.shortnames || []).some((n) => n.toLowerCase().includes(s))) return false;
 			}
 			return true;
 		})

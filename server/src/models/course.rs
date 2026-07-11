@@ -23,6 +23,7 @@ pub struct PatchCourse {
     pub kind: CourseType,
     pub predecessor_ids: Option<Vec<String>>,
     pub successor_ids: Option<Vec<String>>,
+    pub shortnames: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type)]
@@ -47,6 +48,7 @@ pub struct CourseLean {
     #[serde(rename = "type")]
     pub kind: CourseType,
     pub overall: f64,
+    pub shortnames: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -88,6 +90,7 @@ pub struct CourseDetail {
     #[serde(rename = "type")]
     pub kind: CourseType,
     pub overall: f64,
+    pub shortnames: Vec<String>,
     pub predecessors: Vec<CourseRef>,
     pub successors: Vec<CourseRef>,
     pub offerings: Vec<OfferingDetail>,
@@ -97,7 +100,7 @@ pub struct CourseDetail {
 pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort: Option<&str>) -> Result<Vec<CourseLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
-        r#"SELECT c.id, c.code, c.name, c.type as "kind: CourseType",
+        r#"SELECT c.id, c.code, c.name, c.type as "kind: CourseType", c.shortnames,
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
@@ -110,7 +113,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
                JOIN faculty f ON f.id = ofac.faculty_id
                WHERE oi.course_id = c.id AND oi.approved = true AND f.slug = $2
              ))
-           GROUP BY c.id, c.code, c.name, c.type
+           GROUP BY c.id, c.code, c.name, c.type, c.shortnames
            ORDER BY c.name"#,
         pattern,
         instructor
@@ -120,6 +123,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
 
     let mut results: Vec<CourseLean> = rows.into_iter().map(|r| CourseLean {
         id: r.id, code: r.code, name: r.name, kind: r.kind, overall: r.overall,
+        shortnames: r.shortnames,
     }).collect();
 
     match sort {
@@ -146,9 +150,10 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
 pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Result<CourseDetail, AppError> {
     let mut tx = pool.begin().await?;
 
+    let shortnames = patch.shortnames.clone().unwrap_or_default();
     let id = sqlx::query_scalar!(
-        r#"UPDATE courses SET name = $1, description = $2, type = $3 WHERE code = $4 AND deleted_at IS NULL RETURNING id"#,
-        patch.name, patch.description, patch.kind.clone() as CourseType, code
+        r#"UPDATE courses SET name = $1, description = $2, type = $3, shortnames = $4 WHERE code = $5 AND deleted_at IS NULL RETURNING id"#,
+        patch.name, patch.description, patch.kind.clone() as CourseType, &shortnames, code
     )
     .fetch_optional(&mut *tx).await?
     .ok_or(AppError::NotFound)?;
@@ -322,14 +327,14 @@ pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedCourse>, AppError>
 
 pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppError> {
     let row = sqlx::query!(
-        r#"SELECT c.id, c.code, c.name, c.description,
+        r#"SELECT c.id, c.code, c.name, c.description, c.shortnames,
                   c.type as "kind: CourseType",
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
            LEFT JOIN course_reviews r ON r.offering_id = o.id
            WHERE c.code = $1 AND c.deleted_at IS NULL
-           GROUP BY c.id, c.code, c.name, c.description, c.type"#,
+           GROUP BY c.id, c.code, c.name, c.description, c.shortnames, c.type"#,
         code
     )
     .fetch_optional(pool)
@@ -401,6 +406,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
         id: row.id, code: row.code, name: row.name,
         description: row.description.unwrap_or_default(),
         kind: row.kind, overall: row.overall,
+        shortnames: row.shortnames,
         predecessors, successors, offerings, proposed_offerings,
     })
 }
