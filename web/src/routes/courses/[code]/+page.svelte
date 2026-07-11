@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 	import { getCourse, getCourseReviews, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering } from '$lib/api';
 	import type { CourseDetail, CourseReview, Offering, FacultyLean } from '$lib/types';
-	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, COURSE_TYPES } from '$lib/types';
+	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -25,7 +25,6 @@
 	let saving = $state(false);
 	let editname = $state('');
 	let editdesc = $state('');
-	let edittype = $state('');
 	let editofferings = $state<Offering[]>([]);
 	let allfaculty = $state<FacultyLean[]>([]);
 	let facultyloaded = $state(false);
@@ -103,7 +102,6 @@
 		if (!course) return;
 		editname = course.name;
 		editdesc = course.description;
-		edittype = course.type;
 		editofferings = course.offerings.map((o) => ({ ...o, faculty: [...o.faculty] }));
 		editing = true;
 		if (!facultyloaded) {
@@ -183,7 +181,7 @@
 	async function saveEdit() {
 		if (!course) return;
 		saving = true;
-		const updated = await updateCourse(course.code, { name: editname, description: editdesc, type: edittype });
+		const updated = await updateCourse(course.code, { name: editname, description: editdesc });
 		saving = false;
 		if (updated) {
 			course = updated;
@@ -264,19 +262,6 @@
 				{/if}
 				<div class="mb-[22px] flex flex-wrap items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
 					<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.code}</span>
-					{#if editing}
-						<select
-							bind:value={edittype}
-							class="rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-2 py-[3px] text-[12px] text-[var(--fg-2)] outline-none"
-							style="font-family: var(--mono);"
-						>
-							{#each COURSE_TYPES as t (t)}
-								<option value={t}>{t}</option>
-							{/each}
-						</select>
-					{:else}
-						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.type}</span>
-					{/if}
 				</div>
 			</div>
 			<div class="flex shrink-0 items-center gap-2">

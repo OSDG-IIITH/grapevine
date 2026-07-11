@@ -32,12 +32,8 @@
 
 	{#if kind === 'course'}
 		{@const c = item as CourseLean}
-		<div class="flex items-center justify-between gap-[10px]">
+		<div class="flex items-center gap-[10px]">
 			<span class="text-[11px] tracking-[0.04em] text-[var(--fg-3)]" style="font-family: var(--mono);">{c.code}</span>
-			<span
-				class="text-[11px] tracking-[0.04em] text-[var(--fg-4)] {c.type === 'core' ? 'text-[var(--accent-2)]' : ''}"
-				style="font-family: var(--mono);"
-			>{c.type}</span>
 		</div>
 		<div class="text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[var(--fg)]">{c.name}</div>
 		<div class="mt-auto flex items-center gap-2">

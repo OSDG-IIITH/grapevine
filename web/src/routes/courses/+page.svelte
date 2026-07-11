@@ -6,12 +6,10 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
 
-	const TYPES = ['core', 'open', 'breadth', 'stream', 'bouquet', 'hs', 'sci', 'math'];
 	const PER_PAGE = 9;
 
 	let all = $state<CourseLean[]>([]);
 	let allfaculty = $state<FacultyLean[]>([]);
-	let typefilter = $state('');
 	let instructor = $state('');
 	let sort = $state<'' | 'rating_asc' | 'rating_desc'>('');
 	let q = $state('');
@@ -31,7 +29,6 @@
 
 	const filtered = $derived(
 		all.filter((c) => {
-			if (typefilter && c.type !== typefilter) return false;
 			if (q.trim()) {
 				const s = q.toLowerCase();
 				if (!c.name.toLowerCase().includes(s) && !c.code.toLowerCase().includes(s)) return false;
@@ -42,11 +39,6 @@
 
 	const totalpages = $derived(Math.max(1, Math.ceil(filtered.length / PER_PAGE)));
 	const visible = $derived(filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE));
-
-	function settype(t: string) {
-		typefilter = typefilter === t ? '' : t;
-		page = 1;
-	}
 
 	function nextsort() {
 		if (sort === '') sort = 'rating_desc';
@@ -95,31 +87,6 @@
 	<!-- toolbar -->
 	<div class="mb-[22px] mt-[18px] flex flex-wrap items-center justify-between gap-3">
 		<div class="flex flex-wrap items-center gap-[6px]">
-			<!-- mobile: type select -->
-			<select
-				bind:value={typefilter}
-				onchange={() => (page = 1)}
-				class="sm:hidden rounded-[5px] border bg-[var(--bg-inset)] px-[10px] py-[5px] text-[11px] tracking-[0.04em] outline-none transition-[border-color,color] duration-[120ms] {typefilter ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)]'}"
-				style="font-family: var(--mono);"
-			>
-				<option value="">all types</option>
-				{#each TYPES as t (t)}<option value={t}>{t}</option>{/each}
-			</select>
-			<!-- desktop: type pills -->
-			<button
-				type="button"
-				onclick={() => { typefilter = ''; page = 1; }}
-				class="hidden sm:inline-block rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {typefilter === '' ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-			>all</button>
-			{#each TYPES as t (t)}
-				<button
-					type="button"
-					onclick={() => settype(t)}
-					class="hidden sm:inline-block rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {typefilter === t ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-					style="font-family: var(--mono);"
-				>{t}</button>
-			{/each}
 			<Combobox
 				items={[{ value: '', label: 'any instructor' }, ...allfaculty.map((f) => ({ value: f.slug, label: f.name }))]}
 				bind:value={instructor}
