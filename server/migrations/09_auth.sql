@@ -17,8 +17,7 @@ ALTER TABLE users ADD CONSTRAINT users_username_requires_password
 
 -- used-email set: HMAC hashes only, no plaintext, no link to any account
 CREATE TABLE verified_emails (
-  email_hash TEXT PRIMARY KEY,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  email_hash TEXT PRIMARY KEY
 );
 
 -- recovery methods for local accounts

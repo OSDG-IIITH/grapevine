@@ -29,3 +29,7 @@ CREATE TABLE advisor_reviews (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (user_id, faculty_id)
 );
+
+CREATE INDEX idx_course_reviews_offering_id ON course_reviews(offering_id);
+CREATE INDEX idx_advisor_reviews_faculty_id ON advisor_reviews(faculty_id);
+

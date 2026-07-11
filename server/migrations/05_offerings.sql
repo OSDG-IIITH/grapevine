@@ -15,3 +15,6 @@ CREATE TABLE offering_faculty (
   faculty_id TEXT NOT NULL REFERENCES faculty(id) ON DELETE CASCADE,
   PRIMARY KEY (offering_id, faculty_id)
 );
+
+CREATE INDEX idx_offering_faculty_faculty_id ON offering_faculty(faculty_id);
+

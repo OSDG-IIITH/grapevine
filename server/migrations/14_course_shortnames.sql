@@ -1,1 +1,0 @@
-ALTER TABLE courses ADD COLUMN shortnames TEXT[] NOT NULL DEFAULT '{}';
