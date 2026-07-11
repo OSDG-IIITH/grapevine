@@ -17,6 +17,7 @@ pub struct PatchOffering {
 
 #[derive(Debug, Deserialize)]
 pub struct PatchCourse {
+    pub code: Option<String>,
     pub name: String,
     pub description: String,
     #[serde(rename = "type")]
@@ -150,10 +151,11 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
 pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Result<CourseDetail, AppError> {
     let mut tx = pool.begin().await?;
 
+    let new_code = patch.code.as_deref().unwrap_or(code);
     let shortnames = patch.shortnames.clone().unwrap_or_default();
     let id = sqlx::query_scalar!(
-        r#"UPDATE courses SET name = $1, description = $2, type = $3, shortnames = $4 WHERE code = $5 AND deleted_at IS NULL RETURNING id"#,
-        patch.name, patch.description, patch.kind.clone() as CourseType, &shortnames, code
+        r#"UPDATE courses SET name = $1, description = $2, type = $3, shortnames = $4, code = $6 WHERE code = $5 AND deleted_at IS NULL RETURNING id"#,
+        patch.name, patch.description, patch.kind.clone() as CourseType, &shortnames, code, new_code
     )
     .fetch_optional(&mut *tx).await?
     .ok_or(AppError::NotFound)?;
@@ -183,7 +185,7 @@ pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Re
     }
 
     tx.commit().await?;
-    get_by_code(pool, code).await
+    get_by_code(pool, new_code).await
 }
 
 pub async fn create_offering(pool: &PgPool, course_code: &str, body: &CreateOffering) -> Result<OfferingDetail, AppError> {

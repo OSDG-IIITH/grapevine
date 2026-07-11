@@ -223,6 +223,7 @@ export interface MyReviews {
 }
 
 export interface PatchCourse {
+	code?: string;
 	name: string;
 	description: string;
 	type: string;

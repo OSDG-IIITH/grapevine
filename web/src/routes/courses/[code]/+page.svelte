@@ -26,6 +26,7 @@
 	let editing = $state(false);
 	let saving = $state(false);
 	let editname = $state('');
+	let editcode = $state('');
 	let editdesc = $state('');
 	let editshortnames = $state<string[]>([]);
 	let shortnamesinput = $state('');
@@ -123,6 +124,7 @@
 	async function startEdit() {
 		if (!course) return;
 		editname = course.name;
+		editcode = course.code;
 		editdesc = course.description;
 		editshortnames = [...(course.shortnames ?? [])];
 		shortnamesinput = '';
@@ -207,6 +209,7 @@
 		if (!course) return;
 		saving = true;
 		const updated = await updateCourse(course.code, {
+			code: editcode,
 			name: editname,
 			description: editdesc,
 			type: course.type,
@@ -218,6 +221,9 @@
 		if (updated) {
 			course = updated;
 			editing = false;
+			if (updated.code !== code) {
+				goto(`${base}/courses/${encodeURIComponent(updated.code)}`, { replaceState: true });
+			}
 		}
 	}
 
@@ -302,12 +308,22 @@
 						{course.name}
 					</h1>
 				{/if}
-				<div class="mb-[22px] flex flex-wrap items-center gap-[8px] text-[13px] text-[var(--fg-2)]">
-					<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.code}</span>
-					{#each course.shortnames ?? [] as sn (sn)}
-						<span class="rounded-[5px] border border-[var(--border)] px-2 py-[3px] text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">{sn}</span>
-					{/each}
-				</div>
+				{#if editing}
+					<div class="mb-[22px] flex flex-wrap items-center gap-[6px]">
+						<input
+							bind:value={editcode}
+							class="rounded-[5px] border border-[var(--border-strong)] bg-transparent px-2 py-[5px] text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+							style="font-family: var(--mono); min-width: 100px;"
+						/>
+					</div>
+				{:else}
+					<div class="mb-[22px] flex flex-wrap items-center gap-[8px] text-[13px] text-[var(--fg-2)]">
+						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{course.code}</span>
+						{#each course.shortnames ?? [] as sn (sn)}
+							<span class="rounded-[5px] border border-[var(--border)] px-2 py-[3px] text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">{sn}</span>
+						{/each}
+					</div>
+				{/if}
 			</div>
 			<div class="flex shrink-0 items-center gap-2">
 				{#if editing}
