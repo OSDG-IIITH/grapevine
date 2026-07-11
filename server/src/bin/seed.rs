@@ -23,8 +23,6 @@ struct Faculty {
 struct Course {
     code: String,
     name: String,
-    #[serde(rename = "type")]
-    kind: String,
     description: Option<String>,
 }
 
@@ -109,11 +107,11 @@ async fn main() {
     for c in &courses {
         let id = Ulid::new().to_string();
         let row = sqlx::query!(
-            "INSERT INTO courses (id, code, name, type, description)
-             VALUES ($1, $2, $3, $4::course_type, $5)
-             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, type = EXCLUDED.type, description = EXCLUDED.description
+            "INSERT INTO courses (id, code, name, description)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
              RETURNING id, code",
-            id, c.code, c.name, c.kind as _, c.description
+            id, c.code, c.name, c.description
         )
         .fetch_one(&pool)
         .await

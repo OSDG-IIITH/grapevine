@@ -2,7 +2,6 @@ export interface CourseLean {
 	id: string;
 	code: string;
 	name: string;
-	type: string;
 	overall: number;
 	shortnames: string[];
 }
@@ -71,7 +70,6 @@ export interface CourseDetail {
 	code: string;
 	name: string;
 	description: string;
-	type: string;
 	overall: number;
 	shortnames: string[];
 	predecessors: CourseRef[];
@@ -232,7 +230,6 @@ export interface PatchCourse {
 	code?: string;
 	name: string;
 	description: string;
-	type: string;
 	predecessor_ids?: string[];
 	successor_ids?: string[];
 	shortnames?: string[];
@@ -251,4 +248,4 @@ export interface PatchLab {
 	description: string;
 }
 
-export const COURSE_TYPES = ['core', 'open', 'breadth', 'stream', 'bouquet', 'hs', 'sci', 'math'] as const;
+

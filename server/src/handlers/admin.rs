@@ -14,7 +14,7 @@ struct SeedLab { name: String, shortname: String, description: Option<String> }
 struct SeedFaculty { name: String, slug: String, labs: Vec<String>, bio: Option<String> }
 
 #[derive(Serialize)]
-struct SeedCourse { code: String, name: String, #[serde(rename = "type")] kind: String, description: String }
+struct SeedCourse { code: String, name: String, description: String }
 
 #[derive(Serialize)]
 struct SeedOffering { course: String, season: String, year: i16, faculty: Vec<String> }
@@ -50,7 +50,7 @@ pub async fn export(
     .fetch_all(&s.pool).await?;
 
     let courses = sqlx::query!(
-        r#"SELECT code, name, "type"::text as "kind!", description FROM courses ORDER BY code"#
+        r#"SELECT code, name, description FROM courses ORDER BY code"#
     )
     .fetch_all(&s.pool).await?;
 
@@ -69,7 +69,7 @@ pub async fn export(
     Ok(Json(SeedExport {
         labs: labs.into_iter().map(|r| SeedLab { name: r.name, shortname: r.shortname, description: r.description }).collect(),
         faculty: faculty.into_iter().map(|r| SeedFaculty { name: r.name, slug: r.slug, bio: r.bio, labs: r.labs }).collect(),
-        courses: courses.into_iter().map(|r| SeedCourse { code: r.code, name: r.name, kind: r.kind, description: r.description.unwrap_or_default() }).collect(),
+        courses: courses.into_iter().map(|r| SeedCourse { code: r.code, name: r.name, description: r.description.unwrap_or_default() }).collect(),
         offerings: offerings.into_iter().map(|r| SeedOffering { course: r.course, season: r.season, year: r.year, faculty: r.faculty }).collect(),
     }))
 }

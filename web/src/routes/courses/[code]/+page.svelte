@@ -212,7 +212,6 @@
 			code: editcode,
 			name: editname,
 			description: editdesc,
-			type: course.type,
 			predecessor_ids: editpredecessors.map((c) => c.id),
 			successor_ids: editsuccessors.map((c) => c.id),
 			shortnames: editshortnames,

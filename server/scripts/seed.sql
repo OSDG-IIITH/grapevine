@@ -76,18 +76,18 @@ INSERT INTO faculty (id, slug, name, bio, lab_id) VALUES
   ('f14', 'kishore-kothapalli',    'Kishore Kothapalli',    'Algorithmic game theory, mechanism design, and parallel algorithms.', NULL);
 
 -- courses
-INSERT INTO courses (id, code, name, description, type) VALUES
-  ('cs3301', 'CS3.301', 'Operating Systems',                  'Processes, scheduling, memory management, file systems, and OS design with hands-on xv6 projects.', 'core'),
-  ('cs7401', 'CS7.401', 'Introduction to NLP',                'Fundamentals of natural language processing including text classification, sequence models, and transformers.', 'stream'),
-  ('cs5604', 'CS5.604', 'Computer Vision',                    'Image formation, feature extraction, deep learning for vision, and 3D understanding.', 'stream'),
-  ('cs1201', 'CS1.201', 'Data Structures',                    'Arrays, linked lists, trees, graphs, hashing, and algorithm analysis.', 'core'),
-  ('ec2202', 'EC2.202', 'Digital Systems & Microcontrollers', 'Logic design, sequential circuits, microcontroller architecture, and embedded programming.', 'core'),
-  ('hs2103', 'HS2.103', 'History & Philosophy of Science',    'Scientific revolutions, epistemology, and the relationship between science, society, and technology.', 'hs'),
-  ('ma3102', 'MA3.102', 'Probability & Random Processes',     'Probability spaces, distributions, expectation, stochastic processes, and engineering applications.', 'math'),
-  ('cs6301', 'CS6.301', 'Distributed Systems',                'Consensus, replication, fault tolerance, distributed transactions, and modern systems design.', 'stream'),
-  ('cs4301', 'CS4.301', 'Compilers',                          'Lexing, parsing, semantic analysis, intermediate representations, and code generation.', 'stream'),
-  ('op3102', 'OP3.102', 'Cognitive Science',                  'Memory, attention, perception, and decision-making through computational and neuroscientific lenses.', 'open'),
-  ('bq5102', 'BQ5.102', 'Game Theory & Mechanism Design',     'Strategic interaction, Nash equilibria, auction theory, and mechanism design with applications in CS.', 'bouquet');
+INSERT INTO courses (id, code, name, description) VALUES
+  ('cs3301', 'CS3.301', 'Operating Systems',                  'Processes, scheduling, memory management, file systems, and OS design with hands-on xv6 projects.'),
+  ('cs7401', 'CS7.401', 'Introduction to NLP',                'Fundamentals of natural language processing including text classification, sequence models, and transformers.'),
+  ('cs5604', 'CS5.604', 'Computer Vision',                    'Image formation, feature extraction, deep learning for vision, and 3D understanding.'),
+  ('cs1201', 'CS1.201', 'Data Structures',                    'Arrays, linked lists, trees, graphs, hashing, and algorithm analysis.'),
+  ('ec2202', 'EC2.202', 'Digital Systems & Microcontrollers', 'Logic design, sequential circuits, microcontroller architecture, and embedded programming.'),
+  ('hs2103', 'HS2.103', 'History & Philosophy of Science',    'Scientific revolutions, epistemology, and the relationship between science, society, and technology.'),
+  ('ma3102', 'MA3.102', 'Probability & Random Processes',     'Probability spaces, distributions, expectation, stochastic processes, and engineering applications.'),
+  ('cs6301', 'CS6.301', 'Distributed Systems',                'Consensus, replication, fault tolerance, distributed transactions, and modern systems design.'),
+  ('cs4301', 'CS4.301', 'Compilers',                          'Lexing, parsing, semantic analysis, intermediate representations, and code generation.'),
+  ('op3102', 'OP3.102', 'Cognitive Science',                  'Memory, attention, perception, and decision-making through computational and neuroscientific lenses.'),
+  ('bq5102', 'BQ5.102', 'Game Theory & Mechanism Design',     'Strategic interaction, Nash equilibria, auction theory, and mechanism design with applications in CS.');
 
 -- offerings
 INSERT INTO offerings (id, course_id, season, year) VALUES

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM course_succession WHERE predecessor_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "285c108b8193b4acf7e23acae1cf2dee4ebce6b655ae6abe16679066ef2a2bc2"
+}

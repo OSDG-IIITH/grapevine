@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT code, name, \"type\"::text as \"kind!\", description FROM courses ORDER BY code",
+  "query": "SELECT code, name, description FROM courses ORDER BY code",
   "describe": {
     "columns": [
       {
@@ -15,11 +15,6 @@
       },
       {
         "ordinal": 2,
-        "name": "kind!",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 3,
         "name": "description",
         "type_info": "Text"
       }
@@ -30,9 +25,8 @@
     "nullable": [
       false,
       false,
-      null,
       true
     ]
   },
-  "hash": "a7eb7bbeb041ab98e2ccd5eb8f6f4190e512efd64edc66121f3d3792a666ff91"
+  "hash": "694f11b2d7f5bbc8b3a2e4ec61c2d9a3bc43d27b1885a75c687f98407c02b01c"
 }

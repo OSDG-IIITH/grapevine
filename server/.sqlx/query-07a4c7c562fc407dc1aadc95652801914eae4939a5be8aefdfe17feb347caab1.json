@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT o.id as oid, o.season as \"season: Season\", o.year,\n                  c.id as cid, c.code, c.name as cname\n           FROM offerings o\n           JOIN offering_faculty ofac ON ofac.offering_id = o.id\n           JOIN courses c ON c.id = o.course_id\n           WHERE ofac.faculty_id = $1\n           ORDER BY o.year DESC, o.season",
+  "query": "SELECT o.id as oid, o.season as \"season: Season\", o.year,\n                  c.id as cid, c.code, c.name as cname\n           FROM offerings o\n           JOIN offering_faculty ofac ON ofac.offering_id = o.id\n           JOIN courses c ON c.id = o.course_id AND c.deleted_at IS NULL\n           WHERE ofac.faculty_id = $1\n           ORDER BY o.year DESC, o.season",
   "describe": {
     "columns": [
       {
@@ -58,5 +58,5 @@
       false
     ]
   },
-  "hash": "886b34ac2a536e6f26a091525a381b2ac4cd70bf6f87f50dc9a49aa30e55af8f"
+  "hash": "07a4c7c562fc407dc1aadc95652801914eae4939a5be8aefdfe17feb347caab1"
 }
