@@ -12,6 +12,9 @@ use crate::{error::AppError, state::AppState};
 use super::session::{AuthUser, AUTH_METHOD_KEY, IS_ADMIN_KEY, USER_ID_KEY, VERIFIED_KEY};
 use super::validate::is_allowed_email_domain;
 
+const CAS_PENDING_ID: &str = "cas_pending_id";
+const CAS_PENDING_NAME: &str = "cas_pending_name";
+
 /// HMAC-SHA256 of the lowercased email, keyed by `verify_email_secret`, hex-encoded.
 /// Load-bearing for anonymity: a DB reader sees only this hash, never the address.
 fn email_hmac(email: &str, secret: &str) -> String {
@@ -81,8 +84,19 @@ pub async fn callback(
     }
 
     let display_name = parse_cas_display_name(&xml).unwrap_or_else(|| name_from_cas_id(&cas_id));
-    let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
 
+    // New user: show confirmation page before creating the account.
+    let is_new = sqlx::query_scalar!("SELECT 1 AS one FROM users WHERE cas_id = $1", cas_id)
+        .fetch_optional(&s.pool)
+        .await?
+        .is_none();
+    if is_new {
+        session.insert(CAS_PENDING_ID, &cas_id).await.map_err(|_| AppError::Internal)?;
+        session.insert(CAS_PENDING_NAME, &display_name).await.map_err(|_| AppError::Internal)?;
+        return Ok(Redirect::to(&format!("{}/login?cas=pending", s.cfg.frontend_url)));
+    }
+
+    let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
     let id = Ulid::new().to_string();
     let row = sqlx::query!(
         r#"
@@ -91,6 +105,60 @@ pub async fn callback(
         ON CONFLICT (cas_id) DO UPDATE
             SET cas_id = EXCLUDED.cas_id,
                 display_name = EXCLUDED.display_name,
+                verified = true
+        RETURNING id, is_admin
+        "#,
+        id, cas_id, display_name
+    )
+    .fetch_one(&s.pool)
+    .await?;
+
+    let is_admin = if is_moderator {
+        sqlx::query_scalar!(
+            "UPDATE users SET is_admin = true WHERE id = $1 RETURNING is_admin",
+            row.id
+        )
+        .fetch_one(&s.pool)
+        .await?
+    } else {
+        row.is_admin
+    };
+
+    session.insert(USER_ID_KEY, row.id).await.map_err(|_| AppError::Internal)?;
+    session.insert(IS_ADMIN_KEY, is_admin).await.map_err(|_| AppError::Internal)?;
+    session.insert(VERIFIED_KEY, true).await.map_err(|_| AppError::Internal)?;
+    session.insert(AUTH_METHOD_KEY, "cas").await.map_err(|_| AppError::Internal)?;
+
+    Ok(Redirect::to(&s.cfg.frontend_url))
+}
+
+/// Confirm a new CAS account after the user has reviewed the privacy notice.
+/// Reads the pending CAS identity stored by `callback`, creates the user row,
+/// and establishes a full session. If no pending data exists, redirects to login.
+pub async fn casconfirm(
+    State(s): State<AppState>,
+    session: Session,
+) -> Result<Redirect, AppError> {
+    let Some(cas_id): Option<String> = session.get(CAS_PENDING_ID).await.map_err(|_| AppError::Internal)? else {
+        return Ok(Redirect::to(&format!("{}/login", s.cfg.frontend_url)));
+    };
+    let display_name: String = session
+        .get(CAS_PENDING_NAME)
+        .await
+        .map_err(|_| AppError::Internal)?
+        .unwrap_or_else(|| name_from_cas_id(&cas_id));
+
+    session.remove::<String>(CAS_PENDING_ID).await.map_err(|_| AppError::Internal)?;
+    session.remove::<String>(CAS_PENDING_NAME).await.map_err(|_| AppError::Internal)?;
+
+    let is_moderator = s.cfg.moderator_emails.contains(&cas_id);
+    let id = Ulid::new().to_string();
+    let row = sqlx::query!(
+        r#"
+        INSERT INTO users (id, cas_id, display_name, verified)
+        VALUES ($1, $2, $3, true)
+        ON CONFLICT (cas_id) DO UPDATE
+            SET display_name = EXCLUDED.display_name,
                 verified = true
         RETURNING id, is_admin
         "#,

@@ -171,6 +171,10 @@ export function casLoginUrl(): string {
 	return `${BASE}/auth/login`;
 }
 
+export function casConfirmUrl(): string {
+	return `${BASE}/auth/cas/confirm`;
+}
+
 export function casVerifyUrl(): string {
 	return `${BASE}/auth/verify`;
 }

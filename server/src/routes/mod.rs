@@ -32,6 +32,7 @@ pub fn app(state: AppState) -> Router {
     let open = Router::new()
         .route("/auth/login", get(cas::login))
         .route("/auth/callback", get(cas::callback))
+        .route("/auth/cas/confirm", get(cas::casconfirm))
         .route("/auth/register", post(handlers::auth::register))
         .route("/auth/login/local", post(handlers::auth::login_local))
         .route("/auth/recovery/:username", get(handlers::auth::recovery_info))

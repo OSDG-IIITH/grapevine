@@ -3,9 +3,9 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { currentUser } from '$lib/stores';
-	import { getMe, loginLocal, registerLocal, casLoginUrl, recoveryInfo, resetPassword } from '$lib/api';
+	import { getMe, loginLocal, registerLocal, casLoginUrl, casConfirmUrl, recoveryInfo, resetPassword } from '$lib/api';
 
-	type View = 'auth' | 'secure' | 'forgot' | 'reset';
+	type View = 'auth' | 'confirm' | 'secure' | 'forgot' | 'reset';
 
 	let view = $state<View>('auth');
 	let mode = $state<'login' | 'register'>('login');
@@ -71,10 +71,17 @@
 	};
 
 	onMount(async () => {
-		const code = new URLSearchParams(window.location.search).get('error');
+		const params = new URLSearchParams(window.location.search);
+		const code = params.get('error');
 		if (code && NOTICES[code]) {
 			notice = NOTICES[code];
 			history.replaceState(null, '', base + '/login');
+		}
+		if (params.get('cas') === 'pending') {
+			history.replaceState(null, '', base + '/login');
+			checking = false;
+			view = 'confirm';
+			return;
 		}
 		let user = $currentUser;
 		if (!user) user = await getMe();
@@ -350,6 +357,34 @@
 					>
 						Continue with CAS
 					</a>
+
+				{:else if view === 'confirm'}
+					<div class="mb-5 flex items-baseline justify-between">
+						<h2 class="text-[20px] text-[var(--fg)]" style="font-family: var(--serif);">Before you continue</h2>
+						<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-4)]" style="font-family: var(--mono);">cas</span>
+					</div>
+
+					<p class="mb-6 text-[13px] leading-[1.65] text-[var(--fg-3)]" style="text-wrap: pretty;">
+						While your account will be anonymous and other people cannot trace your grapevine account
+						back to your CAS account, if you want to ensure no linkage between the two whatsoever,
+						you can make a regular account instead.
+					</p>
+
+					<a
+						href={casConfirmUrl()}
+						class="inline-flex w-full items-center justify-center rounded-[8px] border px-[14px] py-[11px] text-[14px] font-semibold transition-[background,border-color,opacity] duration-[120ms]"
+						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border-color: #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+					>
+						Continue with CAS
+					</a>
+
+					<button
+						type="button"
+						onclick={() => { view = 'auth'; }}
+						class="mt-3 w-full text-center text-[13px] text-[var(--fg-4)] hover:text-[var(--fg-3)] transition-colors duration-[120ms]"
+					>
+						Use a regular account instead
+					</button>
 
 				{:else if view === 'secure'}
 					<div class="mb-5 flex items-baseline justify-between">
