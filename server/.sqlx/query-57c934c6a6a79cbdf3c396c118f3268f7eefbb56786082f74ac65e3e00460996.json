@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO courses (id, code, name, description)\n             VALUES ($1, $2, $3, $4)\n             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description\n             RETURNING id, code",
+  "query": "INSERT INTO courses (id, code, name, description, shortnames)\n             VALUES ($1, $2, $3, $4, $5)\n             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, shortnames = EXCLUDED.shortnames\n             RETURNING id, code",
   "describe": {
     "columns": [
       {
@@ -19,7 +19,8 @@
         "Text",
         "Text",
         "Text",
-        "Text"
+        "Text",
+        "TextArray"
       ]
     },
     "nullable": [
@@ -27,5 +28,5 @@
       false
     ]
   },
-  "hash": "af791753d8cea8dfbceba33e2d326968bfa89e8dd7e78f9b76f00ac159e2c819"
+  "hash": "57c934c6a6a79cbdf3c396c118f3268f7eefbb56786082f74ac65e3e00460996"
 }

@@ -24,6 +24,8 @@ struct Course {
     code: String,
     name: String,
     description: Option<String>,
+    #[serde(default)]
+    shortnames: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -107,11 +109,11 @@ async fn main() {
     for c in &courses {
         let id = Ulid::new().to_string();
         let row = sqlx::query!(
-            "INSERT INTO courses (id, code, name, description)
-             VALUES ($1, $2, $3, $4)
-             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+            "INSERT INTO courses (id, code, name, description, shortnames)
+             VALUES ($1, $2, $3, $4, $5)
+             ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, shortnames = EXCLUDED.shortnames
              RETURNING id, code",
-            id, c.code, c.name, c.description
+            id, c.code, c.name, c.description, &c.shortnames
         )
         .fetch_one(&pool)
         .await

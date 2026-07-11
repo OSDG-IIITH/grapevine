@@ -2,1411 +2,2145 @@
   {
     "code": "CE0.501",
     "name": "Theory of Elasticity",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TE"
+    ]
   },
   {
     "code": "CE1.501",
     "name": "Structural Dynamics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SD"
+    ]
   },
   {
     "code": "CE1.502",
     "name": "Structural Engineering Design Studio",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SEDS"
+    ]
   },
   {
     "code": "CE1.601",
     "name": "Earthquake Engineering",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EE"
+    ]
   },
   {
     "code": "CE1.603",
     "name": "Advanced Structural Analysis",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ASA"
+    ]
   },
   {
     "code": "CE1.604",
     "name": "Advanced Design of Steel Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ADSS"
+    ]
   },
   {
     "code": "CE1.607",
     "name": "Earthquake Resistant Design of Masonry Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ERDMS"
+    ]
   },
   {
     "code": "CE1.608",
     "name": "Analysis & Design of Precast and Prestressed Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ADPPS"
+    ]
   },
   {
     "code": "CE1.609",
     "name": "Analysis and Design of Bridge Infrastructure",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ADBS"
+    ]
   },
   {
     "code": "CE1.610",
     "name": "Advanced Design of Steel Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ADSS"
+    ]
   },
   {
     "code": "CE1.620",
     "name": "Structural Assessment of Existing Infrastructure",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SAEI"
+    ]
   },
   {
     "code": "CE1.621",
     "name": "Retrofit of Existing Infrastructure",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "REI"
+    ]
   },
   {
     "code": "CE4.501",
     "name": "Finite Element Methods",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "FEM"
+    ]
   },
   {
     "code": "CE5.502",
     "name": "Hydrological modelling and Software Development",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CE8.401",
     "name": "Disaster Management",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CE9.403",
     "name": "CASE Project",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CE9.609",
     "name": "IoT Workshop",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "iotw"
+    ]
   },
   {
     "code": "CG1.402",
     "name": "Intro to Cognitive Science",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ICS"
+    ]
   },
   {
     "code": "CG1.403",
     "name": "Learning and Memory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "lnm"
+    ]
   },
   {
     "code": "CG2.401",
     "name": "Cognitive Neuroscience",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CG3.401",
     "name": "Introduction to Neural and Cognitive Modeling",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "INCM"
+    ]
   },
   {
     "code": "CG3.402",
     "name": "Behavioral Research & Experimental Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BRED"
+    ]
   },
   {
     "code": "CG3.403",
     "name": "Behavioral Research: Statistical Methods",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BRSM"
+    ]
   },
   {
     "code": "CG3.501",
     "name": "Cognitive Science and AI",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "csai"
+    ]
   },
   {
     "code": "CG3.502",
     "name": "Neuroinformatics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CG4.402",
     "name": "Introduction to Neuroeconomics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CG5.405",
     "name": "Art, Vision, & Feelings",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AVF"
+    ]
   },
   {
     "code": "CG9.600",
     "name": "Cognitive Science Seminar",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CL1.101",
     "name": "Introduction to Linguistics-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ITL1"
+    ]
   },
   {
     "code": "CL1.102",
     "name": "Introduction to Linguistics II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ITL2"
+    ]
   },
   {
     "code": "CL2.203",
     "name": "Language and Society",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "LNS"
+    ]
   },
   {
     "code": "CL2.204",
     "name": "Language Typology and Universals",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "LTU"
+    ]
   },
   {
     "code": "CL2.404",
     "name": "Computational Psycholinguistics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CL2.405",
     "name": "Speech Analysis and Linguistics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SAL"
+    ]
   },
   {
     "code": "CL3.101",
     "name": "Computational Linguistics 1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CL1"
+    ]
   },
   {
     "code": "CL3.202",
     "name": "Computational Linguistics II: Comp Semantics and Discourse parsing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CL2"
+    ]
   },
   {
     "code": "CL3.406",
     "name": "Linguistic Data 3: Data Modeling in ILs",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ld3"
+    ]
   },
   {
     "code": "CL3.408",
     "name": "Applications of Language Models",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ALM"
+    ]
   },
   {
     "code": "CL3.409",
     "name": "Evaluation Methods for NLP",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EMN"
+    ]
   },
   {
     "code": "CL5.401",
     "name": "Topics in SSMT",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ssmt"
+    ]
   },
   {
     "code": "CL9.605",
     "name": "Thesis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS0.101",
     "name": "Computer Programming",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "c programming",
+      "cpro"
+    ]
   },
   {
     "code": "CS0.301",
     "name": "Computer Problem Solving",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CPS"
+    ]
   },
   {
     "code": "CS0.302",
     "name": "Computing Tools",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS1.201",
     "name": "Data Structures and Algorithms",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DSA"
+    ]
   },
   {
     "code": "CS1.301",
     "name": "Algorithm Analysis and Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AAD"
+    ]
   },
   {
     "code": "CS1.302",
     "name": "Automata Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AT",
+      "automata"
+    ]
   },
   {
     "code": "CS1.304",
     "name": "Data Structures & Algorithms for Problem Solving",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DSA"
+    ]
   },
   {
     "code": "CS1.305",
     "name": "Introduction to Algorithms Engineering",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IAE"
+    ]
   },
   {
     "code": "CS1.306",
     "name": "Numerical Algorithms",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "NA"
+    ]
   },
   {
     "code": "CS1.402",
     "name": "Principles of Programming Languages",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PPL"
+    ]
   },
   {
     "code": "CS1.403",
     "name": "Compilers",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS1.404",
     "name": "Optimization Methods",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "OM"
+    ]
   },
   {
     "code": "CS1.405",
     "name": "Modern Complexity Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MCT"
+    ]
   },
   {
     "code": "CS1.406",
     "name": "Advanced Algorithms",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AA"
+    ]
   },
   {
     "code": "CS1.407",
     "name": "Entropy and Information",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EI"
+    ]
   },
   {
     "code": "CS1.408",
     "name": "Introduction to Game Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IGT"
+    ]
   },
   {
     "code": "CS1.409",
     "name": "Quantum Algorithms",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "QA"
+    ]
   },
   {
     "code": "CS1.502",
     "name": "Information-Theoretic Methods in Computer Science",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IMCS"
+    ]
   },
   {
     "code": "CS1.504",
     "name": "Quantum Information Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "QIT"
+    ]
   },
   {
     "code": "CS1.505",
     "name": "Quantum aspects of Cryptography",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "QAC"
+    ]
   },
   {
     "code": "CS2.201",
     "name": "Computer Systems Organization",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "cso"
+    ]
   },
   {
     "code": "CS2.501",
     "name": "Advanced Computer Architecture",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS3.301",
     "name": "Operating Systems and Networks",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "OSN"
+    ]
   },
   {
     "code": "CS3.302",
     "name": "Software Programming for Performance",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SPP"
+    ]
   },
   {
     "code": "CS3.303",
     "name": "Introduction to IoT",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "iot"
+    ]
   },
   {
     "code": "CS3.304",
     "name": "Advanced Operating Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AOS"
+    ]
   },
   {
     "code": "CS3.306",
     "name": "Algorithms and Operating Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AOS"
+    ]
   },
   {
     "code": "CS3.307",
     "name": "Performance Modeling of Computer Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PMCS"
+    ]
   },
   {
     "code": "CS3.401",
     "name": "Distributed Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DS",
+      "ds"
+    ]
   },
   {
     "code": "CS3.402",
     "name": "Advanced Computer Networks",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ACN"
+    ]
   },
   {
     "code": "CS3.404",
     "name": "Internals of Application Servers",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IAS"
+    ]
   },
   {
     "code": "CS3.405",
     "name": "Blockchain and Web3 Development",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS3.502",
     "name": "Real-Time Embedded Systems",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS4.301",
     "name": "Data and Applications",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DA",
+      "dna"
+    ]
   },
   {
     "code": "CS4.302",
     "name": "Data Visualisation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DV"
+    ]
   },
   {
     "code": "CS4.401",
     "name": "Data Systems",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS4.405",
     "name": "Data Analytics I",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DA1"
+    ]
   },
   {
     "code": "CS4.406",
     "name": "Information Retrieval & Extraction",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IRE"
+    ]
   },
   {
     "code": "CS4.408",
     "name": "Spatial Informatics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SI"
+    ]
   },
   {
     "code": "CS5.401",
     "name": "User Interaction and Usability of Digital Products",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "UIUDP"
+    ]
   },
   {
     "code": "CS6.201",
     "name": "Introduction to Software Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "iss"
+    ]
   },
   {
     "code": "CS6.301",
     "name": "Design and Analysis of Software Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DASS"
+    ]
   },
   {
     "code": "CS6.302",
     "name": "Software Systems Development",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SSD"
+    ]
   },
   {
     "code": "CS6.303",
     "name": "Foundations for Trustworthy Parallel Computing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ftpc"
+    ]
   },
   {
     "code": "CS6.401",
     "name": "Software Engineering",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SE"
+    ]
   },
   {
     "code": "CS6.402",
     "name": "Engineering Virtual Reality Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EVRS"
+    ]
   },
   {
     "code": "CS6.501",
     "name": "Topics in Software Engineering",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TSE"
+    ]
   },
   {
     "code": "CS6.504",
     "name": "Law, Technology and Digital Governance",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "LTDG"
+    ]
   },
   {
     "code": "CS7.301",
     "name": "Machine, Data and Learning",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MDL"
+    ]
   },
   {
     "code": "CS7.302",
     "name": "Computer Graphics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CG"
+    ]
   },
   {
     "code": "CS7.303",
     "name": "Digital Signal Analysis",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DSA"
+    ]
   },
   {
     "code": "CS7.401",
     "name": "Introduction to NLP",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "inlp"
+    ]
   },
   {
     "code": "CS7.403",
     "name": "Statistical Methods in AI",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "smai"
+    ]
   },
   {
     "code": "CS7.404",
     "name": "Digital Image Processing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DIP"
+    ]
   },
   {
     "code": "CS7.405",
     "name": "Responsible & Safe AI Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "rsai"
+    ]
   },
   {
     "code": "CS7.501",
     "name": "Advanced NLP",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ANLP"
+    ]
   },
   {
     "code": "CS7.503",
     "name": "Mobile Robotics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS7.504",
     "name": "Fairness, Privacy and Ethics in Al",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "fpeai"
+    ]
   },
   {
     "code": "CS7.505",
     "name": "Computer Vision",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CV"
+    ]
   },
   {
     "code": "CS7.601",
     "name": "Deep Learning: Theory and Practices",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS7.603",
     "name": "Topics in Reinforcement Learning",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TRL"
+    ]
   },
   {
     "code": "CS8.301",
     "name": "Introduction to Information Security",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IIS"
+    ]
   },
   {
     "code": "CS8.401",
     "name": "Principles of Information Security",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PIS"
+    ]
   },
   {
     "code": "CS8.402",
     "name": "Information Security Audit and Assurance",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ISAA"
+    ]
   },
   {
     "code": "CS8.403",
     "name": "System and Network Security",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SNS"
+    ]
   },
   {
     "code": "CS8.501",
     "name": "Research in Information Security",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RIS"
+    ]
   },
   {
     "code": "CS9.311",
     "name": "Introduction to Brain and Cognition",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IBC"
+    ]
   },
   {
     "code": "CS9.312",
     "name": "Introduction to Quantum Information and Computation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IQIC"
+    ]
   },
   {
     "code": "CS9.412",
     "name": "PG-Project",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS9.424",
     "name": "Technology Product Entrepreneurship",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "tpe"
+    ]
   },
   {
     "code": "CS9.425",
     "name": "Social Science Perspective on HCI",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS9.428",
     "name": "Environmental Science & Technology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "evs"
+    ]
   },
   {
     "code": "CS9.429",
     "name": "Design for Social Innovation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "dsi"
+    ]
   },
   {
     "code": "CS9.433",
     "name": "Hydro Informatics & Climate Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "hyd",
+      "hydro"
+    ]
   },
   {
     "code": "CS9.440",
     "name": "Introduction to Remote Sensing",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "CS9.501",
     "name": "User Research Methods",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "URM"
+    ]
   },
   {
     "code": "CS9.605",
     "name": "Thesis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC1.202",
     "name": "Bioinstrumentation and Devices",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.101",
     "name": "Digital Systems and Microcontrollers",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DSM"
+    ]
   },
   {
     "code": "EC2.102",
     "name": "Electronic Workshop-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EW1"
+    ]
   },
   {
     "code": "EC2.103",
     "name": "Analog Electronic Circuits",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "AEC"
+    ]
   },
   {
     "code": "EC2.201",
     "name": "VLSI Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "vlsi"
+    ]
   },
   {
     "code": "EC2.202",
     "name": "Electronics Workshop II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EW2"
+    ]
   },
   {
     "code": "EC2.204",
     "name": "Intro to Processor Architecture",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IPA"
+    ]
   },
   {
     "code": "EC2.205",
     "name": "Radio Frequency Based Sensors design: Principles and Applications",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RFBSDPA"
+    ]
   },
   {
     "code": "EC2.206",
     "name": "VLSI & Embedded Systems Foundations of RF and Microwave Sensors",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "FRMS"
+    ]
   },
   {
     "code": "EC2.207",
     "name": "Intro to VLSI and Embedded Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "vlsi"
+    ]
   },
   {
     "code": "EC2.401",
     "name": "Analog IC Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "Analog Integrated Circuit Design"
+    ]
   },
   {
     "code": "EC2.407",
     "name": "Design for Testability",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.408",
     "name": "Digital VLSI Design",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.409",
     "name": "Principles of Semiconductor Devices",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.410",
     "name": "CMOS References and Regulators",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.412",
     "name": "CMOS Oscillator Design",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.413",
     "name": "Instrumentation and Devices",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC2.502",
     "name": "Flexible Electronics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "FE"
+    ]
   },
   {
     "code": "EC3.202",
     "name": "Embedded Systems Workshop",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ESW"
+    ]
   },
   {
     "code": "EC4.201",
     "name": "Mechatronics System Design-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MSD1"
+    ]
   },
   {
     "code": "EC4.202",
     "name": "Intro to Robotics: Perception and Planning",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "irprp"
+    ]
   },
   {
     "code": "EC4.401",
     "name": "Robotics: Dynamics and Control",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RDC"
+    ]
   },
   {
     "code": "EC4.402",
     "name": "Intro to UAV Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "uav"
+    ]
   },
   {
     "code": "EC4.403",
     "name": "Robotics: Planning and Navigation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RPN"
+    ]
   },
   {
     "code": "EC4.404",
     "name": "Mechatronics System Design",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MSD"
+    ]
   },
   {
     "code": "EC5.101",
     "name": "Networks, Signals and Systems",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ness",
+      "nss"
+    ]
   },
   {
     "code": "EC5.102",
     "name": "Information and Communication",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC5.201",
     "name": "Signal Processing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SP"
+    ]
   },
   {
     "code": "EC5.202",
     "name": "Systems Thinking",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ST"
+    ]
   },
   {
     "code": "EC5.203",
     "name": "Communication Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CT",
+      "cciot"
+    ]
   },
   {
     "code": "EC5.205",
     "name": "Introduction to Coding Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ICT"
+    ]
   },
   {
     "code": "EC5.206",
     "name": "Introduction to Statistical Signal Processing",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC5.207",
     "name": "The Mathematics of Information: Theory & Application",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "mita"
+    ]
   },
   {
     "code": "EC5.406",
     "name": "Signal Detection and Estimation Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SDET"
+    ]
   },
   {
     "code": "EC5.407",
     "name": "Wireless Communications",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "WC"
+    ]
   },
   {
     "code": "EC5.408",
     "name": "Speech Signal Processing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SSP"
+    ]
   },
   {
     "code": "EC5.410",
     "name": "Information Theory",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IT"
+    ]
   },
   {
     "code": "EC5.411",
     "name": "Modern Coding Theory",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "EC5.412",
     "name": "Foundations for Signal Processing and Communication",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "FSPC"
+    ]
   },
   {
     "code": "EC5.414",
     "name": "Machine Learning for Communication",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MLC"
+    ]
   },
   {
     "code": "EC9.605",
     "name": "Thesis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "GS0.101",
     "name": "Spatial Thinking and Practice",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "STP"
+    ]
   },
   {
     "code": "GS0.301",
     "name": "Introduction to Spatial Sciences and Technology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ISS"
+    ]
   },
   {
     "code": "GS1.401",
     "name": "Optical Remote Sensing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ORS"
+    ]
   },
   {
     "code": "GS1.402",
     "name": "Cyber GIS: Geospatial Web and GeoBI",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "GS1.501",
     "name": "Advanced Remote Sensing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ARS"
+    ]
   },
   {
     "code": "GS2.401",
     "name": "Spatial Informatics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SI"
+    ]
   },
   {
     "code": "GS2.503",
     "name": "Spatial Data Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SDS"
+    ]
   },
   {
     "code": "GS3.401",
     "name": "Geospatial for Sustainable Development",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "GS3.403",
     "name": "Geospatial Technology for Disaster Risk Modelling",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "GTDRM"
+    ]
   },
   {
     "code": "HS0.201",
     "name": "Thinking and Knowing in the Human Sciences-I",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TKHS1"
+    ]
   },
   {
     "code": "HS0.202",
     "name": "Thinking and Knowing in the Human Sciences - II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TKHS2"
+    ]
   },
   {
     "code": "HS0.214",
     "name": "Introduction to Philosophy",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "itp"
+    ]
   },
   {
     "code": "HS0.216",
     "name": "Thinking and Knowing in the Human Sciences III",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TKHS3"
+    ]
   },
   {
     "code": "HS0.302",
     "name": "Research Methods in Human Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RMHS"
+    ]
   },
   {
     "code": "HS0.305",
     "name": "Introduction to Philosophy of Technology",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "HS1.204",
     "name": "Introduction to Literature",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "itl"
+    ]
   },
   {
     "code": "HS1.208",
     "name": "Introduction to Film Studies",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IFS"
+    ]
   },
   {
     "code": "HS1.209",
     "name": "Music Language Creativity",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MLC"
+    ]
   },
   {
     "code": "HS1.210",
     "name": "Music Workshop",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MW"
+    ]
   },
   {
     "code": "HS1.301",
     "name": "Critical Viewing and Reading",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CVR"
+    ]
   },
   {
     "code": "HS1.302",
     "name": "Readings in Russian Literature",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RRL"
+    ]
   },
   {
     "code": "HS1.303",
     "name": "Readings from Hindi Literature",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RHL"
+    ]
   },
   {
     "code": "HS1.401",
     "name": "Readings from Hindi Literature",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RHL"
+    ]
   },
   {
     "code": "HS2.201",
     "name": "Introduction to Sociology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SOC"
+    ]
   },
   {
     "code": "HS2.202",
     "name": "Introduction to Psychology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "itp"
+    ]
   },
   {
     "code": "HS2.303",
     "name": "Work, Entrepreneurship and Technology in Contemporary Societies",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EPIIFST",
+      "WETCS"
+    ]
   },
   {
     "code": "HS2.304",
     "name": "Sociology of Platform Economies",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SPE"
+    ]
   },
   {
     "code": "HS3.201",
     "name": "Introduction to History",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "HIS"
+    ]
   },
   {
     "code": "HS3.303",
     "name": "Theories and Practices of Nationalism",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "tpn"
+    ]
   },
   {
     "code": "HS4.102",
     "name": "Making of the Contemporary India",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "moci"
+    ]
   },
   {
     "code": "HS4.201",
     "name": "Introduction to Politics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "HS4.303",
     "name": "Digital Democracy and Data Governance in the European Union",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DDDG"
+    ]
   },
   {
     "code": "HS5.202",
     "name": "Introduction to Economics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "intro to econ"
+    ]
   },
   {
     "code": "HS5.301",
     "name": "Growth and Development",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "HS7.101",
     "name": "Human Sciences Lab-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "hsl",
+      "hsl1"
+    ]
   },
   {
     "code": "HS7.301",
     "name": "Science, Technology and Society",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "sts"
+    ]
   },
   {
     "code": "HS8.101",
     "name": "Making of Contemporary World",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "mocw"
+    ]
   },
   {
     "code": "HS8.102",
     "name": "Intro to Human Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IHS"
+    ]
   },
   {
     "code": "HS8.201",
     "name": "Gender and Society",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "gns"
+    ]
   },
   {
     "code": "HS8.202",
     "name": "Gender, Culture and Representation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "GCR"
+    ]
   },
   {
     "code": "HS8.302",
     "name": "Classical Text Readings II",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "HS8.304",
     "name": "The Digital City",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DC"
+    ]
   },
   {
     "code": "HS8.305",
     "name": "Knowing India Through Data",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "KITD"
+    ]
   },
   {
     "code": "HS9.302",
     "name": "Classical Text Reading",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CTR"
+    ]
   },
   {
     "code": "HS9.605",
     "name": "Thesis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "MA2.101",
     "name": "Linear Algebra",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "la"
+    ]
   },
   {
     "code": "MA4.101",
     "name": "Real Analysis",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ra"
+    ]
   },
   {
     "code": "MA4.301",
     "name": "Differential Equations",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "DE"
+    ]
   },
   {
     "code": "MA4.303",
     "name": "Linear Partial Differential Equations and Variational Calculus",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "LPDEVC"
+    ]
   },
   {
     "code": "MA4.404",
     "name": "Functional Analysis",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "FA"
+    ]
   },
   {
     "code": "MA5.101",
     "name": "Discrete Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ds"
+    ]
   },
   {
     "code": "MA5.501",
     "name": "Topics in Discrete Mathematics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TDM"
+    ]
   },
   {
     "code": "MA6.101",
     "name": "Probability and Statistics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "pns",
+      "prs"
+    ]
   },
   {
     "code": "MA6.102",
     "name": "Probability and Random Processes",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PRP"
+    ]
   },
   {
     "code": "MA6.301",
     "name": "Maths for Computer Science 1- Probability and Statistics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MCS1PS"
+    ]
   },
   {
     "code": "MA6.302",
     "name": "Maths for Computer Science 2 - Linear Algebra",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MCS2LA"
+    ]
   },
   {
     "code": "MA7.501",
     "name": "Continuous Variable Quantum Information Theory and Computation",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CVQITC"
+    ]
   },
   {
     "code": "MA8.401",
     "name": "Topics in Applied Optimization",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "MA8.402",
     "name": "Mathematics for Finance",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MF"
+    ]
   },
   {
     "code": "New_Causal_Inference",
     "name": "Causal Inference",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "New_Environmental_Humanities",
     "name": "Environmental Humanities",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EH"
+    ]
   },
   {
     "code": "New_Hardware_AI",
     "name": "Hardware for AI",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "hwai"
+    ]
   },
   {
     "code": "New_LM_Agents",
     "name": "Language Models and Agents",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "New_NLP_Healthcare",
     "name": "NLP and Healthcare",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "New_QECC",
     "name": "Quantum Error Correcting Codes",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "New_Quantum_Materials",
     "name": "Quantum Materials and Devices",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "QMD"
+    ]
   },
   {
     "code": "New_Rethinking_Corruption",
     "name": "Rethinking Corruption in India",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "RCI"
+    ]
   },
   {
     "code": "OC2.101",
     "name": "Arts-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "arts2"
+    ]
   },
   {
     "code": "OC2.102",
     "name": "Arts-2",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "arts2"
+    ]
   },
   {
     "code": "OC9.600",
     "name": "Institute Seminar",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD1.301",
     "name": "Design Thinking - Research to Define",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD1.401",
     "name": "Design Thinking - Idea to Evaluate",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD1.411",
     "name": "Product Design Workshop",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PDW"
+    ]
   },
   {
     "code": "PD1.501",
     "name": "Human Computer Interaction",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "HCI"
+    ]
   },
   {
     "code": "PD2.401",
     "name": "Product Management 101",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "pm101"
+    ]
   },
   {
     "code": "PD2.403",
     "name": "Sustainable Growth Strategy for Startup",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SGSS"
+    ]
   },
   {
     "code": "PD2.421",
     "name": "Business Fundamentals",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BF"
+    ]
   },
   {
     "code": "PD2.422",
     "name": "Business Finance",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BF"
+    ]
   },
   {
     "code": "PD2.501",
     "name": "Product Marketing",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PM"
+    ]
   },
   {
     "code": "PD2.502",
     "name": "Product Lifecycle Management",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PLM"
+    ]
   },
   {
     "code": "PD9.403",
     "name": "PDM Project-3",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD9.404",
     "name": "PDM Project-4",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD9.601",
     "name": "PDM-Seminar",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "PD9.602",
     "name": "PDM Seminar",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC1.101",
     "name": "Electrodynamics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "EDY"
+    ]
   },
   {
     "code": "SC1.102",
     "name": "Classical Mechanics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CM"
+    ]
   },
   {
     "code": "SC1.110",
     "name": "Science 1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SCI1"
+    ]
   },
   {
     "code": "SC1.111",
     "name": "Science II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SCI2"
+    ]
   },
   {
     "code": "SC1.203",
     "name": "Quantum Mechanics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "QM"
+    ]
   },
   {
     "code": "SC1.204",
     "name": "Thermodynamics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "TH"
+    ]
   },
   {
     "code": "SC1.205",
     "name": "Statistical Mechanics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SM"
+    ]
   },
   {
     "code": "SC1.308",
     "name": "The Universe Across Scales",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "uas"
+    ]
   },
   {
     "code": "SC1.310",
     "name": "Open Quantum Systems and Quantum Thermodynamics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC1.415",
     "name": "Physics of Early Universe",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PEU"
+    ]
   },
   {
     "code": "SC1.420",
     "name": "Introduction to Particle Physics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "IPP"
+    ]
   },
   {
     "code": "SC1.421",
     "name": "Introduction to Quantum Field Theory",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC1.425",
     "name": "Topics in Physics",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC1.440",
     "name": "Dynamical Process in Complex Networks",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC2.101",
     "name": "General and Structural Chemistry",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "GSC"
+    ]
   },
   {
     "code": "SC2.202",
     "name": "Organic Chemistry",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "OC"
+    ]
   },
   {
     "code": "SC2.203",
     "name": "Biomolecular Structures",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BMSTR"
+    ]
   },
   {
     "code": "SC2.301",
     "name": "Physics of Soft Condensed Matter",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "PSCM"
+    ]
   },
   {
     "code": "SC2.304",
     "name": "Spectroscopy",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC2.305",
     "name": "Chemical Kinetics and Reaction Dynamics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CKRD"
+    ]
   },
   {
     "code": "SC2.309",
     "name": "Chemistry Topics for Engineers",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CTE"
+    ]
   },
   {
     "code": "SC2.315",
     "name": "Molecular Symmetry and Quantum Mechanics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MSQM"
+    ]
   },
   {
     "code": "SC2.316",
     "name": "Molecular Modeling and Simulations",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MMS"
+    ]
   },
   {
     "code": "SC2.401",
     "name": "Topics in Nanosciences",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC3.101",
     "name": "Introduction to Biology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "ITB"
+    ]
   },
   {
     "code": "SC3.202",
     "name": "Bioinformatics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "bioinf"
+    ]
   },
   {
     "code": "SC3.203",
     "name": "Systems Biology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SB"
+    ]
   },
   {
     "code": "SC3.316",
     "name": "Mathematical Models in Biology",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MMB"
+    ]
   },
   {
     "code": "SC3.321",
     "name": "Biomolecular Structure Interaction & Dynamics",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "BMSTR"
+    ]
   },
   {
     "code": "SC3.404",
     "name": "Molecular Biology",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC3.410",
     "name": "NGS Data Analysis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "SC4.101",
     "name": "Computing in Sciences-1",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CIS1"
+    ]
   },
   {
     "code": "SC4.102",
     "name": "Computing in Sciences II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "CIS2"
+    ]
   },
   {
     "code": "SC4.110",
     "name": "Science Lab I",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SL1"
+    ]
   },
   {
     "code": "SC4.111",
     "name": "Science Lab II",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "SL2"
+    ]
   },
   {
     "code": "SC4.411",
     "name": "Machine Learning for Natural Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MLNS"
+    ]
   },
   {
     "code": "SC5.450",
     "name": "Mathematical Methods in Sciences",
-    "description": ""
+    "description": "",
+    "shortnames": [
+      "MMS"
+    ]
   },
   {
     "code": "SC9.605",
     "name": "Thesis",
-    "description": ""
+    "description": "",
+    "shortnames": []
   },
   {
     "code": "TBD",
     "name": "Structural Safety of Built Infrastructure",
-    "description": ""
+    "description": "",
+    "shortnames": []
   }
 ]
