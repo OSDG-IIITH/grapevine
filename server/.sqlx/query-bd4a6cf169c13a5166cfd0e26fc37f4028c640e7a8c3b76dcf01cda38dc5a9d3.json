@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT f.id, f.slug, f.name,\n                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as \"overall!: f64\"\n           FROM faculty f\n           JOIN faculty_labs fl ON fl.faculty_id = f.id\n           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id\n           WHERE fl.lab_id = $1\n           GROUP BY f.id, f.slug, f.name\n           ORDER BY f.name",
+  "query": "SELECT f.id, f.slug, f.name,\n                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as \"overall!: f64\"\n           FROM faculty f\n           JOIN faculty_labs fl ON fl.faculty_id = f.id\n           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id\n           WHERE fl.lab_id = $1 AND f.deleted_at IS NULL\n           GROUP BY f.id, f.slug, f.name\n           ORDER BY f.name",
   "describe": {
     "columns": [
       {
@@ -36,5 +36,5 @@
       null
     ]
   },
-  "hash": "24396e0673300c7d66ab6a67e7790b3ad9b7dd7297de0abf67011b02d5698354"
+  "hash": "bd4a6cf169c13a5166cfd0e26fc37f4028c640e7a8c3b76dcf01cda38dc5a9d3"
 }

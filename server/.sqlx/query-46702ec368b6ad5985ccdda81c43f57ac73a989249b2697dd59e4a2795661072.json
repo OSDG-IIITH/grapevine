@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT f.id, f.slug, f.name, f.bio,\n                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as \"overall!: f64\"\n           FROM faculty f\n           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id\n           WHERE f.slug = $1\n           GROUP BY f.id, f.slug, f.name, f.bio",
+  "query": "SELECT f.id, f.slug, f.name,\n                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as \"overall!: f64\"\n           FROM faculty f\n           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id\n           WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)\n           GROUP BY f.id, f.slug, f.name\n           ORDER BY f.name",
   "describe": {
     "columns": [
       {
@@ -20,11 +20,6 @@
       },
       {
         "ordinal": 3,
-        "name": "bio",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
         "name": "overall!: f64",
         "type_info": "Float8"
       }
@@ -38,9 +33,8 @@
       false,
       false,
       false,
-      true,
       null
     ]
   },
-  "hash": "8b7ab180f16b32917e219993cac2180968621c14dfd01ce32c54eda4da1553c6"
+  "hash": "46702ec368b6ad5985ccdda81c43f57ac73a989249b2697dd59e4a2795661072"
 }

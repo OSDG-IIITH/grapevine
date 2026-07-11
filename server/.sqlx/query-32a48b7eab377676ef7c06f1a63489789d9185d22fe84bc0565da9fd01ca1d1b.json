@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, shortname, name, description FROM labs WHERE shortname = $1",
+  "query": "SELECT l.id, l.shortname, l.name\n           FROM faculty_labs fl\n           JOIN labs l ON l.id = fl.lab_id AND l.deleted_at IS NULL\n           WHERE fl.faculty_id = $1",
   "describe": {
     "columns": [
       {
@@ -17,11 +17,6 @@
         "ordinal": 2,
         "name": "name",
         "type_info": "Text"
-      },
-      {
-        "ordinal": 3,
-        "name": "description",
-        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -32,9 +27,8 @@
     "nullable": [
       false,
       false,
-      false,
-      true
+      false
     ]
   },
-  "hash": "372f16d25572cd4cf8225503e99deb325d3db246fb17f0b31259c81904d01aad"
+  "hash": "32a48b7eab377676ef7c06f1a63489789d9185d22fe84bc0565da9fd01ca1d1b"
 }

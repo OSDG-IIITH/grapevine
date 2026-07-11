@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE faculty SET deleted_at = NULL WHERE slug = $1 AND deleted_at IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6bd97037b8f7256dbdd4380b57b23992331026a6888dc1cfbe3d45bed66f8ebc"
+}
