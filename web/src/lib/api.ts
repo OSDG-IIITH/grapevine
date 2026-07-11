@@ -346,6 +346,22 @@ export async function proposeReview(
 	return res;
 }
 
+export async function deleteCourse(code: string): Promise<boolean> {
+	const res = await apivoid(`/courses/${encodeURIComponent(code)}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function getDeletedCourses(): Promise<{ code: string; name: string; deleted_at: string }[] | null> {
+	return apifetch('/admin/deleted-courses');
+}
+
+export async function restoreCourse(code: string): Promise<boolean> {
+	const res = await apivoid(`/admin/deleted-courses/${encodeURIComponent(code)}/restore`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
+}
+
 export async function getProposedOfferings(): Promise<ProposedOfferingResponse[] | null> {
 	return apifetch<ProposedOfferingResponse[]>('/admin/proposed');
 }

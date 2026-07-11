@@ -93,6 +93,16 @@ pub struct ProposeReviewRequest {
     pub faculty_ids: Option<Vec<String>>,
 }
 
+pub async fn delete(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(code): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    course::soft_delete(&s.pool, &code).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn propose_review(
     State(s): State<AppState>,
     user: AuthUser,

@@ -91,7 +91,8 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
            LEFT JOIN course_reviews r ON r.offering_id = o.id
-           WHERE ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
+           WHERE c.deleted_at IS NULL
+             AND ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
              AND ($2::text IS NULL OR EXISTS (
                SELECT 1 FROM offerings oi
                JOIN offering_faculty ofac ON ofac.offering_id = oi.id
@@ -251,10 +252,38 @@ pub async fn update_offering_faculty(pool: &PgPool, offering_id: &str, faculty_i
 }
 
 pub async fn id_by_code(pool: &PgPool, code: &str) -> Result<String, AppError> {
-    sqlx::query_scalar!("SELECT id FROM courses WHERE code = $1", code)
+    sqlx::query_scalar!("SELECT id FROM courses WHERE code = $1 AND deleted_at IS NULL", code)
         .fetch_optional(pool)
         .await?
         .ok_or(AppError::NotFound)
+}
+
+pub async fn soft_delete(pool: &PgPool, code: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE courses SET deleted_at = NOW() WHERE code = $1 AND deleted_at IS NULL", code)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+pub async fn restore(pool: &PgPool, code: &str) -> Result<(), AppError> {
+    let n = sqlx::query!("UPDATE courses SET deleted_at = NULL WHERE code = $1 AND deleted_at IS NOT NULL", code)
+        .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeletedCourse {
+    pub code: String,
+    pub name: String,
+    pub deleted_at: chrono::DateTime<chrono::Utc>,
+}
+
+pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedCourse>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT code, name, deleted_at as "deleted_at!: chrono::DateTime<chrono::Utc>"
+           FROM courses WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC"#
+    )
+    .fetch_all(pool).await?;
+    Ok(rows.into_iter().map(|r| DeletedCourse { code: r.code, name: r.name, deleted_at: r.deleted_at }).collect())
 }
 
 pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppError> {
@@ -265,7 +294,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
            LEFT JOIN course_reviews r ON r.offering_id = o.id
-           WHERE c.code = $1
+           WHERE c.code = $1 AND c.deleted_at IS NULL
            GROUP BY c.id, c.code, c.name, c.description, c.type"#,
         code
     )

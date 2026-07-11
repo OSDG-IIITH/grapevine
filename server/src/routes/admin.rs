@@ -10,4 +10,6 @@ pub fn router() -> Router<AppState> {
         .route("/admin/proposed", get(admin::list_proposed))
         .route("/admin/proposed/:id/approve", post(admin::approve_proposed))
         .route("/admin/proposed/:id/reject", post(admin::reject_proposed))
+        .route("/admin/deleted-courses", get(admin::deleted_courses))
+        .route("/admin/deleted-courses/:code/restore", post(admin::restore_course))
 }

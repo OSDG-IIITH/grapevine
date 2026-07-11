@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getFlags, dismissFlag, deleteFlaggedReview, exportSeedData, getProposedOfferings, approveProposedOffering, rejectProposedOffering } from '$lib/api';
+	import { getFlags, dismissFlag, deleteFlaggedReview, exportSeedData, getProposedOfferings, approveProposedOffering, rejectProposedOffering, getDeletedCourses, restoreCourse } from '$lib/api';
 	import { currentUser } from '$lib/stores';
 	import type { FlagResponse, ProposedOfferingResponse } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -8,19 +8,27 @@
 
 	let items = $state<FlagResponse[]>([]);
 	let proposed = $state<ProposedOfferingResponse[]>([]);
+	let deleted = $state<{ code: string; name: string; deleted_at: string }[]>([]);
 	let loading = $state(true);
 	let error = $state(false);
-	let activetab = $state<'flagged' | 'proposed'>('flagged');
+	let activetab = $state<'flagged' | 'proposed' | 'deleted'>('flagged');
 
 	onMount(async () => {
-		const [flags, props] = await Promise.all([getFlags(), getProposedOfferings()]);
+		const [flags, props, del] = await Promise.all([getFlags(), getProposedOfferings(), getDeletedCourses()]);
 		if (flags === null || props === null) error = true;
 		else {
 			items = flags;
 			proposed = props;
+			deleted = del ?? [];
 		}
 		loading = false;
 	});
+
+	async function doRestore(code: string) {
+		if (await restoreCourse(code)) {
+			deleted = deleted.filter((d) => d.code !== code);
+		}
+	}
 
 	async function dismiss(id: string) {
 		if (await dismissFlag(id)) items = items.filter((i) => i.id !== id);
@@ -111,8 +119,9 @@
 		<div class="mb-6">
 			<Tabs items={[
 				{ id: 'flagged', label: 'Flagged reviews', count: items.length },
-				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length }
-			]} active={activetab} onchange={(id) => { activetab = id as 'flagged' | 'proposed'; }} />
+				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length },
+				{ id: 'deleted', label: 'Deleted courses', count: deleted.length }
+			]} active={activetab} onchange={(id) => { activetab = id as 'flagged' | 'proposed' | 'deleted'; }} />
 		</div>
 
 		{#if activetab === 'flagged'}
@@ -177,7 +186,7 @@
 					</div>
 				{/each}
 			{/if}
-		{:else}
+		{:else if activetab === 'proposed'}
 			{#if proposed.length === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
 					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
@@ -242,6 +251,29 @@
 								onclick={() => rejectProp(p.id)}
 							>Reject</button>
 						</div>
+					</div>
+				{/each}
+			{/if}
+		{:else if activetab === 'deleted'}
+			{#if deleted.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
+					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
+					No deleted courses.
+				</div>
+			{:else}
+				{#each deleted as d (d.code)}
+					<div
+						class="mb-3 flex items-center gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[22px] py-[16px]"
+						style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
+					>
+						<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{d.code}</span>
+						<span class="flex-1 text-[14px] text-[var(--fg)]">{d.name}</span>
+						<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
+						<button
+							type="button"
+							onclick={() => doRestore(d.code)}
+							class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+						>Restore</button>
 					</div>
 				{/each}
 			{/if}

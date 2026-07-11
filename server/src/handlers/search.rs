@@ -59,7 +59,7 @@ async fn search_courses(pool: &PgPool, q: &str) -> Result<Vec<(f32, String, Stri
     Ok(sqlx::query_as(
         "SELECT GREATEST(similarity(name, $1), similarity(code, $1))::real AS score, name, code
          FROM courses
-         WHERE similarity(name, $1) > 0.1 OR similarity(code, $1) > 0.1
+         WHERE (similarity(name, $1) > 0.1 OR similarity(code, $1) > 0.1) AND deleted_at IS NULL
          ORDER BY score DESC LIMIT 10"
     )
     .bind(q)

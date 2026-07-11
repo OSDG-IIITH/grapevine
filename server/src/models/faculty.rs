@@ -179,7 +179,7 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
                   c.id as cid, c.code, c.name as cname
            FROM offerings o
            JOIN offering_faculty ofac ON ofac.offering_id = o.id
-           JOIN courses c ON c.id = o.course_id
+           JOIN courses c ON c.id = o.course_id AND c.deleted_at IS NULL
            WHERE ofac.faculty_id = $1
            ORDER BY o.year DESC, o.season"#,
         row.id

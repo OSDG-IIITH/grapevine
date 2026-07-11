@@ -208,7 +208,7 @@ pub async fn delete_review(
     Err(AppError::NotFound)
 }
 
-use crate::models::offering::Season;
+use crate::models::{course, offering::Season};
 
 #[derive(Serialize)]
 pub struct ProposedOfferingResponse {
@@ -330,5 +330,23 @@ pub async fn reject_proposed(
         .rows_affected();
 
     if rows == 0 { return Err(AppError::NotFound); }
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn deleted_courses(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<course::DeletedCourse>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(course::list_deleted(&s.pool).await?))
+}
+
+pub async fn restore_course(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(code): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    course::restore(&s.pool, &code).await?;
     Ok(StatusCode::NO_CONTENT)
 }
