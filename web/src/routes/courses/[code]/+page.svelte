@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getCourse, getCourseReviews, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse } from '$lib/api';
-	import type { CourseDetail, CourseReview, Offering, FacultyLean } from '$lib/types';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
@@ -12,6 +12,7 @@
 	import Tabs from '$lib/components/Tabs.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
+	import Combobox from '$lib/components/Combobox.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 
 	const code = $derived($page.params.code);
@@ -27,8 +28,12 @@
 	let editname = $state('');
 	let editdesc = $state('');
 	let editofferings = $state<Offering[]>([]);
+	let editpredecessors = $state<CourseRef[]>([]);
+	let editsuccessors = $state<CourseRef[]>([]);
 	let allfaculty = $state<FacultyLean[]>([]);
 	let facultyloaded = $state(false);
+	let allcourses = $state<CourseLean[]>([]);
+	let coursesloaded = $state(false);
 	let creating = $state(false);
 	let crseason = $state('M');
 	let cryear = $state('');
@@ -118,12 +123,13 @@
 		editname = course.name;
 		editdesc = course.description;
 		editofferings = course.offerings.map((o) => ({ ...o, faculty: [...o.faculty] }));
+		editpredecessors = [...course.predecessors];
+		editsuccessors = [...course.successors];
 		editing = true;
-		if (!facultyloaded) {
-			const all = await getFaculty();
-			allfaculty = all ?? [];
-			facultyloaded = true;
-		}
+		const loads: Promise<unknown>[] = [];
+		if (!facultyloaded) loads.push(getFaculty().then((a) => { allfaculty = a ?? []; facultyloaded = true; }));
+		if (!coursesloaded) loads.push(getCourses().then((a) => { allcourses = a ?? []; coursesloaded = true; }));
+		await Promise.all(loads);
 	}
 
 	function cancelEdit() {
@@ -196,13 +202,29 @@
 	async function saveEdit() {
 		if (!course) return;
 		saving = true;
-		const updated = await updateCourse(course.code, { name: editname, description: editdesc });
+		const updated = await updateCourse(course.code, {
+			name: editname,
+			description: editdesc,
+			type: course.type,
+			predecessor_ids: editpredecessors.map((c) => c.id),
+			successor_ids: editsuccessors.map((c) => c.id),
+		});
 		saving = false;
 		if (updated) {
 			course = updated;
 			editing = false;
 		}
 	}
+
+	const availablepredecessors = $derived(
+		allcourses.filter((c) => c.id !== course?.id && !editpredecessors.some((p) => p.id === c.id))
+	);
+	const availablesuccessors = $derived(
+		allcourses.filter((c) => c.id !== course?.id && !editsuccessors.some((s) => s.id === c.id))
+	);
+
+	let predpick = $state('');
+	let succpick = $state('');
 
 	const axes = $derived((() => {
 		if (!reviews.length) return { difficulty: 0, workload: 0, teaching: 0, grading: 0, content: 0 };
@@ -475,10 +497,115 @@
 					{/if}
 				{/if}
 			</div>
+
+			<!-- succession editor -->
+			<div class="mb-7 overflow-hidden rounded-[10px] border border-[var(--border)]" style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107, 143, 111, 0.04), transparent 48%);">
+				<div class="border-b border-[var(--border)] px-5 py-[13px]">
+					<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Succession</span>
+				</div>
+				<!-- predecessors -->
+				<div class="flex flex-wrap items-center gap-[6px] border-b border-[var(--border)] px-5 py-[13px]">
+					<span class="mr-1 shrink-0 text-[12px] text-[var(--fg-3)]">Replaces</span>
+					{#each editpredecessors as c (c.id)}
+						<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
+							<span style="font-family: var(--mono); font-size: 11px; color: var(--fg-3);">{c.code}</span>
+							<span class="ml-[3px]">{c.name}</span>
+							<button
+								type="button"
+								onclick={() => { editpredecessors = editpredecessors.filter((x) => x.id !== c.id); }}
+								aria-label="Remove {c.name}"
+								class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+							>
+								<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+									<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+								</svg>
+							</button>
+						</span>
+					{/each}
+					{#if availablepredecessors.length > 0}
+						<Combobox
+							items={availablepredecessors.map((c) => ({ value: c.id, label: c.name }))}
+							bind:value={predpick}
+							placeholder="+ predecessor"
+							searchplaceholder="search courses…"
+							popoverwidth="260px"
+							onselect={(id) => {
+								const c = allcourses.find((x) => x.id === id);
+								if (c) editpredecessors = [...editpredecessors, { id: c.id, code: c.code, name: c.name }];
+								predpick = '';
+							}}
+							class="rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
+							style="font-family: var(--mono);"
+						/>
+					{/if}
+				</div>
+				<!-- successors -->
+				<div class="flex flex-wrap items-center gap-[6px] px-5 py-[13px]">
+					<span class="mr-1 shrink-0 text-[12px] text-[var(--fg-3)]">Replaced by</span>
+					{#each editsuccessors as c (c.id)}
+						<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
+							<span style="font-family: var(--mono); font-size: 11px; color: var(--fg-3);">{c.code}</span>
+							<span class="ml-[3px]">{c.name}</span>
+							<button
+								type="button"
+								onclick={() => { editsuccessors = editsuccessors.filter((x) => x.id !== c.id); }}
+								aria-label="Remove {c.name}"
+								class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
+							>
+								<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+									<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+								</svg>
+							</button>
+						</span>
+					{/each}
+					{#if availablesuccessors.length > 0}
+						<Combobox
+							items={availablesuccessors.map((c) => ({ value: c.id, label: c.name }))}
+							bind:value={succpick}
+							placeholder="+ successor"
+							searchplaceholder="search courses…"
+							popoverwidth="260px"
+							onselect={(id) => {
+								const c = allcourses.find((x) => x.id === id);
+								if (c) editsuccessors = [...editsuccessors, { id: c.id, code: c.code, name: c.name }];
+								succpick = '';
+							}}
+							class="rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
+							style="font-family: var(--mono);"
+						/>
+					{/if}
+				</div>
+			</div>
 		{:else}
 			<p class="mb-7 mt-[14px] max-w-[720px] leading-[1.65] text-[var(--fg-2)]" style="font-size: 15px; text-wrap: pretty;">
 				{course.description}
 			</p>
+			{#if course.predecessors.length > 0 || course.successors.length > 0}
+				<div class="mb-7 flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+					{#if course.predecessors.length > 0}
+						<span class="flex flex-wrap items-center gap-[6px] text-[var(--fg-3)]">
+							Replaces
+							{#each course.predecessors as p (p.id)}
+								<a href="{base}/courses/{p.code}" class="flex items-center gap-[5px] rounded-[5px] border border-[var(--border)] bg-[var(--bg-2)] px-[8px] py-[3px] text-[12px] text-[var(--fg-2)] transition-colors hover:text-[var(--fg)]">
+									<span style="font-family: var(--mono); font-size: 11px; color: var(--fg-3);">{p.code}</span>
+									<span>{p.name}</span>
+								</a>
+							{/each}
+						</span>
+					{/if}
+					{#if course.successors.length > 0}
+						<span class="flex flex-wrap items-center gap-[6px] text-[var(--fg-3)]">
+							Replaced by
+							{#each course.successors as s (s.id)}
+								<a href="{base}/courses/{s.code}" class="flex items-center gap-[5px] rounded-[5px] border border-[var(--border)] bg-[var(--bg-2)] px-[8px] py-[3px] text-[12px] text-[var(--fg-2)] transition-colors hover:text-[var(--fg)]">
+									<span style="font-family: var(--mono); font-size: 11px; color: var(--fg-3);">{s.code}</span>
+									<span>{s.name}</span>
+								</a>
+							{/each}
+						</span>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 
 		<RatingsBlock

@@ -59,6 +59,12 @@ export interface ProposedOfferingLean {
 	year: number;
 }
 
+export interface CourseRef {
+	id: string;
+	code: string;
+	name: string;
+}
+
 export interface CourseDetail {
 	id: string;
 	code: string;
@@ -66,6 +72,8 @@ export interface CourseDetail {
 	description: string;
 	type: string;
 	overall: number;
+	predecessors: CourseRef[];
+	successors: CourseRef[];
 	offerings: Offering[];
 	proposed_offerings: ProposedOfferingLean[];
 }
@@ -216,6 +224,8 @@ export interface PatchCourse {
 	name: string;
 	description: string;
 	type: string;
+	predecessor_ids?: string[];
+	successor_ids?: string[];
 }
 
 export interface PatchFaculty {

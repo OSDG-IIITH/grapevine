@@ -21,6 +21,8 @@ pub struct PatchCourse {
     pub description: String,
     #[serde(rename = "type")]
     pub kind: CourseType,
+    pub predecessor_ids: Option<Vec<String>>,
+    pub successor_ids: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type)]
@@ -45,6 +47,13 @@ pub struct CourseLean {
     #[serde(rename = "type")]
     pub kind: CourseType,
     pub overall: f64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CourseRef {
+    pub id: String,
+    pub code: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -79,6 +88,8 @@ pub struct CourseDetail {
     #[serde(rename = "type")]
     pub kind: CourseType,
     pub overall: f64,
+    pub predecessors: Vec<CourseRef>,
+    pub successors: Vec<CourseRef>,
     pub offerings: Vec<OfferingDetail>,
     pub proposed_offerings: Vec<ProposedOfferingLean>,
 }
@@ -133,17 +144,40 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
 }
 
 pub async fn update_course(pool: &PgPool, code: &str, patch: &PatchCourse) -> Result<CourseDetail, AppError> {
-    let rows = sqlx::query!(
-        r#"UPDATE courses SET name = $1, description = $2, type = $3 WHERE code = $4"#,
-        patch.name,
-        patch.description,
-        patch.kind.clone() as CourseType,
-        code
+    let mut tx = pool.begin().await?;
+
+    let id = sqlx::query_scalar!(
+        r#"UPDATE courses SET name = $1, description = $2, type = $3 WHERE code = $4 AND deleted_at IS NULL RETURNING id"#,
+        patch.name, patch.description, patch.kind.clone() as CourseType, code
     )
-    .execute(pool)
-    .await?
-    .rows_affected();
-    if rows == 0 { return Err(AppError::NotFound); }
+    .fetch_optional(&mut *tx).await?
+    .ok_or(AppError::NotFound)?;
+
+    if let Some(ref pids) = patch.predecessor_ids {
+        sqlx::query!("DELETE FROM course_succession WHERE successor_id = $1", id)
+            .execute(&mut *tx).await?;
+        for pid in pids {
+            sqlx::query!(
+                "INSERT INTO course_succession (predecessor_id, successor_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                pid, id
+            )
+            .execute(&mut *tx).await?;
+        }
+    }
+
+    if let Some(ref sids) = patch.successor_ids {
+        sqlx::query!("DELETE FROM course_succession WHERE predecessor_id = $1", id)
+            .execute(&mut *tx).await?;
+        for sid in sids {
+            sqlx::query!(
+                "INSERT INTO course_succession (predecessor_id, successor_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                id, sid
+            )
+            .execute(&mut *tx).await?;
+        }
+    }
+
+    tx.commit().await?;
     get_by_code(pool, code).await
 }
 
@@ -344,9 +378,29 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
         id: pr.id, season: pr.season, year: pr.year
     }).collect();
 
+    let pred_rows = sqlx::query!(
+        "SELECT c.id, c.code, c.name FROM courses c
+         JOIN course_succession cs ON cs.predecessor_id = c.id
+         WHERE cs.successor_id = $1 AND c.deleted_at IS NULL",
+        row.id
+    )
+    .fetch_all(pool).await?;
+
+    let succ_rows = sqlx::query!(
+        "SELECT c.id, c.code, c.name FROM courses c
+         JOIN course_succession cs ON cs.successor_id = c.id
+         WHERE cs.predecessor_id = $1 AND c.deleted_at IS NULL",
+        row.id
+    )
+    .fetch_all(pool).await?;
+
+    let predecessors = pred_rows.into_iter().map(|r| CourseRef { id: r.id, code: r.code, name: r.name }).collect();
+    let successors = succ_rows.into_iter().map(|r| CourseRef { id: r.id, code: r.code, name: r.name }).collect();
+
     Ok(CourseDetail {
         id: row.id, code: row.code, name: row.name,
         description: row.description.unwrap_or_default(),
-        kind: row.kind, overall: row.overall, offerings, proposed_offerings,
+        kind: row.kind, overall: row.overall,
+        predecessors, successors, offerings, proposed_offerings,
     })
 }
