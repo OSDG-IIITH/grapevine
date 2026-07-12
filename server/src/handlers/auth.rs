@@ -5,7 +5,7 @@ use ulid::Ulid;
 use crate::{
     auth::{
         password,
-        session::{AuthUser, AUTH_METHOD_KEY, USER_ID_KEY, VERIFIED_KEY},
+        session::{AuthUser, AUTH_METHOD_KEY, IS_ADMIN_KEY, USER_ID_KEY, VERIFIED_KEY},
         validate::{normalize_answer, normalize_username, validate_password},
     },
     error::AppError,
@@ -158,6 +158,7 @@ pub async fn register(
 
     session.insert(USER_ID_KEY, &row.id).await.map_err(|_| AppError::Internal)?;
     session.insert(VERIFIED_KEY, false).await.map_err(|_| AppError::Internal)?;
+    session.insert(IS_ADMIN_KEY, row.is_admin).await.map_err(|_| AppError::Internal)?;
     session.insert(AUTH_METHOD_KEY, "local").await.map_err(|_| AppError::Internal)?;
 
     Ok(Json(Me {
@@ -198,6 +199,7 @@ pub async fn login_local(
 
     session.insert(USER_ID_KEY, &row.id).await.map_err(|_| AppError::Internal)?;
     session.insert(VERIFIED_KEY, row.verified).await.map_err(|_| AppError::Internal)?;
+    session.insert(IS_ADMIN_KEY, row.is_admin).await.map_err(|_| AppError::Internal)?;
     session.insert(AUTH_METHOD_KEY, "local").await.map_err(|_| AppError::Internal)?;
 
     Ok(Json(Me {

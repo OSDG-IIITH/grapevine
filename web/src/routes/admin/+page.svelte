@@ -7,7 +7,9 @@
 		getDeletedFaculty, restoreFaculty,
 		getDeletedLabs, restoreLab,
 		getDeletedOfferings, restoreOffering,
-		getAuditLogs, restoreReview
+		getAuditLogs, restoreReview,
+		getModerators, addCasModerator, addLocalModerator, demoteModerator,
+		type Moderator
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
 	import type { FlagResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
@@ -23,6 +25,11 @@
 	let deletedlabs = $state<{ shortname: string; name: string; deleted_at: string }[]>([]);
 	let deletedofferings = $state<DeletedOffering[]>([]);
 	let auditlogs = $state<AuditLog[]>([]);
+	let moderators = $state<Moderator[]>([]);
+	let modtype = $state<'cas' | 'local'>('cas');
+	let modinput = $state({ casid: '', username: '' });
+	let modsubmitting = $state(false);
+
 	const restoreactionmap: Record<string, string> = {
 		DELETE_REVIEW: 'RESTORE_REVIEW',
 		DELETE_OFFERING: 'RESTORE_OFFERING',
@@ -33,13 +40,13 @@
 	};
 	let loading = $state(true);
 	let error = $state(false);
-	let activetab = $state<'flagged' | 'proposed' | 'deleted' | 'audit'>('audit');
+	let activetab = $state<'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators'>('audit');
 
 	onMount(async () => {
-		const [flags, props, del, delfac, dellabs, deloff, logs] = await Promise.all([
+		const [flags, props, del, delfac, dellabs, deloff, logs, mods] = await Promise.all([
 			getFlags(), getProposedOfferings(),
 			getDeletedCourses(), getDeletedFaculty(), getDeletedLabs(), getDeletedOfferings(),
-			getAuditLogs()
+			getAuditLogs(), getModerators()
 		]);
 		if (flags === null || props === null) error = true;
 		else {
@@ -50,6 +57,7 @@
 			deletedlabs = dellabs ?? [];
 			deletedofferings = deloff ?? [];
 			auditlogs = logs ?? [];
+			moderators = mods ?? [];
 		}
 		loading = false;
 	});
@@ -143,6 +151,25 @@
 		return labels[action] ?? action.toLowerCase().replace(/_/g, ' ');
 	}
 
+	async function doAddMod() {
+		modsubmitting = true;
+		let ok = false;
+		if (modtype === 'cas') {
+			ok = await addCasModerator(modinput.casid.trim());
+		} else {
+			ok = await addLocalModerator(modinput.username.trim());
+		}
+		if (ok) {
+			modinput = { casid: '', username: '' };
+			moderators = (await getModerators()) ?? moderators;
+		}
+		modsubmitting = false;
+	}
+
+	async function doDemote(id: string) {
+		if (await demoteModerator(id)) moderators = moderators.filter((m) => m.id !== id);
+	}
+
 	let exporting = $state(false);
 
 	async function doexport() {
@@ -216,7 +243,8 @@
 				{ id: 'audit', label: 'Audit log', count: auditlogs.length },
 				{ id: 'flagged', label: 'Flagged reviews', count: items.length },
 				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length },
-				{ id: 'deleted', label: 'Deleted', count: totaldeleted }
+				{ id: 'deleted', label: 'Deleted', count: totaldeleted },
+				{ id: 'moderators', label: 'Moderators', count: moderators.length }
 			]} active={activetab} onchange={(id) => { activetab = id as typeof activetab; }} />
 		</div>
 
@@ -440,6 +468,71 @@
 					{/each}
 				{/if}
 			{/if}
+		{:else if activetab === 'moderators'}
+			<div class="mb-6 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[22px]">
+				<div class="mb-4 text-[13px] font-medium text-[var(--fg)]">Add moderator</div>
+				<div class="mb-4 flex gap-2">
+					<button
+						type="button"
+						onclick={() => { modtype = 'cas'; }}
+						class="rounded-[6px] border px-3 py-[5px] text-[12px] transition-colors {modtype === 'cas' ? 'border-[rgba(107,143,111,0.3)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] bg-transparent text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+					>CAS account</button>
+					<button
+						type="button"
+						onclick={() => { modtype = 'local'; }}
+						class="rounded-[6px] border px-3 py-[5px] text-[12px] transition-colors {modtype === 'local' ? 'border-[rgba(107,143,111,0.3)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] bg-transparent text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+					>Local account</button>
+				</div>
+				{#if modtype === 'cas'}
+					<input
+						type="email"
+						placeholder="CAS email"
+						bind:value={modinput.casid}
+						class="mb-3 w-full rounded-[7px] border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[13px] text-[var(--fg)] placeholder-[var(--fg-4)] outline-none focus:border-[var(--border-strong)]"
+					/>
+				{:else}
+					<input
+						type="text"
+						placeholder="Username"
+						bind:value={modinput.username}
+						class="mb-3 w-full rounded-[7px] border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[13px] text-[var(--fg)] placeholder-[var(--fg-4)] outline-none focus:border-[var(--border-strong)]"
+					/>
+				{/if}
+				<button
+					type="button"
+					onclick={doAddMod}
+					disabled={modsubmitting}
+					class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[14px] py-2 text-[13px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)] disabled:opacity-50"
+				>{modsubmitting ? 'Adding…' : 'Add moderator'}</button>
+			</div>
+
+			{#if moderators.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
+					No moderators yet.
+				</div>
+			{:else}
+				{#each moderators as mod (mod.id)}
+					<div class="mb-2 flex items-center gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px]">
+						<div class="flex-1 min-w-0">
+							<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+								<span class="text-[14px] font-medium text-[var(--fg)]">{mod.display_name}</span>
+								<span class="rounded-[4px] border px-[6px] py-[1px] text-[11px] {mod.cas_id ? 'border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border-strong)] text-[var(--fg-3)]'}">{mod.cas_id ? 'CAS' : 'Local'}</span>
+								<span class="text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">{mod.cas_id ?? mod.username ?? ''}</span>
+							</div>
+						</div>
+						<span class="shrink-0 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(mod.created_at)}</span>
+						{#if mod.id !== $currentUser?.id}
+							<button
+								type="button"
+								onclick={() => doDemote(mod.id)}
+								aria-label="Demote {mod.display_name}"
+								class="shrink-0 inline-flex items-center rounded-[6px] border border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)] px-[10px] py-[4px] text-[11px] font-medium text-[var(--danger)] transition-colors hover:bg-[rgba(217,138,138,0.14)]"
+							>Demote</button>
+						{/if}
+					</div>
+				{/each}
+			{/if}
+
 		{/if}
 	{/if}
 </div>

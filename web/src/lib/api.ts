@@ -453,3 +453,21 @@ export async function restoreOffering(id: string): Promise<boolean> {
 	if (res) listCache.clear();
 	return res;
 }
+
+export type Moderator = { id: string; display_name: string; username: string | null; cas_id: string | null; created_at: string };
+
+export async function getModerators(): Promise<Moderator[] | null> {
+	return apifetch<Moderator[]>('/admin/moderators');
+}
+
+export async function addCasModerator(casid: string): Promise<boolean> {
+	return apivoid('/admin/moderators/cas', json({ cas_id: casid }));
+}
+
+export async function addLocalModerator(username: string, displayName?: string, password?: string): Promise<boolean> {
+	return apivoid('/admin/moderators/local', json({ username, display_name: displayName, password }));
+}
+
+export async function demoteModerator(id: string): Promise<boolean> {
+	return apivoid(`/admin/moderators/${id}/demote`, { method: 'POST' });
+}

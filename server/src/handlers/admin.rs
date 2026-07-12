@@ -4,8 +4,13 @@ use axum::{
     Json,
 };
 use chrono::{DateTime, Utc};
-use serde::Serialize;
-use crate::{auth::session::AuthUser, error::AppError, models::{audit, course, faculty, lab, offering::Season}, state::AppState};
+use serde::{Deserialize, Serialize};
+use crate::{
+    auth::{session::AuthUser, validate::normalize_username},
+    error::AppError,
+    models::{audit, course, faculty, lab, offering::Season},
+    state::AppState,
+};
 
 #[derive(Serialize)]
 struct SeedLab { name: String, shortname: String, description: Option<String> }
@@ -488,6 +493,169 @@ pub async fn audit_logs(
 ) -> Result<Json<Vec<audit::AuditLog>>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     Ok(Json(audit::list(&s.pool).await?))
+}
+
+#[derive(Serialize)]
+pub struct ModeratorRow {
+    pub id: String,
+    pub display_name: String,
+    pub username: Option<String>,
+    pub cas_id: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+pub async fn list_moderators(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<ModeratorRow>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    let rows = sqlx::query!(
+        r#"SELECT id, display_name, username, cas_id,
+                  created_at as "created_at!: DateTime<Utc>"
+           FROM users WHERE is_admin = true ORDER BY display_name"#
+    )
+    .fetch_all(&s.pool).await?;
+    Ok(Json(rows.into_iter().map(|r| ModeratorRow {
+        id: r.id,
+        display_name: r.display_name,
+        username: r.username,
+        cas_id: r.cas_id,
+        created_at: r.created_at,
+    }).collect()))
+}
+
+fn name_from_cas_id(cas_id: &str) -> String {
+    let local = cas_id.split('@').next().unwrap_or(cas_id);
+    let mut parts = Vec::new();
+    for part in local.split(|c| c == '.' || c == '_' || c == '-') {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        let mut chars = part.chars();
+        let first = chars.next().map(|c| c.to_uppercase().to_string()).unwrap_or_default();
+        let rest = chars.as_str().to_lowercase();
+        parts.push(format!("{}{}", first, rest));
+    }
+    if parts.is_empty() {
+        cas_id.to_string()
+    } else {
+        parts.join(" ")
+    }
+}
+
+#[derive(Deserialize)]
+pub struct AddCasMod {
+    pub cas_id: String,
+}
+
+pub async fn add_cas_moderator(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<AddCasMod>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let cas_id = body.cas_id.trim().to_lowercase();
+    if cas_id.is_empty() { return Err(AppError::BadRequest("cas_id required".into())); }
+
+    let display_name = name_from_cas_id(&cas_id);
+    let id = ulid::Ulid::new().to_string();
+
+    let row = sqlx::query!(
+        r#"
+        INSERT INTO users (id, cas_id, display_name, is_admin, verified)
+        VALUES ($1, $2, $3, true, true)
+        ON CONFLICT (cas_id) DO UPDATE
+            SET is_admin = true
+        RETURNING id
+        "#,
+        id, cas_id, display_name
+    )
+    .fetch_one(&s.pool)
+    .await?;
+
+    audit::logaction(&s.pool, &user.id, "ADD_MODERATOR", "user", &row.id,
+        Some(serde_json::json!({ "cas_id": cas_id }))).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(Deserialize)]
+pub struct AddLocalMod {
+    pub username: String,
+    pub display_name: Option<String>,
+    pub password: Option<String>,
+}
+
+pub async fn add_local_moderator(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<AddLocalMod>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let username = normalize_username(&body.username).map_err(AppError::BadRequest)?;
+
+    // Check if user already exists
+    let existing = sqlx::query!("SELECT id FROM users WHERE username = $1", username)
+        .fetch_optional(&s.pool)
+        .await?;
+
+    let user_id = if let Some(row) = existing {
+        sqlx::query!("UPDATE users SET is_admin = true WHERE id = $1", row.id)
+            .execute(&s.pool)
+            .await?;
+        row.id
+    } else {
+        let password = body.password.as_deref()
+            .filter(|p| !p.trim().is_empty())
+            .ok_or_else(|| AppError::BadRequest("Password is required to create a new local account".into()))?;
+        
+        crate::auth::validate::validate_password(password).map_err(AppError::BadRequest)?;
+
+        let display_name = body.display_name.as_deref()
+            .map(|d| d.trim().to_string())
+            .filter(|d| !d.is_empty())
+            .unwrap_or_else(|| body.username.trim().to_string());
+
+        let password_hash = crate::auth::password::hash(password).map_err(|_| AppError::Internal)?;
+        let id = ulid::Ulid::new().to_string();
+
+        sqlx::query!(
+            r#"
+            INSERT INTO users (id, username, password_hash, display_name, is_admin, verified)
+            VALUES ($1, $2, $3, $4, true, true)
+            "#,
+            id, username, password_hash, display_name
+        )
+        .execute(&s.pool)
+        .await?;
+        
+        id
+    };
+
+    audit::logaction(&s.pool, &user.id, "ADD_MODERATOR", "user", &user_id,
+        Some(serde_json::json!({ "username": username }))).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn demote_moderator(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    if id == user.id { return Err(AppError::BadRequest("cannot demote yourself".into())); }
+
+    let rows = sqlx::query!(
+        "UPDATE users SET is_admin = false WHERE id = $1 AND is_admin = true RETURNING id",
+        id
+    )
+    .fetch_optional(&s.pool).await?;
+
+    if rows.is_none() { return Err(AppError::NotFound); }
+    audit::logaction(&s.pool, &user.id, "REMOVE_MODERATOR", "user", &id, None).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 #[derive(Serialize)]

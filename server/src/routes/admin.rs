@@ -21,4 +21,8 @@ pub fn router() -> Router<AppState> {
         .route("/admin/deleted-faculty/:slug/restore", post(admin::restore_faculty))
         .route("/admin/deleted-labs", get(admin::deleted_labs))
         .route("/admin/deleted-labs/:shortname/restore", post(admin::restore_lab))
+        .route("/admin/moderators", get(admin::list_moderators))
+        .route("/admin/moderators/cas", post(admin::add_cas_moderator))
+        .route("/admin/moderators/local", post(admin::add_local_moderator))
+        .route("/admin/moderators/:id/demote", post(admin::demote_moderator))
 }
