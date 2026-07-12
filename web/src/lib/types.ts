@@ -149,6 +149,14 @@ export const COURSE_AXIS_LABELS: Record<string, string> = {
 	content: 'Content'
 };
 
+export const COURSE_AXIS_SCALE_LABELS: Record<string, { low: string; high: string }> = {
+	difficulty: { low: 'very difficult', high: 'very easy' },
+	workload: { low: 'very heavy', high: 'very light' },
+	teaching: { low: 'very poor', high: 'very good' },
+	grading: { low: 'very harsh', high: 'very lenient' },
+	content: { low: 'very dull', high: 'very engaging' }
+};
+
 export const ADVISOR_AXIS_ORDER = ['research', 'availability', 'mentorship', 'support', 'workload'] as const;
 
 export const ADVISOR_AXIS_LABELS: Record<string, string> = {
@@ -157,6 +165,14 @@ export const ADVISOR_AXIS_LABELS: Record<string, string> = {
 	mentorship: 'Mentorship',
 	support: 'Support',
 	workload: 'Workload'
+};
+
+export const ADVISOR_AXIS_SCALE_LABELS: Record<string, { low: string; high: string }> = {
+	research: { low: 'very poor', high: 'excellent' },
+	availability: { low: 'rarely available', high: 'very available' },
+	mentorship: { low: 'very poor', high: 'excellent' },
+	support: { low: 'very poor', high: 'excellent' },
+	workload: { low: 'very heavy', high: 'very light' }
 };
 
 export interface FlagResponse {
@@ -268,5 +284,4 @@ export interface AuditLog {
 	previous_state: Record<string, unknown> | null;
 	created_at: string;
 }
-
 

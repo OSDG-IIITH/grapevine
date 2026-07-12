@@ -4,7 +4,14 @@
 	import { onMount, untrack } from 'svelte';
 	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview, proposeReview } from '$lib/api';
 	import type { CourseLean, FacultyLean, Offering } from '$lib/types';
-	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
+	import {
+		COURSE_AXIS_ORDER,
+		COURSE_AXIS_LABELS,
+		COURSE_AXIS_SCALE_LABELS,
+		ADVISOR_AXIS_ORDER,
+		ADVISOR_AXIS_LABELS,
+		ADVISOR_AXIS_SCALE_LABELS
+	} from '$lib/types';
 	import SegBar from '$lib/components/SegBar.svelte';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
@@ -101,6 +108,7 @@
 
 	const axisorder = $derived(kind === 'course' ? [...COURSE_AXIS_ORDER] : [...ADVISOR_AXIS_ORDER]);
 	const axislabels = $derived(kind === 'course' ? COURSE_AXIS_LABELS : ADVISOR_AXIS_LABELS);
+	const axisscalelabels = $derived(kind === 'course' ? COURSE_AXIS_SCALE_LABELS : ADVISOR_AXIS_SCALE_LABELS);
 	const cansubmit = $derived(
 		!submitting &&
 		body.trim().length > 20 &&
@@ -346,15 +354,18 @@
 			<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Ratings
-					<span class="mt-[6px] block text-[12px] normal-case tracking-normal text-[var(--fg-4)]">
-						1 is bad, 5 is good.<br />For workload, 5 means light.
-					</span>
 				</div>
-				<div class="min-w-0" style="display: grid; grid-template-columns: 110px 1fr 30px; gap: 16px 18px; align-items: center;">
+				<div class="min-w-0" style="display: grid; grid-template-columns: 110px 1fr 30px; gap: 18px; align-items: start;">
 					{#each axisorder as k (k)}
-						<div class="text-[13px] text-[var(--fg-2)]">{axislabels[k]}</div>
-						<SegBar score={axes[k] ?? 0} interactive onchange={(v) => (axes = { ...axes, [k]: v })} />
-						<div class="text-right text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">
+						<div class="pt-[3px] text-[13px] text-[var(--fg-2)]">{axislabels[k]}</div>
+						<div class="min-w-0">
+							<SegBar score={axes[k] ?? 0} interactive onchange={(v) => (axes = { ...axes, [k]: v })} />
+							<div class="mt-[5px] grid grid-cols-5 gap-[5px] text-[10px] leading-none text-[var(--fg-4)]" style="font-family: var(--mono);">
+								<span class="whitespace-nowrap">{axisscalelabels[k].low}</span>
+								<span class="col-start-5 whitespace-nowrap text-right">{axisscalelabels[k].high}</span>
+							</div>
+						</div>
+						<div class="pt-[3px] text-right text-[12px] text-[var(--fg)]" style="font-family: var(--mono);">
 							{axes[k] ? axes[k].toFixed(1) : '—'}
 						</div>
 					{/each}
