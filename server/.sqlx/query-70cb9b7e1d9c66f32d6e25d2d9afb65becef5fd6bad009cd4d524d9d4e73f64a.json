@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, season as \"season: Season\", year FROM offerings WHERE id = $1 AND deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "season: Season",
+        "type_info": {
+          "Custom": {
+            "name": "offering_season",
+            "kind": {
+              "Enum": [
+                "M",
+                "S"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "year",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "70cb9b7e1d9c66f32d6e25d2d9afb65becef5fd6bad009cd4d524d9d4e73f64a"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE offerings SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND approved = false AND deleted_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f7c34af14cd21f7fa6b21158a0d75e1ce89ef3ac0d84e9813fe04c424b812aad"
+}

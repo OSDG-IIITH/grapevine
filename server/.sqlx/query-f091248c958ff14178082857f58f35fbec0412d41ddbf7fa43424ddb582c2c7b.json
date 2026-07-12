@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id, c.code as course_code, o.season::text as \"season!\", o.year\n           FROM offerings o\n           JOIN courses c ON c.id = o.course_id\n           WHERE o.id = $1 AND o.approved = false AND o.deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "course_code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "season!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "year",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "f091248c958ff14178082857f58f35fbec0412d41ddbf7fa43424ddb582c2c7b"
+}

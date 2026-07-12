@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id as oid, o.season as \"season: Season\", o.year,\n                  f.id as \"fid?\", f.slug as \"fslug?\", f.name as \"fname?\"\n           FROM offerings o\n           LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id\n           LEFT JOIN faculty f ON f.id = ofac.faculty_id\n           WHERE o.course_id = $1 AND o.approved = true AND o.deleted_at IS NULL\n           ORDER BY o.year DESC, o.season",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "oid",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "season: Season",
+        "type_info": {
+          "Custom": {
+            "name": "offering_season",
+            "kind": {
+              "Enum": [
+                "M",
+                "S"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "year",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 3,
+        "name": "fid?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "fslug?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "fname?",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "157b29c8f1a0a97462069a14b164ed3d91f74e92a092cf2e43d9335d91463db1"
+}

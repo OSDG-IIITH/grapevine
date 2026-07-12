@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a.id, a.admin_id, u.display_name as admin_name, a.action, a.target_type, a.target_id,\n                  a.previous_state as \"previous_state?: Value\",\n                  a.created_at as \"created_at!: DateTime<Utc>\"\n           FROM audit_logs a\n           JOIN users u ON u.id = a.admin_id\n           ORDER BY a.created_at DESC\n           LIMIT 500",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "admin_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "admin_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "action",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "target_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "target_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "previous_state?: Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "a67e691a169584452f9c49af15dedd80e1ccf6c6243a05aa01c5ff98bc0f7d20"
+}

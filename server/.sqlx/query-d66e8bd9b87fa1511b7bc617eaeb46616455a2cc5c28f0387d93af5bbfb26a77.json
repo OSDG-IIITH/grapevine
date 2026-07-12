@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM offerings WHERE course_id = $1 AND season = $2::offering_season AND year = $3 AND deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "offering_season",
+            "kind": {
+              "Enum": [
+                "M",
+                "S"
+              ]
+            }
+          }
+        },
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d66e8bd9b87fa1511b7bc617eaeb46616455a2cc5c28f0387d93af5bbfb26a77"
+}
