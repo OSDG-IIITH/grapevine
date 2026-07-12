@@ -93,15 +93,15 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
         r#"SELECT c.id, c.code, c.name, c.shortnames,
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
-           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
-           LEFT JOIN course_reviews r ON r.offering_id = o.id
+           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true AND o.deleted_at IS NULL
+           LEFT JOIN course_reviews r ON r.offering_id = o.id AND r.deleted_at IS NULL
            WHERE c.deleted_at IS NULL
              AND ($1::text IS NULL OR c.code ILIKE $1 OR c.name ILIKE $1)
              AND ($2::text IS NULL OR EXISTS (
                SELECT 1 FROM offerings oi
                JOIN offering_faculty ofac ON ofac.offering_id = oi.id
                JOIN faculty f ON f.id = ofac.faculty_id
-               WHERE oi.course_id = c.id AND oi.approved = true AND f.slug = $2
+               WHERE oi.course_id = c.id AND oi.approved = true AND oi.deleted_at IS NULL AND f.slug = $2
              ))
            GROUP BY c.id, c.code, c.name, c.shortnames
            ORDER BY c.name"#,
@@ -245,15 +245,27 @@ pub async fn propose_offering(pool: &PgPool, course_code: &str, body: &CreateOff
     })
 }
 
-pub async fn delete_offering(pool: &PgPool, offering_id: &str) -> Result<(), AppError> {
-    let n = sqlx::query!("DELETE FROM offerings WHERE id = $1", offering_id)
-        .execute(pool).await?.rows_affected();
+pub async fn delete_offering(pool: &PgPool, offering_id: &str, admin_id: &str) -> Result<(), AppError> {
+    let n = sqlx::query!(
+        "UPDATE offerings SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND deleted_at IS NULL",
+        admin_id, offering_id
+    )
+    .execute(pool).await?.rows_affected();
+    if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
+}
+
+pub async fn restore_offering(pool: &PgPool, offering_id: &str) -> Result<(), AppError> {
+    let n = sqlx::query!(
+        "UPDATE offerings SET deleted_at = NULL, deleted_by = NULL WHERE id = $1 AND deleted_at IS NOT NULL",
+        offering_id
+    )
+    .execute(pool).await?.rows_affected();
     if n == 0 { Err(AppError::NotFound) } else { Ok(()) }
 }
 
 pub async fn update_offering_faculty(pool: &PgPool, offering_id: &str, faculty_ids: &[String]) -> Result<OfferingDetail, AppError> {
     let row = sqlx::query!(
-        r#"SELECT id, season as "season: Season", year FROM offerings WHERE id = $1"#,
+        r#"SELECT id, season as "season: Season", year FROM offerings WHERE id = $1 AND deleted_at IS NULL"#,
         offering_id
     )
     .fetch_optional(pool).await?.ok_or(AppError::NotFound)?;
@@ -321,8 +333,8 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
         r#"SELECT c.id, c.code, c.name, c.description, c.shortnames,
                   COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM courses c
-           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true
-           LEFT JOIN course_reviews r ON r.offering_id = o.id
+           LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true AND o.deleted_at IS NULL
+           LEFT JOIN course_reviews r ON r.offering_id = o.id AND r.deleted_at IS NULL
            WHERE c.code = $1 AND c.deleted_at IS NULL
            GROUP BY c.id, c.code, c.name, c.description, c.shortnames"#,
         code
@@ -337,7 +349,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
            FROM offerings o
            LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id
            LEFT JOIN faculty f ON f.id = ofac.faculty_id
-           WHERE o.course_id = $1 AND o.approved = true
+           WHERE o.course_id = $1 AND o.approved = true AND o.deleted_at IS NULL
            ORDER BY o.year DESC, o.season"#,
         row.id
     )
@@ -363,7 +375,7 @@ pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppE
     }
 
     let proposed_rows = sqlx::query!(
-        r#"SELECT id, season as "season: Season", year FROM offerings WHERE course_id = $1 AND approved = false ORDER BY year DESC, season"#,
+        r#"SELECT id, season as "season: Season", year FROM offerings WHERE course_id = $1 AND approved = false AND deleted_at IS NULL ORDER BY year DESC, season"#,
         row.id
     )
     .fetch_all(pool)

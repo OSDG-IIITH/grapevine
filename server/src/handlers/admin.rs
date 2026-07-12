@@ -5,7 +5,7 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use crate::{auth::session::AuthUser, error::AppError, state::AppState};
+use crate::{auth::session::AuthUser, error::AppError, models::{audit, course, faculty, lab, offering::Season}, state::AppState};
 
 #[derive(Serialize)]
 struct SeedLab { name: String, shortname: String, description: Option<String> }
@@ -61,6 +61,7 @@ pub async fn export(
            JOIN courses c ON c.id = o.course_id
            LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id
            LEFT JOIN faculty f ON f.id = ofac.faculty_id
+           WHERE o.deleted_at IS NULL
            GROUP BY o.id, c.code, o.season, o.year
            ORDER BY c.code, o.year, o.season"#
     )
@@ -104,7 +105,7 @@ pub async fn flags(
                   LEFT(cr.body, 200) as "review_body?",
                   u.id as reporter_id, u.display_name as reporter_name
            FROM course_review_flags f
-           JOIN course_reviews cr ON cr.id = f.review_id
+           JOIN course_reviews cr ON cr.id = f.review_id AND cr.deleted_at IS NULL
            JOIN users u ON u.id = f.user_id
            ORDER BY f.created_at DESC"#
     )
@@ -118,7 +119,7 @@ pub async fn flags(
                   LEFT(ar.body, 200) as "review_body?",
                   u.id as reporter_id, u.display_name as reporter_name
            FROM advisor_review_flags f
-           JOIN advisor_reviews ar ON ar.id = f.review_id
+           JOIN advisor_reviews ar ON ar.id = f.review_id AND ar.deleted_at IS NULL
            JOIN users u ON u.id = f.user_id
            ORDER BY f.created_at DESC"#
     )
@@ -167,6 +168,7 @@ pub async fn dismiss_flag(
             .await?;
     }
 
+    audit::logaction(&s.pool, &user.id, "DISMISS_FLAG", "flag", &id, None).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -185,9 +187,22 @@ pub async fn delete_review(
     .await?;
 
     if let Some(f) = course_flag {
-        sqlx::query!("DELETE FROM course_reviews WHERE id = $1", f.review_id)
-            .execute(&s.pool)
-            .await?;
+        let review = sqlx::query!(
+            "SELECT body FROM course_reviews WHERE id = $1 AND deleted_at IS NULL",
+            f.review_id
+        )
+        .fetch_optional(&s.pool)
+        .await?;
+
+        sqlx::query!(
+            "UPDATE course_reviews SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND deleted_at IS NULL",
+            user.id, f.review_id
+        )
+        .execute(&s.pool)
+        .await?;
+
+        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        audit::logaction(&s.pool, &user.id, "DELETE_REVIEW", "course_review", &f.review_id, prev).await?;
         return Ok(StatusCode::NO_CONTENT);
     }
 
@@ -199,16 +214,78 @@ pub async fn delete_review(
     .await?;
 
     if let Some(f) = advisor_flag {
-        sqlx::query!("DELETE FROM advisor_reviews WHERE id = $1", f.review_id)
-            .execute(&s.pool)
-            .await?;
+        let review = sqlx::query!(
+            "SELECT body FROM advisor_reviews WHERE id = $1 AND deleted_at IS NULL",
+            f.review_id
+        )
+        .fetch_optional(&s.pool)
+        .await?;
+
+        sqlx::query!(
+            "UPDATE advisor_reviews SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND deleted_at IS NULL",
+            user.id, f.review_id
+        )
+        .execute(&s.pool)
+        .await?;
+
+        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        audit::logaction(&s.pool, &user.id, "DELETE_REVIEW", "advisor_review", &f.review_id, prev).await?;
         return Ok(StatusCode::NO_CONTENT);
     }
 
     Err(AppError::NotFound)
 }
 
-use crate::models::{course, faculty, lab, offering::Season};
+pub async fn restore_review_course(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let n = sqlx::query!(
+        "UPDATE course_reviews SET deleted_at = NULL, deleted_by = NULL WHERE id = $1 AND deleted_at IS NOT NULL",
+        id
+    )
+    .execute(&s.pool)
+    .await?
+    .rows_affected();
+
+    if n == 0 { return Err(AppError::NotFound); }
+    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "course_review", &id, None).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn restore_review_advisor(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let n = sqlx::query!(
+        "UPDATE advisor_reviews SET deleted_at = NULL, deleted_by = NULL WHERE id = $1 AND deleted_at IS NOT NULL",
+        id
+    )
+    .execute(&s.pool)
+    .await?
+    .rows_affected();
+
+    if n == 0 { return Err(AppError::NotFound); }
+    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "advisor_review", &id, None).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn restore_offering_handler(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    course::restore_offering(&s.pool, &id).await?;
+    audit::logaction(&s.pool, &user.id, "RESTORE_OFFERING", "offering", &id, None).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
 
 #[derive(Serialize)]
 pub struct ProposedOfferingResponse {
@@ -248,7 +325,7 @@ pub async fn list_proposed(
            JOIN courses c ON c.id = o.course_id
            LEFT JOIN offering_faculty ofac ON ofac.offering_id = o.id
            LEFT JOIN faculty f ON f.id = ofac.faculty_id
-           WHERE o.approved = false
+           WHERE o.approved = false AND o.deleted_at IS NULL
            GROUP BY o.id, c.code, c.name, o.season, o.year, o.created_at
            ORDER BY o.created_at DESC"#
     )
@@ -265,7 +342,7 @@ pub async fn list_proposed(
                       u.display_name
                FROM course_reviews cr
                JOIN users u ON u.id = cr.user_id
-               WHERE cr.offering_id = $1
+               WHERE cr.offering_id = $1 AND cr.deleted_at IS NULL
                ORDER BY cr.created_at DESC"#,
             o.id
         )
@@ -306,7 +383,7 @@ pub async fn approve_proposed(
     if !user.is_admin { return Err(AppError::Forbidden); }
 
     let rows = sqlx::query!(
-        "UPDATE offerings SET approved = true WHERE id = $1 AND approved = false",
+        "UPDATE offerings SET approved = true WHERE id = $1 AND approved = false AND deleted_at IS NULL",
         id
     )
     .execute(&s.pool)
@@ -314,6 +391,7 @@ pub async fn approve_proposed(
     .rows_affected();
 
     if rows == 0 { return Err(AppError::NotFound); }
+    audit::logaction(&s.pool, &user.id, "APPROVE_PROPOSED", "offering", &id, None).await?;
     Ok(StatusCode::OK)
 }
 
@@ -324,12 +402,26 @@ pub async fn reject_proposed(
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
 
-    let rows = sqlx::query!("DELETE FROM offerings WHERE id = $1 AND approved = false", id)
-        .execute(&s.pool)
-        .await?
-        .rows_affected();
+    let offering = sqlx::query!(
+        r#"SELECT o.id, c.code as course_code, o.season::text as "season!", o.year
+           FROM offerings o
+           JOIN courses c ON c.id = o.course_id
+           WHERE o.id = $1 AND o.approved = false AND o.deleted_at IS NULL"#,
+        id
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::NotFound)?;
 
-    if rows == 0 { return Err(AppError::NotFound); }
+    sqlx::query!(
+        "UPDATE offerings SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND approved = false AND deleted_at IS NULL",
+        user.id, id
+    )
+    .execute(&s.pool)
+    .await?;
+
+    let prev = serde_json::json!({ "course_code": offering.course_code, "season": offering.season, "year": offering.year });
+    audit::logaction(&s.pool, &user.id, "REJECT_PROPOSED", "offering", &id, Some(prev)).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -356,6 +448,7 @@ pub async fn restore_faculty(
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     faculty::restore(&s.pool, &slug).await?;
+    audit::logaction(&s.pool, &user.id, "RESTORE_FACULTY", "faculty", &slug, None).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -374,6 +467,7 @@ pub async fn restore_lab(
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     lab::restore(&s.pool, &shortname).await?;
+    audit::logaction(&s.pool, &user.id, "RESTORE_LAB", "lab", &shortname, None).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -384,5 +478,52 @@ pub async fn restore_course(
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     course::restore(&s.pool, &code).await?;
+    audit::logaction(&s.pool, &user.id, "RESTORE_COURSE", "course", &code, None).await?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn audit_logs(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<audit::AuditLog>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(audit::list(&s.pool).await?))
+}
+
+#[derive(Serialize)]
+pub struct DeletedOffering {
+    pub id: String,
+    pub course_code: String,
+    pub course_name: String,
+    pub season: String,
+    pub year: i16,
+    pub deleted_at: DateTime<Utc>,
+}
+
+pub async fn deleted_offerings(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<DeletedOffering>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let rows = sqlx::query!(
+        r#"SELECT o.id, c.code as course_code, c.name as course_name,
+                  o.season::text as "season!", o.year,
+                  o.deleted_at as "deleted_at!: DateTime<Utc>"
+           FROM offerings o
+           JOIN courses c ON c.id = o.course_id
+           WHERE o.deleted_at IS NOT NULL
+           ORDER BY o.deleted_at DESC"#
+    )
+    .fetch_all(&s.pool)
+    .await?;
+
+    Ok(Json(rows.into_iter().map(|r| DeletedOffering {
+        id: r.id,
+        course_code: r.course_code,
+        course_name: r.course_name,
+        season: r.season,
+        year: r.year,
+        deleted_at: r.deleted_at,
+    }).collect()))
 }

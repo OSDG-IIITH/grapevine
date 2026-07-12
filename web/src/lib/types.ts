@@ -258,4 +258,15 @@ export interface PatchLab {
 	description: string;
 }
 
+export interface AuditLog {
+	id: string;
+	admin_id: string;
+	admin_name: string;
+	action: string;
+	target_type: string;
+	target_id: string;
+	previous_state: Record<string, unknown> | null;
+	created_at: string;
+}
+
 

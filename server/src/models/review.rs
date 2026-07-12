@@ -127,11 +127,11 @@ pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &
                     COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM course_reviews cr
-           JOIN offerings o ON o.id = cr.offering_id
+           JOIN offerings o ON o.id = cr.offering_id AND o.deleted_at IS NULL
            JOIN users u ON u.id = cr.user_id
            LEFT JOIN course_review_votes v ON v.review_id = cr.id
            LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2
-           WHERE o.course_id = $1 AND o.approved = true
+           WHERE o.course_id = $1 AND o.approved = true AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
                     cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
@@ -164,11 +164,11 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
                     COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM course_reviews cr
-           JOIN offerings o ON o.id = cr.offering_id
+           JOIN offerings o ON o.id = cr.offering_id AND o.deleted_at IS NULL
            JOIN users u ON u.id = cr.user_id
            LEFT JOIN course_review_votes v ON v.review_id = cr.id
            LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2
-           WHERE cr.offering_id = $1 AND o.approved = true
+           WHERE cr.offering_id = $1 AND o.approved = true AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
                     cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
@@ -201,11 +201,11 @@ pub async fn proposed_course_reviews_by_course(pool: &PgPool, course_id: &str, u
                     COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
                   uv.vote as "user_vote?"
            FROM course_reviews cr
-           JOIN offerings o ON o.id = cr.offering_id
+           JOIN offerings o ON o.id = cr.offering_id AND o.deleted_at IS NULL
            JOIN users u ON u.id = cr.user_id
            LEFT JOIN course_review_votes v ON v.review_id = cr.id
            LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2
-           WHERE o.course_id = $1 AND o.approved = false
+           WHERE o.course_id = $1 AND o.approved = false AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
                     cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
@@ -249,7 +249,7 @@ pub async fn edit_course_review(pool: &PgPool, review_id: &str, user_id: &str, r
              workload = COALESCE($5, workload),
              body = COALESCE($6, body),
              edited_at = now()
-           WHERE id = $7 AND user_id = $8
+           WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
            RETURNING id, offering_id"#,
         req.difficulty, req.teaching, req.grading, req.content, req.workload, req.body,
         review_id, user_id
@@ -264,7 +264,7 @@ pub async fn edit_course_review(pool: &PgPool, review_id: &str, user_id: &str, r
 
 pub async fn delete_course_review(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
     let rows = sqlx::query!(
-        "DELETE FROM course_reviews WHERE id = $1 AND user_id = $2",
+        "DELETE FROM course_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
         review_id, user_id
     )
     .execute(pool)
@@ -327,7 +327,7 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
            JOIN users u ON u.id = ar.user_id
            LEFT JOIN advisor_review_votes v ON v.review_id = ar.id
            LEFT JOIN advisor_review_votes uv ON uv.review_id = ar.id AND uv.user_id = $2
-           WHERE ar.faculty_id = $1
+           WHERE ar.faculty_id = $1 AND ar.deleted_at IS NULL
            GROUP BY ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                     ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
                     ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
@@ -371,7 +371,7 @@ pub async fn edit_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
              workload = COALESCE($5, workload),
              body = COALESCE($6, body),
              edited_at = now()
-           WHERE id = $7 AND user_id = $8
+           WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
            RETURNING id, faculty_id"#,
         req.research, req.availability, req.mentorship, req.support, req.workload, req.body,
         review_id, user_id
@@ -386,7 +386,7 @@ pub async fn edit_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
 
 pub async fn delete_advisor_review(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
     let rows = sqlx::query!(
-        "DELETE FROM advisor_reviews WHERE id = $1 AND user_id = $2",
+        "DELETE FROM advisor_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
         review_id, user_id
     )
     .execute(pool)
@@ -449,7 +449,7 @@ pub async fn my_course_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Cours
            JOIN users u ON u.id = cr.user_id
            LEFT JOIN course_review_votes v ON v.review_id = cr.id
            LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $1
-           WHERE cr.user_id = $1
+           WHERE cr.user_id = $1 AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
                     cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
@@ -485,7 +485,7 @@ pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Advi
            JOIN users u ON u.id = ar.user_id
            LEFT JOIN advisor_review_votes v ON v.review_id = ar.id
            LEFT JOIN advisor_review_votes uv ON uv.review_id = ar.id AND uv.user_id = $1
-           WHERE ar.user_id = $1
+           WHERE ar.user_id = $1 AND ar.deleted_at IS NULL
            GROUP BY ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                     ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
                     ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote

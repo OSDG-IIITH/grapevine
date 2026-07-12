@@ -1,23 +1,45 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getFlags, dismissFlag, deleteFlaggedReview, exportSeedData, getProposedOfferings, approveProposedOffering, rejectProposedOffering, getDeletedCourses, restoreCourse, getDeletedFaculty, restoreFaculty, getDeletedLabs, restoreLab } from '$lib/api';
+	import {
+		getFlags, dismissFlag, deleteFlaggedReview, exportSeedData,
+		getProposedOfferings, approveProposedOffering, rejectProposedOffering,
+		getDeletedCourses, restoreCourse,
+		getDeletedFaculty, restoreFaculty,
+		getDeletedLabs, restoreLab,
+		getDeletedOfferings, restoreOffering,
+		getAuditLogs, restoreReview
+	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
-	import type { FlagResponse, ProposedOfferingResponse } from '$lib/types';
+	import type { FlagResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
+
+	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 
 	let items = $state<FlagResponse[]>([]);
 	let proposed = $state<ProposedOfferingResponse[]>([]);
 	let deleted = $state<{ code: string; name: string; deleted_at: string }[]>([]);
 	let deletedfaculty = $state<{ slug: string; name: string; deleted_at: string }[]>([]);
 	let deletedlabs = $state<{ shortname: string; name: string; deleted_at: string }[]>([]);
+	let deletedofferings = $state<DeletedOffering[]>([]);
+	let auditlogs = $state<AuditLog[]>([]);
+	const restoreactionmap: Record<string, string> = {
+		DELETE_REVIEW: 'RESTORE_REVIEW',
+		DELETE_OFFERING: 'RESTORE_OFFERING',
+		REJECT_PROPOSED: 'RESTORE_OFFERING',
+		DELETE_COURSE: 'RESTORE_COURSE',
+		DELETE_FACULTY: 'RESTORE_FACULTY',
+		DELETE_LAB: 'RESTORE_LAB',
+	};
 	let loading = $state(true);
 	let error = $state(false);
-	let activetab = $state<'flagged' | 'proposed' | 'deleted'>('flagged');
+	let activetab = $state<'flagged' | 'proposed' | 'deleted' | 'audit'>('audit');
 
 	onMount(async () => {
-		const [flags, props, del, delfac, dellabs] = await Promise.all([
-			getFlags(), getProposedOfferings(), getDeletedCourses(), getDeletedFaculty(), getDeletedLabs()
+		const [flags, props, del, delfac, dellabs, deloff, logs] = await Promise.all([
+			getFlags(), getProposedOfferings(),
+			getDeletedCourses(), getDeletedFaculty(), getDeletedLabs(), getDeletedOfferings(),
+			getAuditLogs()
 		]);
 		if (flags === null || props === null) error = true;
 		else {
@@ -26,6 +48,8 @@
 			deleted = del ?? [];
 			deletedfaculty = delfac ?? [];
 			deletedlabs = dellabs ?? [];
+			deletedofferings = deloff ?? [];
+			auditlogs = logs ?? [];
 		}
 		loading = false;
 	});
@@ -42,6 +66,10 @@
 		if (await restoreLab(shortname)) deletedlabs = deletedlabs.filter((d) => d.shortname !== shortname);
 	}
 
+	async function doRestoreOffering(id: string) {
+		if (await restoreOffering(id)) deletedofferings = deletedofferings.filter((d) => d.id !== id);
+	}
+
 	async function dismiss(id: string) {
 		if (await dismissFlag(id)) items = items.filter((i) => i.id !== id);
 	}
@@ -51,15 +79,68 @@
 	}
 
 	async function approveProp(id: string) {
-		if (await approveProposedOffering(id)) {
-			proposed = proposed.filter((p) => p.id !== id);
-		}
+		if (await approveProposedOffering(id)) proposed = proposed.filter((p) => p.id !== id);
 	}
 
 	async function rejectProp(id: string) {
-		if (await rejectProposedOffering(id)) {
-			proposed = proposed.filter((p) => p.id !== id);
+		if (await rejectProposedOffering(id)) proposed = proposed.filter((p) => p.id !== id);
+	}
+
+	async function doRestoreAudit(log: AuditLog) {
+		let ok = false;
+		let restoreaction = '';
+		if (log.action === 'DELETE_REVIEW') {
+			ok = await restoreReview(log.target_type === 'course_review' ? 'course' : 'advisor', log.target_id);
+			restoreaction = 'RESTORE_REVIEW';
+		} else if (log.action === 'DELETE_OFFERING' || log.action === 'REJECT_PROPOSED') {
+			ok = await restoreOffering(log.target_id);
+			if (ok) deletedofferings = deletedofferings.filter((d) => d.id !== log.target_id);
+			restoreaction = 'RESTORE_OFFERING';
+		} else if (log.action === 'DELETE_COURSE') {
+			ok = await restoreCourse(log.target_id);
+			if (ok) deleted = deleted.filter((d) => d.code !== log.target_id);
+			restoreaction = 'RESTORE_COURSE';
+		} else if (log.action === 'DELETE_FACULTY') {
+			ok = await restoreFaculty(log.target_id);
+			if (ok) deletedfaculty = deletedfaculty.filter((d) => d.slug !== log.target_id);
+			restoreaction = 'RESTORE_FACULTY';
+		} else if (log.action === 'DELETE_LAB') {
+			ok = await restoreLab(log.target_id);
+			if (ok) deletedlabs = deletedlabs.filter((d) => d.shortname !== log.target_id);
+			restoreaction = 'RESTORE_LAB';
 		}
+		if (ok && $currentUser) {
+			auditlogs = [{
+				id: crypto.randomUUID(),
+				admin_id: $currentUser.id,
+				admin_name: $currentUser.display_name,
+				action: restoreaction,
+				target_type: log.target_type,
+				target_id: log.target_id,
+				previous_state: null,
+				created_at: new Date().toISOString()
+			}, ...auditlogs];
+		}
+	}
+
+	function isrestorable(log: AuditLog): boolean {
+		const ra = restoreactionmap[log.action];
+		if (!ra) return false;
+		return !auditlogs.some(l => l.action === ra && l.target_id === log.target_id && l.created_at > log.created_at);
+	}
+
+	function actionlabel(action: string): string {
+		const labels: Record<string, string> = {
+			CREATE_COURSE: 'created course', UPDATE_COURSE: 'updated course', DELETE_COURSE: 'deleted course',
+			CREATE_FACULTY: 'created faculty', UPDATE_FACULTY: 'updated faculty', DELETE_FACULTY: 'deleted faculty',
+			CREATE_LAB: 'created lab', UPDATE_LAB: 'updated lab', DELETE_LAB: 'deleted lab',
+			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty',
+			APPROVE_PROPOSED: 'approved proposed', REJECT_PROPOSED: 'rejected proposed',
+			DELETE_REVIEW: 'deleted review', DISMISS_FLAG: 'dismissed flag',
+			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
+			RESTORE_REVIEW: 'restored review', RESTORE_OFFERING: 'restored offering',
+		};
+		return labels[action] ?? action.toLowerCase().replace(/_/g, ' ');
 	}
 
 	let exporting = $state(false);
@@ -87,6 +168,8 @@
 		if (d < 30) return `${Math.floor(d / 7)}w ago`;
 		return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 	}
+
+	let totaldeleted = $derived(deleted.length + deletedfaculty.length + deletedlabs.length + deletedofferings.length);
 </script>
 
 <svelte:head>
@@ -130,13 +213,52 @@
 
 		<div class="mb-6">
 			<Tabs items={[
+				{ id: 'audit', label: 'Audit log', count: auditlogs.length },
 				{ id: 'flagged', label: 'Flagged reviews', count: items.length },
 				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length },
-				{ id: 'deleted', label: 'Deleted', count: deleted.length + deletedfaculty.length + deletedlabs.length }
-			]} active={activetab} onchange={(id) => { activetab = id as 'flagged' | 'proposed' | 'deleted'; }} />
+				{ id: 'deleted', label: 'Deleted', count: totaldeleted }
+			]} active={activetab} onchange={(id) => { activetab = id as typeof activetab; }} />
 		</div>
 
-		{#if activetab === 'flagged'}
+		{#if activetab === 'audit'}
+			{#if auditlogs.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
+					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
+					No audit log entries yet.
+				</div>
+			{:else}
+				{#each auditlogs as log (log.id)}
+					<div class="mb-2 flex items-start gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px]">
+						<div class="flex-1 min-w-0">
+							<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+								<span class="font-medium text-[var(--fg)]">{log.admin_name}</span>
+								<span class="text-[var(--fg-3)]">{actionlabel(log.action)}</span>
+								<span
+									class="rounded-[4px] border border-[var(--border-strong)] px-[6px] py-[1px] text-[11px] text-[var(--fg-2)]"
+									style="font-family: var(--mono);"
+								>{log.target_id}</span>
+							</div>
+							{#if log.previous_state}
+								<div class="mt-1 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">
+									{Object.entries(log.previous_state).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+								</div>
+							{/if}
+						</div>
+						<div class="flex items-center gap-2 shrink-0">
+							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(log.created_at)}</span>
+							{#if isrestorable(log)}
+								<button
+									type="button"
+									onclick={() => doRestoreAudit(log)}
+									class="inline-flex items-center rounded-[6px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[10px] py-[4px] text-[11px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+								>Restore</button>
+							{/if}
+						</div>
+					</div>
+				{/each}
+			{/if}
+
+		{:else if activetab === 'flagged'}
 			{#if items.length === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
 					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
@@ -148,13 +270,11 @@
 						class="mb-3 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[22px]"
 						style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
 					>
-						<!-- head -->
 						<div class="mb-3 flex items-center gap-3 text-[12px] text-[var(--fg-3)]">
 							<span
 								class="rounded px-2 py-[2px] text-[11px] text-[var(--danger)] border border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)]"
 								style="font-family: var(--mono);"
 							>{it.reason}</span>
-
 							{#if it.review_type === 'course' && it.course_code}
 								<span
 									class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] tracking-[0.02em] text-[var(--fg-2)]"
@@ -164,25 +284,17 @@
 									<span style="font-family: var(--mono); color: var(--fg-3);">{it.offering_code}</span>
 								{/if}
 							{/if}
-
 							{#if it.review_type === 'advisor' && it.faculty_name}
 								<span>advisor review · <span class="text-[var(--fg-2)]">{it.faculty_name}</span></span>
 							{/if}
-
 							<span class="ml-auto text-[var(--fg-4)]" style="font-family: var(--mono); font-size: 11px;">
 								flagged {reltime(it.created_at)}
 							</span>
 						</div>
-
-						<!-- reporter -->
 						<div class="mb-3 text-[12px] text-[var(--fg-3)]">
 							reported by <span class="text-[var(--fg-2)]">{it.reporter.display_name}</span>
 						</div>
-
-						<!-- body -->
 						<div class="text-[14px] leading-[1.65] text-[var(--fg)]">{it.review_body}</div>
-
-						<!-- actions -->
 						<div class="mt-4 flex gap-2">
 							<button
 								type="button"
@@ -198,6 +310,7 @@
 					</div>
 				{/each}
 			{/if}
+
 		{:else if activetab === 'proposed'}
 			{#if proposed.length === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
@@ -210,7 +323,6 @@
 						class="mb-3 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[22px]"
 						style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);"
 					>
-						<!-- head -->
 						<div class="mb-3 flex items-center gap-3 text-[12px] text-[var(--fg-3)]">
 							<span
 								class="rounded px-2 py-[2px] text-[11px] text-[var(--accent-2)] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)]"
@@ -227,7 +339,6 @@
 							{/if}
 						</div>
 						<div class="mb-3 text-[13px] font-semibold text-[var(--fg)]">{p.course_name}</div>
-						
 						{#if p.reviews.length === 0}
 							<div class="text-[13px] italic text-[var(--fg-4)] mb-3">Proposed directly (no review content)</div>
 						{:else}
@@ -249,8 +360,6 @@
 								</div>
 							{/each}
 						{/if}
-
-						<!-- actions -->
 						<div class="mt-4 flex gap-2">
 							<button
 								type="button"
@@ -266,8 +375,9 @@
 					</div>
 				{/each}
 			{/if}
+
 		{:else if activetab === 'deleted'}
-			{#if deleted.length + deletedfaculty.length + deletedlabs.length === 0}
+			{#if totaldeleted === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
 					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
 					Nothing deleted.
@@ -310,6 +420,20 @@
 							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.name}</span>
 							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
 							<button type="button" onclick={() => doRestoreLab(d.shortname)}
+								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+							>Restore</button>
+						</div>
+					{/each}
+				{/if}
+				{#if deletedofferings.length > 0}
+					<div class="mb-2 mt-4 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-4)]" style="font-family: var(--mono);">Offerings</div>
+					{#each deletedofferings as d (d.id)}
+						<div class="mb-3 flex items-center gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[22px] py-[16px]"
+							style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
+							<span class="rounded-[5px] border border-[var(--border-strong)] px-2 py-[3px] text-[12px] text-[var(--fg-2)]" style="font-family: var(--mono);">{d.course_code} · {d.season === 'M' ? 'Monsoon' : 'Spring'} 20{d.year}</span>
+							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.course_name}</span>
+							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
+							<button type="button" onclick={() => doRestoreOffering(d.id)}
 								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
 							>Restore</button>
 						</div>

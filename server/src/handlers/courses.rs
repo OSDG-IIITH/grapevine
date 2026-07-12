@@ -7,7 +7,7 @@ use serde::Deserialize;
 use crate::{
     auth::session::{AuthUser, MaybeAuth},
     error::AppError,
-    models::{course, review, offering::Season},
+    models::{audit, course, review, offering::Season},
     state::AppState,
 };
 
@@ -17,7 +17,9 @@ pub async fn create(
     Json(body): Json<course::CreateCourse>,
 ) -> Result<(StatusCode, Json<course::CourseDetail>), AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok((StatusCode::CREATED, Json(course::create_course(&s.pool, &body).await?)))
+    let result = course::create_course(&s.pool, &body).await?;
+    audit::logaction(&s.pool, &user.id, "CREATE_COURSE", "course", &result.code, None).await?;
+    Ok((StatusCode::CREATED, Json(result)))
 }
 
 #[derive(Deserialize)]
@@ -48,7 +50,22 @@ pub async fn update(
     Json(body): Json<course::PatchCourse>,
 ) -> Result<Json<course::CourseDetail>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok(Json(course::update_course(&s.pool, &code, &body).await?))
+
+    let prev_row = sqlx::query!(
+        "SELECT id, code, name, description FROM courses WHERE code = $1 AND deleted_at IS NULL",
+        code
+    )
+    .fetch_optional(&s.pool)
+    .await?;
+
+    let result = course::update_course(&s.pool, &code, &body).await?;
+
+    if let Some(p) = prev_row {
+        let prev = serde_json::json!({ "code": p.code, "name": p.name, "description": p.description });
+        audit::logaction(&s.pool, &user.id, "UPDATE_COURSE", "course", &p.id, Some(prev)).await?;
+    }
+
+    Ok(Json(result))
 }
 
 pub async fn create_offering(
@@ -58,7 +75,9 @@ pub async fn create_offering(
     Json(body): Json<course::CreateOffering>,
 ) -> Result<Json<course::OfferingDetail>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok(Json(course::create_offering(&s.pool, &code, &body).await?))
+    let result = course::create_offering(&s.pool, &code, &body).await?;
+    audit::logaction(&s.pool, &user.id, "CREATE_OFFERING", "offering", &result.id, None).await?;
+    Ok(Json(result))
 }
 
 pub async fn reviews(
@@ -108,7 +127,20 @@ pub async fn delete(
     Path(code): Path<String>,
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let row = sqlx::query!(
+        "SELECT id, name FROM courses WHERE code = $1 AND deleted_at IS NULL",
+        code
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::NotFound)?;
+
     course::soft_delete(&s.pool, &code).await?;
+
+    let prev = serde_json::json!({ "code": code, "name": row.name });
+    audit::logaction(&s.pool, &user.id, "DELETE_COURSE", "course", &code, Some(prev)).await?;
+
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -123,7 +155,7 @@ pub async fn propose_review(
     let course_id = course::id_by_code(&s.pool, &code).await?;
 
     let existing_id = sqlx::query_scalar!(
-        r#"SELECT id FROM offerings WHERE course_id = $1 AND season = $2::offering_season AND year = $3"#,
+        r#"SELECT id FROM offerings WHERE course_id = $1 AND season = $2::offering_season AND year = $3 AND deleted_at IS NULL"#,
         course_id, body.season.clone() as Season, body.year
     )
     .fetch_optional(&mut *tx)

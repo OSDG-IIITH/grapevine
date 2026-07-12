@@ -4,3 +4,4 @@ pub mod offering;
 pub mod faculty;
 pub mod lab;
 pub mod review;
+pub mod audit;

@@ -4,7 +4,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{faculty, review}, state::AppState};
+use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{audit, faculty, review}, state::AppState};
 
 pub async fn create(
     State(s): State<AppState>,
@@ -12,7 +12,9 @@ pub async fn create(
     Json(body): Json<faculty::CreateFaculty>,
 ) -> Result<(StatusCode, Json<faculty::FacultyDetail>), AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok((StatusCode::CREATED, Json(faculty::create_faculty(&s.pool, &body).await?)))
+    let result = faculty::create_faculty(&s.pool, &body).await?;
+    audit::logaction(&s.pool, &user.id, "CREATE_FACULTY", "faculty", &result.slug, None).await?;
+    Ok((StatusCode::CREATED, Json(result)))
 }
 
 #[derive(Deserialize)]
@@ -42,7 +44,22 @@ pub async fn update(
     Json(body): Json<faculty::PatchFaculty>,
 ) -> Result<Json<faculty::FacultyDetail>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok(Json(faculty::update_faculty(&s.pool, &slug, &body).await?))
+
+    let prev_row = sqlx::query!(
+        "SELECT id, name, slug, bio FROM faculty WHERE slug = $1 AND deleted_at IS NULL",
+        slug
+    )
+    .fetch_optional(&s.pool)
+    .await?;
+
+    let result = faculty::update_faculty(&s.pool, &slug, &body).await?;
+
+    if let Some(p) = prev_row {
+        let prev = serde_json::json!({ "name": p.name, "slug": p.slug, "bio": p.bio });
+        audit::logaction(&s.pool, &user.id, "UPDATE_FACULTY", "faculty", &p.id, Some(prev)).await?;
+    }
+
+    Ok(Json(result))
 }
 
 pub async fn delete(
@@ -51,7 +68,20 @@ pub async fn delete(
     Path(slug): Path<String>,
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
+
+    let row = sqlx::query!(
+        "SELECT name FROM faculty WHERE slug = $1 AND deleted_at IS NULL",
+        slug
+    )
+    .fetch_optional(&s.pool)
+    .await?
+    .ok_or(AppError::NotFound)?;
+
     faculty::soft_delete(&s.pool, &slug).await?;
+
+    let prev = serde_json::json!({ "name": row.name, "slug": slug });
+    audit::logaction(&s.pool, &user.id, "DELETE_FACULTY", "faculty", &slug, Some(prev)).await?;
+
     Ok(StatusCode::NO_CONTENT)
 }
 

@@ -9,7 +9,8 @@ import type {
 	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
-	ProposedOfferingResponse, ProposedOfferingLean
+	ProposedOfferingResponse, ProposedOfferingLean,
+	AuditLog
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -429,6 +430,26 @@ export async function approveProposedOffering(id: string): Promise<boolean> {
 
 export async function rejectProposedOffering(id: string): Promise<boolean> {
 	const res = await apivoid(`/admin/proposed/${id}/reject`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function getAuditLogs(): Promise<AuditLog[] | null> {
+	return apifetch<AuditLog[]>('/admin/audit-logs');
+}
+
+export async function getDeletedOfferings(): Promise<{ id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string }[] | null> {
+	return apifetch('/admin/deleted-offerings');
+}
+
+export async function restoreReview(type: 'course' | 'advisor', id: string): Promise<boolean> {
+	const res = await apivoid(`/admin/reviews/${type}/${id}/restore`, { method: 'POST' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function restoreOffering(id: string): Promise<boolean> {
+	const res = await apivoid(`/admin/offerings/${id}/restore`, { method: 'POST' });
 	if (res) listCache.clear();
 	return res;
 }

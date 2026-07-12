@@ -137,6 +137,15 @@
 					>
 						<div class="px-3 py-[9px] text-[12px] text-[var(--fg-3)]">{$currentUser.display_name}</div>
 						<div class="border-t border-[var(--border)]"></div>
+						{#if $currentUser.is_admin}
+							<a
+								href="{base}/admin"
+								onclick={() => (dropopen = false)}
+								class="flex w-full items-center px-3 py-[9px] text-[13px] text-[var(--fg-2)] transition-colors duration-[100ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+							>
+								Admin
+							</a>
+						{/if}
 						<a
 							href="{base}/profile"
 							onclick={() => (dropopen = false)}

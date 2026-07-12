@@ -68,7 +68,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
         r#"SELECT f.id, f.slug, f.name,
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
-           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
+           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)
            GROUP BY f.id, f.slug, f.name
            ORDER BY f.name"#,
@@ -187,7 +187,7 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
         r#"SELECT f.id, f.slug, f.name, f.bio,
                   COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
            FROM faculty f
-           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id
+           LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.slug = $1 AND f.deleted_at IS NULL
            GROUP BY f.id, f.slug, f.name, f.bio"#,
         slug
@@ -214,7 +214,7 @@ pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, App
            FROM offerings o
            JOIN offering_faculty ofac ON ofac.offering_id = o.id
            JOIN courses c ON c.id = o.course_id AND c.deleted_at IS NULL
-           WHERE ofac.faculty_id = $1
+           WHERE ofac.faculty_id = $1 AND o.deleted_at IS NULL
            ORDER BY o.year DESC, o.season"#,
         row.id
     )
