@@ -142,7 +142,7 @@ export interface AdvisorReview {
 export const COURSE_AXIS_ORDER = ['difficulty', 'workload', 'teaching', 'grading', 'content'] as const;
 
 export const COURSE_AXIS_LABELS: Record<string, string> = {
-	difficulty: 'Difficulty',
+	difficulty: 'Easiness',
 	workload: 'Workload',
 	teaching: 'Teaching',
 	grading: 'Grading',
