@@ -13,6 +13,7 @@
 		ADVISOR_AXIS_SCALE_LABELS
 	} from '$lib/types';
 	import SegBar from '$lib/components/SegBar.svelte';
+	import OverallBar from '$lib/components/OverallBar.svelte';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
 	import Loader from "@lucide/svelte/icons/loader";
@@ -34,6 +35,7 @@
 	let anon = $state(true);
 	let submitted = $state(false);
 	let submitting = $state(false);
+	let manualoverall = $state<number | null>(null);
 
 	let proposeSeason = $state('M');
 	let proposeYear = $state('');
@@ -117,18 +119,20 @@
 	);
 	const selectedfaculty = $derived(allfaculty.find((f) => f.id === facultyid));
 	const selectedcourse = $derived(allcourses.find((c) => c.id === courseid));
-	const overall = $derived.by(() => {
+	const calculatedaverage = $derived.by(() => {
 		const filled = axisorder.filter((k) => axes[k]);
 		return filled.length ? filled.reduce((s, k) => s + axes[k], 0) / filled.length : null;
 	});
+	const overall = $derived(manualoverall !== null ? manualoverall : calculatedaverage);
 
 	function setkind(k: 'course' | 'advisor') {
 		kind = k;
 		axes = {};
+		manualoverall = null;
 	}
 
 	async function submit() {
-		if (!cansubmit) return;
+		if (!cansubmit || overall === null) return;
 		submitting = true;
 
 		let result;
@@ -146,6 +150,7 @@
 					grading: axes.grading,
 					content: axes.content,
 					workload: axes.workload,
+					overall,
 					body,
 					faculty_ids: proposeFaculty.map((f) => f.id)
 				});
@@ -157,6 +162,7 @@
 					grading: axes.grading,
 					content: axes.content,
 					workload: axes.workload,
+					overall,
 					body
 				});
 			}
@@ -170,6 +176,7 @@
 					mentorship: axes.mentorship,
 					support: axes.support,
 					workload: axes.workload,
+					overall,
 					body
 				});
 			}
@@ -369,11 +376,27 @@
 							{axes[k] ? axes[k].toFixed(1) : '—'}
 						</div>
 					{/each}
-					<div class="col-span-3 mt-1 flex items-center justify-end gap-3">
-						<div class="text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">overall</div>
-						<div class="text-[13px] font-medium text-[var(--fg)]" style="font-family: var(--mono);">
-							{overall !== null ? overall.toFixed(1) : '—'}
+					<div class="col-span-3 mt-3 flex flex-col gap-2">
+						<div class="flex items-center justify-between text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">
+							<span>overall {manualoverall !== null ? '(adjusted)' : '(average)'}</span>
+							<span class="text-[13px] font-medium {overall !== null ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)]'}">
+								{overall !== null ? overall.toFixed(1) : '—'}
+							</span>
 						</div>
+						<OverallBar
+							value={overall ?? 3}
+							interactive
+							disabled={calculatedaverage === null}
+							onchange={(v) => { manualoverall = v; }}
+						/>
+						{#if manualoverall !== null}
+							<button
+								type="button"
+								onclick={() => { manualoverall = null; }}
+								class="self-start text-[11px] text-[var(--fg-4)] hover:text-[var(--fg-3)] transition-colors duration-[120ms]"
+								style="font-family: var(--mono);"
+							>reset to average</button>
+						{/if}
 					</div>
 				</div>
 			</div>

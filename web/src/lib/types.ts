@@ -230,6 +230,7 @@ export interface CreateCourseReview {
 	grading: number;
 	content: number;
 	workload: number;
+	overall: number;
 	body: string;
 }
 
@@ -242,6 +243,7 @@ export interface CreateAdvisorReview {
 	mentorship: number;
 	support: number;
 	workload: number;
+	overall: number;
 	body: string;
 }
 

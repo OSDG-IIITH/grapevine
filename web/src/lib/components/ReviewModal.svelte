@@ -2,6 +2,7 @@
 	import type { CourseReview, AdvisorReview } from '$lib/types';
 	import { IconFlag, IconTrash, IconPencil, IconCheck } from '@tabler/icons-svelte';
 	import SegBar from './SegBar.svelte';
+	import OverallBar from './OverallBar.svelte';
 
 	interface Props {
 		review: CourseReview | AdvisorReview;
@@ -18,17 +19,26 @@
 		saving: boolean;
 		editbody: string;
 		editvalues: Record<string, number>;
+		editoverall: number | null;
 		onvote: (v: 0 | 1 | -1) => void;
 		onflag: () => void;
 		oneditstart: () => void;
 		oneditvalue: (k: string, v: number) => void;
+		oneditoverall: (v: number) => void;
 		oneditbody: (v: string) => void;
 		onsaved: () => void;
 		ondelete: () => void;
 		onclose: () => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, editing, saving, editbody, editvalues, onvote, onflag, oneditstart, oneditvalue, oneditbody, onsaved, ondelete, onclose }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, editing, saving, editbody, editvalues, editoverall, onvote, onflag, oneditstart, oneditvalue, oneditoverall, oneditbody, onsaved, ondelete, onclose }: Props = $props();
+
+	const editcalcavg = $derived.by(() => {
+		if (!editing) return null;
+		const vals = axisorder.map((k) => editvalues[k] ?? axisval(k));
+		return vals.reduce((s, v) => s + v, 0) / vals.length;
+	});
+	const editshownoverall = $derived(editoverall !== null ? editoverall : editcalcavg);
 
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
@@ -141,6 +151,19 @@
 					<span class="text-right text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{axisval(k).toFixed(1)}</span>
 				{/if}
 			{/each}
+			{#if editing}
+				<div class="col-span-3 mt-1 flex flex-col gap-[6px]">
+					<div class="flex items-center justify-between text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">
+						<span>overall {editoverall !== null ? '(adjusted)' : '(average)'}</span>
+						<span class="text-[var(--accent-2)]">{editshownoverall !== null ? editshownoverall.toFixed(1) : '—'}</span>
+					</div>
+					<OverallBar
+						value={editshownoverall ?? 3}
+						interactive
+						onchange={(v) => oneditoverall(v)}
+					/>
+				</div>
+			{/if}
 		</div>
 
 		<!-- body -->

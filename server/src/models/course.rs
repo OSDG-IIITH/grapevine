@@ -91,7 +91,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT c.id, c.code, c.name, c.shortnames,
-                  COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true AND o.deleted_at IS NULL
            LEFT JOIN course_reviews r ON r.offering_id = o.id AND r.deleted_at IS NULL
@@ -331,7 +331,7 @@ pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedCourse>, AppError>
 pub async fn get_by_code(pool: &PgPool, code: &str) -> Result<CourseDetail, AppError> {
     let row = sqlx::query!(
         r#"SELECT c.id, c.code, c.name, c.description, c.shortnames,
-                  COALESCE(AVG((r.difficulty + r.teaching + r.grading + r.content + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true AND o.deleted_at IS NULL
            LEFT JOIN course_reviews r ON r.offering_id = o.id AND r.deleted_at IS NULL

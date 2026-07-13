@@ -60,7 +60,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>) -> Result<Vec<LabLean>, AppErr
     let rows = sqlx::query!(
         r#"SELECT l.id, l.shortname, l.name, l.description,
                   COUNT(DISTINCT f.id)::int8 as "facultycount!: i64",
-                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM labs l
            LEFT JOIN faculty_labs fl ON fl.lab_id = l.id
            LEFT JOIN faculty f ON f.id = fl.faculty_id
@@ -114,7 +114,7 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
                 COALESCE(AVG(r.mentorship::float), 0.0)::float8 as "mentorship!: f64",
                 COALESCE(AVG(r.support::float), 0.0)::float8 as "support!: f64",
                 COALESCE(AVG(r.workload::float), 0.0)::float8 as "workload!: f64",
-                COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM advisor_reviews r
            JOIN faculty f ON f.id = r.faculty_id
            JOIN faculty_labs fl ON fl.faculty_id = f.id
@@ -126,7 +126,7 @@ pub async fn get_by_shortname(pool: &PgPool, shortname: &str) -> Result<LabDetai
 
     let faculty_rows = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name,
-                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM faculty f
            JOIN faculty_labs fl ON fl.faculty_id = f.id
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL

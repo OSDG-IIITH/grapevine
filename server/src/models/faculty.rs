@@ -66,7 +66,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name,
-                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)
@@ -185,7 +185,7 @@ pub async fn list_deleted(pool: &PgPool) -> Result<Vec<DeletedFaculty>, AppError
 pub async fn get_by_slug(pool: &PgPool, slug: &str) -> Result<FacultyDetail, AppError> {
     let row = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name, f.bio,
-                  COALESCE(AVG((r.research + r.availability + r.mentorship + r.support + r.workload)::float / 5.0), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.slug = $1 AND f.deleted_at IS NULL

@@ -361,6 +361,7 @@ export async function proposeReview(
 		grading: number;
 		content: number;
 		workload: number;
+		overall: number;
 		body: string;
 		faculty_ids?: string[];
 	}

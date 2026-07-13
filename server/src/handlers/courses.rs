@@ -117,6 +117,7 @@ pub struct ProposeReviewRequest {
     pub grading: i16,
     pub content: i16,
     pub workload: i16,
+    pub overall: f32,
     pub body: String,
     pub faculty_ids: Option<Vec<String>>,
 }
@@ -188,9 +189,9 @@ pub async fn propose_review(
 
     let review_id = ulid::Ulid::new().to_string();
     sqlx::query!(
-        "INSERT INTO course_reviews (id, user_id, offering_id, anonymous, difficulty, teaching, grading, content, workload, body)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-        review_id, user.id, offering_id, body.anonymous, body.difficulty, body.teaching, body.grading, body.content, body.workload, body.body
+        "INSERT INTO course_reviews (id, user_id, offering_id, anonymous, difficulty, teaching, grading, content, workload, overall, body)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+        review_id, user.id, offering_id, body.anonymous, body.difficulty, body.teaching, body.grading, body.content, body.workload, body.overall, body.body
     )
     .execute(&mut *tx)
     .await?;
@@ -200,6 +201,7 @@ pub async fn propose_review(
     let r_row = sqlx::query!(
         r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                   cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.overall as "overall!: f32",
                   cr.body,
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
                   u.display_name
@@ -210,9 +212,6 @@ pub async fn propose_review(
     )
     .fetch_one(&s.pool)
     .await?;
-
-    let overall = (r_row.difficulty + r_row.teaching + r_row.grading + r_row.content + r_row.workload) as f32 / 5.0;
-    let overall = (overall * 100.0).round() / 100.0;
 
     let author = if r_row.anonymous { None } else { Some(review::AuthorRef { id: r_row.user_id, display_name: r_row.display_name }) };
     let r = review::CourseReview {
@@ -225,7 +224,7 @@ pub async fn propose_review(
         grading: r_row.grading,
         content: r_row.content,
         workload: r_row.workload,
-        overall,
+        overall: r_row.overall,
         body: r_row.body,
         score: 0,
         upvotes: 0,

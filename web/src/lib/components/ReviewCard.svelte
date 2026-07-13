@@ -37,6 +37,7 @@
 	let saving = $state(false);
 	let editbody = $state('');
 	let editvalues = $state<Record<string, number>>({});
+	let editoverall = $state<number | null>(null);
 
 	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
 	const stars = $derived(Math.round(review.overall ?? 0));
@@ -92,6 +93,7 @@
 		editmode = true;
 		editbody = review.body;
 		editvalues = axisfromreview();
+		editoverall = null;
 		open = true;
 	}
 
@@ -105,6 +107,8 @@
 		const payload = { body: editbody.trim() } as EditCourseReview | EditAdvisorReview;
 		const base = axisfromreview();
 		for (const k of axisorder) (payload as Record<string, number>)[k] = editvalues[k] ?? base[k];
+		const axisavg = axisorder.reduce((s, k) => s + ((payload as Record<string, number>)[k] ?? 0), 0) / axisorder.length;
+		(payload as Record<string, number>).overall = editoverall !== null ? editoverall : axisavg;
 		const updated = kind === 'course'
 			? await editCourseReview(review.id, payload as EditCourseReview)
 			: await editAdvisorReview(review.id, payload as EditAdvisorReview);
@@ -261,10 +265,12 @@
 		saving={saving}
 		editbody={editbody}
 		editvalues={editvalues}
+		editoverall={editoverall}
 		onvote={(v) => handlevote(v)}
 		onflag={() => { if (canflag && !flagged) flagopen = true; }}
 		oneditstart={startedit}
 		oneditvalue={seteditvalue}
+		oneditoverall={(v) => (editoverall = v)}
 		oneditbody={(v) => (editbody = v)}
 		onsaved={handlesave}
 		ondelete={handledelete}

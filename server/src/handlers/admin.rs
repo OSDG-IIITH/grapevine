@@ -312,6 +312,7 @@ pub struct ProposedReviewResponse {
     pub grading: i16,
     pub content: i16,
     pub workload: i16,
+    pub overall: f32,
     pub author_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
@@ -341,7 +342,7 @@ pub async fn list_proposed(
     for o in offerings {
         let reviews = sqlx::query!(
             r#"SELECT cr.id, cr.body, cr.difficulty, cr.teaching, cr.grading,
-                      cr.content, cr.workload,
+                      cr.content, cr.workload, cr.overall as "overall!: f32",
                       cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
                       cr.anonymous,
                       u.display_name
@@ -362,6 +363,7 @@ pub async fn list_proposed(
             grading: r.grading,
             content: r.content,
             workload: r.workload,
+            overall: r.overall,
             author_name: if r.anonymous { None } else { Some(r.display_name) },
             created_at: r.created_at,
         }).collect();

@@ -60,6 +60,7 @@ pub struct CreateCourseReview {
     pub grading: i16,
     pub content: i16,
     pub workload: i16,
+    pub overall: f32,
     pub body: String,
 }
 
@@ -70,6 +71,7 @@ pub struct EditCourseReview {
     pub grading: Option<i16>,
     pub content: Option<i16>,
     pub workload: Option<i16>,
+    pub overall: Option<f32>,
     pub body: Option<String>,
 }
 
@@ -81,6 +83,7 @@ pub struct CreateAdvisorReview {
     pub mentorship: i16,
     pub support: i16,
     pub workload: i16,
+    pub overall: f32,
     pub body: String,
 }
 
@@ -91,6 +94,7 @@ pub struct EditAdvisorReview {
     pub mentorship: Option<i16>,
     pub support: Option<i16>,
     pub workload: Option<i16>,
+    pub overall: Option<f32>,
     pub body: Option<String>,
 }
 
@@ -104,20 +108,11 @@ pub struct FlagBody {
     pub reason: String,
 }
 
-fn course_overall(difficulty: i16, teaching: i16, grading: i16, content: i16, workload: i16) -> f32 {
-    let sum = (difficulty + teaching + grading + content + workload) as f32;
-    (sum / 5.0 * 100.0).round() / 100.0
-}
-
-fn advisor_overall(research: i16, availability: i16, mentorship: i16, support: i16, workload: i16) -> f32 {
-    let sum = (research + availability + mentorship + support + workload) as f32;
-    (sum / 5.0 * 100.0).round() / 100.0
-}
-
 pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &str) -> Result<Vec<CourseReview>, AppError> {
     let rows = sqlx::query!(
         r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                   cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.overall as "overall!: f32",
                   cr.body,
                   cr.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -134,7 +129,7 @@ pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &
            WHERE o.course_id = $1 AND o.approved = true AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
-                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
+                    cr.overall, cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
            ORDER BY "score!" DESC, cr.created_at DESC"#,
         course_id, user_id
     )
@@ -142,11 +137,10 @@ pub async fn course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = course_overall(r.difficulty, r.teaching, r.grading, r.content, r.workload);
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -155,6 +149,7 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
     let rows = sqlx::query!(
         r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                   cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.overall as "overall!: f32",
                   cr.body,
                   cr.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -171,7 +166,7 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
            WHERE cr.offering_id = $1 AND o.approved = true AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
-                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
+                    cr.overall, cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
            ORDER BY "score!" DESC, cr.created_at DESC"#,
         offering_id, user_id
     )
@@ -179,11 +174,10 @@ pub async fn course_reviews_by_offering(pool: &PgPool, offering_id: &str, user_i
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = course_overall(r.difficulty, r.teaching, r.grading, r.content, r.workload);
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -192,6 +186,7 @@ pub async fn proposed_course_reviews_by_course(pool: &PgPool, course_id: &str, u
     let rows = sqlx::query!(
         r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                   cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.overall as "overall!: f32",
                   cr.body,
                   cr.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -208,7 +203,7 @@ pub async fn proposed_course_reviews_by_course(pool: &PgPool, course_id: &str, u
            WHERE o.course_id = $1 AND o.approved = false AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
-                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
+                    cr.overall, cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
            ORDER BY cr.created_at DESC"#,
         course_id, user_id
     )
@@ -216,11 +211,10 @@ pub async fn proposed_course_reviews_by_course(pool: &PgPool, course_id: &str, u
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = course_overall(r.difficulty, r.teaching, r.grading, r.content, r.workload);
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -228,9 +222,9 @@ pub async fn proposed_course_reviews_by_course(pool: &PgPool, course_id: &str, u
 pub async fn create_course_review(pool: &PgPool, user_id: &str, offering_id: &str, req: CreateCourseReview) -> Result<CourseReview, AppError> {
     let id = Ulid::new().to_string();
     sqlx::query!(
-        "INSERT INTO course_reviews (id, user_id, offering_id, anonymous, difficulty, teaching, grading, content, workload, body)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-        id, user_id, offering_id, req.anonymous, req.difficulty, req.teaching, req.grading, req.content, req.workload, req.body
+        "INSERT INTO course_reviews (id, user_id, offering_id, anonymous, difficulty, teaching, grading, content, workload, overall, body)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+        id, user_id, offering_id, req.anonymous, req.difficulty, req.teaching, req.grading, req.content, req.workload, req.overall, req.body
     )
     .execute(pool)
     .await?;
@@ -248,10 +242,11 @@ pub async fn edit_course_review(pool: &PgPool, review_id: &str, user_id: &str, r
              content = COALESCE($4, content),
              workload = COALESCE($5, workload),
              body = COALESCE($6, body),
+             overall = COALESCE($7, overall),
              edited_at = now()
-           WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
+           WHERE id = $8 AND user_id = $9 AND deleted_at IS NULL
            RETURNING id, offering_id"#,
-        req.difficulty, req.teaching, req.grading, req.content, req.workload, req.body,
+        req.difficulty, req.teaching, req.grading, req.content, req.workload, req.body, req.overall,
         review_id, user_id
     )
     .fetch_optional(pool)
@@ -315,6 +310,7 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
     let rows = sqlx::query!(
         r#"SELECT ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                   ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
+                  ar.overall as "overall!: f32",
                   ar.body,
                   ar.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   ar.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -330,7 +326,7 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
            WHERE ar.faculty_id = $1 AND ar.deleted_at IS NULL
            GROUP BY ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                     ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
-                    ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
+                    ar.overall, ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
            ORDER BY "score!" DESC, ar.created_at DESC"#,
         faculty_id, user_id
     )
@@ -338,11 +334,10 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = advisor_overall(r.research, r.availability, r.mentorship, r.support, r.workload);
         let author = if r.anonymous { None } else { Some(AuthorRef { id: r.user_id, display_name: r.display_name }) };
         AdvisorReview { id: r.id, faculty_id: r.faculty_id, author, anonymous: r.anonymous,
             research: r.research, availability: r.availability, mentorship: r.mentorship, support: r.support,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -350,9 +345,9 @@ pub async fn advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id
 pub async fn create_advisor_review(pool: &PgPool, user_id: &str, faculty_id: &str, req: CreateAdvisorReview) -> Result<AdvisorReview, AppError> {
     let id = Ulid::new().to_string();
     sqlx::query!(
-        "INSERT INTO advisor_reviews (id, user_id, faculty_id, anonymous, research, availability, mentorship, support, workload, body)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-        id, user_id, faculty_id, req.anonymous, req.research, req.availability, req.mentorship, req.support, req.workload, req.body
+        "INSERT INTO advisor_reviews (id, user_id, faculty_id, anonymous, research, availability, mentorship, support, workload, overall, body)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+        id, user_id, faculty_id, req.anonymous, req.research, req.availability, req.mentorship, req.support, req.workload, req.overall, req.body
     )
     .execute(pool)
     .await?;
@@ -370,10 +365,11 @@ pub async fn edit_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
              support = COALESCE($4, support),
              workload = COALESCE($5, workload),
              body = COALESCE($6, body),
+             overall = COALESCE($7, overall),
              edited_at = now()
-           WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
+           WHERE id = $8 AND user_id = $9 AND deleted_at IS NULL
            RETURNING id, faculty_id"#,
-        req.research, req.availability, req.mentorship, req.support, req.workload, req.body,
+        req.research, req.availability, req.mentorship, req.support, req.workload, req.body, req.overall,
         review_id, user_id
     )
     .fetch_optional(pool)
@@ -437,6 +433,7 @@ pub async fn my_course_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Cours
     let rows = sqlx::query!(
         r#"SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                   cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
+                  cr.overall as "overall!: f32",
                   cr.body,
                   cr.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   cr.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -452,7 +449,7 @@ pub async fn my_course_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Cours
            WHERE cr.user_id = $1 AND cr.deleted_at IS NULL
            GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,
                     cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,
-                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
+                    cr.overall, cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote
            ORDER BY cr.created_at DESC"#,
         user_id
     )
@@ -460,11 +457,10 @@ pub async fn my_course_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Cours
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = course_overall(r.difficulty, r.teaching, r.grading, r.content, r.workload);
         let author = Some(AuthorRef { id: r.user_id, display_name: r.display_name });
         CourseReview { id: r.id, offering_id: r.offering_id, author, anonymous: r.anonymous,
             difficulty: r.difficulty, teaching: r.teaching, grading: r.grading, content: r.content,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
@@ -473,6 +469,7 @@ pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Advi
     let rows = sqlx::query!(
         r#"SELECT ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                   ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
+                  ar.overall as "overall!: f32",
                   ar.body,
                   ar.edited_at as "edited_at?: chrono::DateTime<chrono::Utc>",
                   ar.created_at as "created_at!: chrono::DateTime<chrono::Utc>",
@@ -488,7 +485,7 @@ pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Advi
            WHERE ar.user_id = $1 AND ar.deleted_at IS NULL
            GROUP BY ar.id, ar.faculty_id, ar.user_id, ar.anonymous,
                     ar.research, ar.availability, ar.mentorship, ar.support, ar.workload,
-                    ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
+                    ar.overall, ar.body, ar.edited_at, ar.created_at, u.display_name, uv.vote
            ORDER BY ar.created_at DESC"#,
         user_id
     )
@@ -496,11 +493,10 @@ pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Advi
     .await?;
 
     Ok(rows.into_iter().map(|r| {
-        let overall = advisor_overall(r.research, r.availability, r.mentorship, r.support, r.workload);
         let author = Some(AuthorRef { id: r.user_id, display_name: r.display_name });
         AdvisorReview { id: r.id, faculty_id: r.faculty_id, author, anonymous: r.anonymous,
             research: r.research, availability: r.availability, mentorship: r.mentorship, support: r.support,
-            workload: r.workload, overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+            workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
 }
