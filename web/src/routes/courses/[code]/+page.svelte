@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse } from '$lib/api';
-	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef } from '$lib/types';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, ReportTarget } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
@@ -14,6 +14,7 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import ReportModal from '$lib/components/ReportModal.svelte';
 
 	const code = $derived($page.params.code);
 
@@ -22,6 +23,29 @@
 	let proposedReviews = $state<CourseReview[]>([]);
 	let tab = $state('all');
 	let error = $state('');
+	let activereport = $state<{ type: ReportTarget; id: string; label: string } | null>(null);
+	let reportsubmitting = $state(false);
+
+	async function sendReport(reason: string) {
+		if (!activereport) return;
+		reportsubmitting = true;
+		const ok = await submitReport(activereport.type, activereport.id, reason);
+		reportsubmitting = false;
+		if (ok) {
+			toast.success('Report sent to the moderators.');
+			activereport = null;
+		}
+	}
+
+	function reportCourseInfo() {
+		if (!course) return;
+		activereport = { type: 'course', id: course.id, label: `${course.code} · ${course.name}` };
+	}
+
+	function reportOfferingInfo() {
+		if (!course || !selectedoffering) return;
+		activereport = { type: 'offering', id: selectedoffering.id, label: `${course.code} · ${selectedoffering.code} instructor listing` };
+	}
 
 	let editing = $state(false);
 	let saving = $state(false);
@@ -101,6 +125,7 @@
 		course = null;
 		reviews = [];
 		proposedReviews = [];
+		activereport = null;
 		tab = 'all';
 		editing = false;
 
@@ -366,6 +391,11 @@
 							Edit
 						</button>
 					{/if}
+					<button
+						type="button"
+						onclick={reportCourseInfo}
+						class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>Report course info</button>
 					<a
 						href="{base}/review?course={course.code}"
 						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
@@ -754,13 +784,19 @@
 
 		<!-- taught-by banner -->
 		{#if selectedoffering}
-			<div class="mb-[18px] flex items-center gap-[14px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
+			<div class="mb-[18px] flex flex-wrap items-center gap-[14px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
 				<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Taught by</span>
 				{#each selectedoffering.faculty as f, i (f.id)}
 					<a href="{base}/faculty/{f.slug ?? f.id}" class="text-[var(--fg)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]">
 						{f.name}{i < selectedoffering.faculty.length - 1 ? ',' : ''}
 					</a>
 				{/each}
+				<button
+					type="button"
+					onclick={reportOfferingInfo}
+					class="ml-auto text-[11px] text-[var(--fg-3)] underline decoration-[var(--border-strong)] underline-offset-4 transition-colors hover:text-[var(--fg)]"
+					style="font-family: var(--mono);"
+				>Report this offering</button>
 			</div>
 		{/if}
 
@@ -801,6 +837,10 @@
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 	{/if}
 </div>
+
+{#if activereport}
+	<ReportModal title="Report inaccurate course information" target={activereport.label} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) activereport = null; }} onsubmit={sendReport} />
+{/if}
 
 {#if confirmdel}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">

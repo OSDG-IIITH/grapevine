@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		getFlags, dismissFlag, deleteFlaggedReview, exportSeedData,
+		getReports, dismissReport,
 		getProposedOfferings, approveProposedOffering, rejectProposedOffering,
 		getDeletedCourses, restoreCourse,
 		getDeletedFaculty, restoreFaculty,
@@ -12,13 +13,14 @@
 		type Moderator
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
-	import type { FlagResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
+	import type { FlagResponse, ReportResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 
 	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 
 	let items = $state<FlagResponse[]>([]);
+	let reports = $state<ReportResponse[]>([]);
 	let proposed = $state<ProposedOfferingResponse[]>([]);
 	let deleted = $state<{ code: string; name: string; deleted_at: string }[]>([]);
 	let deletedfaculty = $state<{ slug: string; name: string; deleted_at: string }[]>([]);
@@ -40,17 +42,18 @@
 	};
 	let loading = $state(true);
 	let error = $state(false);
-	let activetab = $state<'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators'>('audit');
+	let activetab = $state<'reports' | 'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators'>('audit');
 
 	onMount(async () => {
-		const [flags, props, del, delfac, dellabs, deloff, logs, mods] = await Promise.all([
-			getFlags(), getProposedOfferings(),
+		const [flags, reportitems, props, del, delfac, dellabs, deloff, logs, mods] = await Promise.all([
+			getFlags(), getReports(), getProposedOfferings(),
 			getDeletedCourses(), getDeletedFaculty(), getDeletedLabs(), getDeletedOfferings(),
 			getAuditLogs(), getModerators()
 		]);
-		if (flags === null || props === null) error = true;
+		if (flags === null || reportitems === null || props === null) error = true;
 		else {
 			items = flags;
+			reports = reportitems;
 			proposed = props;
 			deleted = del ?? [];
 			deletedfaculty = delfac ?? [];
@@ -80,6 +83,10 @@
 
 	async function dismiss(id: string) {
 		if (await dismissFlag(id)) items = items.filter((i) => i.id !== id);
+	}
+
+	async function dismissInfoReport(id: string) {
+		if (await dismissReport(id)) reports = reports.filter((report) => report.id !== id);
 	}
 
 	async function deleteReview(id: string) {
@@ -144,7 +151,7 @@
 			CREATE_LAB: 'created lab', UPDATE_LAB: 'updated lab', DELETE_LAB: 'deleted lab',
 			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty',
 			APPROVE_PROPOSED: 'approved proposed', REJECT_PROPOSED: 'rejected proposed',
-			DELETE_REVIEW: 'deleted review', DISMISS_FLAG: 'dismissed flag',
+			DELETE_REVIEW: 'deleted review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
 			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
 			RESTORE_REVIEW: 'restored review', RESTORE_OFFERING: 'restored offering',
 		};
@@ -196,6 +203,10 @@
 		return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 	}
 
+	function reporttypelabel(type: ReportResponse['target_type']): string {
+		return type === 'course' || type === 'offering' ? 'course information' : `${type} information`;
+	}
+
 	let totaldeleted = $derived(deleted.length + deletedfaculty.length + deletedlabs.length + deletedofferings.length);
 </script>
 
@@ -222,7 +233,7 @@
 					Moderator inbox
 				</h1>
 				<div class="flex items-center gap-[14px] text-[13px] text-[var(--fg-2)]">
-					<span>{items.length + proposed.length} pending items</span>
+					<span>{reports.length + items.length + proposed.length} pending items</span>
 				</div>
 			</div>
 			<button
@@ -241,6 +252,7 @@
 		<div class="mb-6">
 			<Tabs items={[
 				{ id: 'audit', label: 'Audit log', count: auditlogs.length },
+				{ id: 'reports', label: 'Information reports', count: reports.length },
 				{ id: 'flagged', label: 'Flagged reviews', count: items.length },
 				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length },
 				{ id: 'deleted', label: 'Deleted', count: totaldeleted },
@@ -281,6 +293,29 @@
 									class="inline-flex items-center rounded-[6px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[10px] py-[4px] text-[11px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
 								>Restore</button>
 							{/if}
+						</div>
+					</div>
+				{/each}
+			{/if}
+
+		{:else if activetab === 'reports'}
+			{#if reports.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
+					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
+					Inbox zero. No inaccurate information reported.
+				</div>
+			{:else}
+				{#each reports as report (report.id)}
+					<div class="mb-3 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[22px]" style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
+						<div class="mb-3 flex flex-wrap items-center gap-3 text-[12px] text-[var(--fg-3)]">
+							<span class="rounded px-2 py-[2px] text-[11px] uppercase text-[var(--accent-2)] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)]" style="font-family: var(--mono);">{reporttypelabel(report.target_type)}</span>
+							<span class="text-[var(--fg)]">{report.target_label}</span>
+							<span class="ml-auto text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">reported {reltime(report.created_at)}</span>
+						</div>
+						<div class="mb-3 text-[12px] text-[var(--fg-3)]">reported by <span class="text-[var(--fg-2)]">{report.reporter_name}</span></div>
+						<p class="m-0 whitespace-pre-wrap text-[14px] leading-[1.65] text-[var(--fg)]">{report.reason}</p>
+						<div class="mt-4">
+							<button type="button" onclick={() => dismissInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] text-[var(--fg)] transition-colors hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]">Dismiss report</button>
 						</div>
 					</div>
 				{/each}

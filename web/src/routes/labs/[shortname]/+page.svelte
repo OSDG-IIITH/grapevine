@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getLab, updateLab, deleteLab } from '$lib/api';
+	import { getLab, updateLab, deleteLab, submitReport } from '$lib/api';
 	import { toast } from 'svelte-sonner';
 	import type { LabDetail } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
@@ -11,11 +11,25 @@
 	import RatingsBlock from '$lib/components/RatingsBlock.svelte';
 	import SegBar from '$lib/components/SegBar.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import ReportModal from '$lib/components/ReportModal.svelte';
 
 	const shortname = $derived($page.params.shortname);
 
 	let lab = $state<LabDetail | null>(null);
 	let error = $state('');
+	let reportopen = $state(false);
+	let reportsubmitting = $state(false);
+
+	async function sendReport(reason: string) {
+		if (!lab) return;
+		reportsubmitting = true;
+		const ok = await submitReport('lab', lab.id, reason);
+		reportsubmitting = false;
+		if (ok) {
+			toast.success('Report sent to the moderators.');
+			reportopen = false;
+		}
+	}
 
 	let editing = $state(false);
 	let saving = $state(false);
@@ -27,6 +41,7 @@
 		const s = shortname;
 		if (!s) return;
 		lab = null;
+		reportopen = false;
 		error = '';
 		editing = false;
 		getLab(s).then((data) => {
@@ -159,6 +174,11 @@
 							Edit
 						</button>
 					{/if}
+					<button
+						type="button"
+						onclick={() => { reportopen = true; }}
+						class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>Report info</button>
 				{/if}
 			</div>
 		</div>
@@ -242,4 +262,8 @@
 			</div>
 		</div>
 	</div>
+{/if}
+
+{#if reportopen && lab}
+	<ReportModal target={`${lab.short} · ${lab.name}`} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) reportopen = false; }} onsubmit={sendReport} />
 {/if}

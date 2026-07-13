@@ -204,6 +204,19 @@ export interface FlagResponse {
 	faculty_name?: string;
 }
 
+export type ReportTarget = 'course' | 'faculty' | 'lab' | 'offering';
+
+export interface ReportResponse {
+	id: string;
+	target_type: ReportTarget;
+	target_id: string;
+	target_label: string;
+	reason: string;
+	created_at: string;
+	reporter_id: string;
+	reporter_name: string;
+}
+
 export interface SearchResult {
 	type: 'course' | 'faculty' | 'lab';
 	name: string;
@@ -302,4 +315,3 @@ export interface AuditLog {
 	previous_state: Record<string, unknown> | null;
 	created_at: string;
 }
-

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     auth::{session::AuthUser, validate::normalize_username},
     error::AppError,
-    models::{audit, course, faculty, lab, offering::Season},
+    models::{audit, course, faculty, lab, offering::Season, report},
     state::AppState,
 };
 
@@ -174,6 +174,24 @@ pub async fn dismiss_flag(
     }
 
     audit::logaction(&s.pool, &user.id, "DISMISS_FLAG", "flag", &id, None).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn reports(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<report::ReportResponse>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(report::list(&s.pool).await?))
+}
+
+pub async fn dismiss_report(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    report::dismiss(&s.pool, &id, &user.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
