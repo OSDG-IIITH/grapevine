@@ -2,6 +2,7 @@
 .direnv/
 data/
 server/seed/pipeline
+server/.sqlx
 
 # ai slop
 .claude/
