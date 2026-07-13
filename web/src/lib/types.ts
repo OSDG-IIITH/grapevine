@@ -4,6 +4,12 @@ export interface CourseLean {
 	name: string;
 	overall: number;
 	shortnames: string[];
+	reviews_count: number;
+	difficulty: number;
+	workload: number;
+	teaching: number;
+	grading: number;
+	content: number;
 }
 
 export interface FacultyLean {
@@ -12,7 +18,17 @@ export interface FacultyLean {
 	slug: string;
 	labs: { id: string; name: string; short: string }[];
 	overall: number;
+	reviews_count: number;
+	research: number;
+	availability: number;
+	mentorship: number;
+	support: number;
+	workload: number;
 }
+
+export type CourseSort = 'rating_desc' | 'rating_asc' | 'name_asc' | 'name_desc' | 'reviews_desc' | 'reviews_asc' | 'difficulty_desc' | 'difficulty_asc' | 'workload_desc' | 'workload_asc' | 'teaching_desc' | 'teaching_asc' | 'grading_desc' | 'grading_asc' | 'content_desc' | 'content_asc';
+
+export type FacultySort = 'rating_desc' | 'rating_asc' | 'name_asc' | 'name_desc' | 'reviews_desc' | 'reviews_asc' | 'mentorship_desc' | 'mentorship_asc' | 'availability_desc' | 'availability_asc' | 'support_desc' | 'support_asc' | 'research_desc' | 'research_asc' | 'workload_desc' | 'workload_asc';
 
 export interface FacultyDetail {
 	id: string;

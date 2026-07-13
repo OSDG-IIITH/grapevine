@@ -25,6 +25,12 @@ pub struct FacultyLean {
     pub name: String,
     pub labs: Vec<LabRef>,
     pub overall: f64,
+    pub reviews_count: i64,
+    pub research: f64,
+    pub availability: f64,
+    pub mentorship: f64,
+    pub support: f64,
+    pub workload: f64,
 }
 
 #[derive(Debug, Serialize)]
@@ -62,11 +68,33 @@ pub struct FacultyDetail {
     pub offerings: Vec<OfferingWithCourse>,
 }
 
+fn fdesc(a: f64, b: f64) -> std::cmp::Ordering {
+    match (a == 0.0, b == 0.0) {
+        (true, false) => std::cmp::Ordering::Greater,
+        (false, true) => std::cmp::Ordering::Less,
+        _ => b.partial_cmp(&a).unwrap_or(std::cmp::Ordering::Equal),
+    }
+}
+
+fn fasc(a: f64, b: f64) -> std::cmp::Ordering {
+    match (a == 0.0, b == 0.0) {
+        (true, false) => std::cmp::Ordering::Greater,
+        (false, true) => std::cmp::Ordering::Less,
+        _ => a.partial_cmp(&b).unwrap_or(std::cmp::Ordering::Equal),
+    }
+}
+
 pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<Vec<FacultyLean>, AppError> {
     let pattern = q.map(|s| format!("%{}%", s));
     let rows = sqlx::query!(
         r#"SELECT f.id, f.slug, f.name,
-                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64"
+                  COALESCE(AVG(r.overall::float8), 0.0)::float8 as "overall!: f64",
+                  COALESCE(AVG(r.research::float8), 0.0)::float8 as "research!: f64",
+                  COALESCE(AVG(r.availability::float8), 0.0)::float8 as "availability!: f64",
+                  COALESCE(AVG(r.mentorship::float8), 0.0)::float8 as "mentorship!: f64",
+                  COALESCE(AVG(r.support::float8), 0.0)::float8 as "support!: f64",
+                  COALESCE(AVG(r.workload::float8), 0.0)::float8 as "workload!: f64",
+                  COUNT(r.id)::int8 as "reviews_count!: i64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)
@@ -96,24 +124,37 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
     let mut results: Vec<FacultyLean> = rows.into_iter().map(|r| FacultyLean {
         labs: labs_map.remove(&r.id).unwrap_or_default(),
         id: r.id, slug: r.slug, name: r.name, overall: r.overall,
+        reviews_count: r.reviews_count, research: r.research,
+        availability: r.availability, mentorship: r.mentorship,
+        support: r.support, workload: r.workload,
     }).collect();
 
+    let rcmp = |a: i64, b: i64, desc: bool| -> std::cmp::Ordering {
+        match (a == 0, b == 0) {
+            (true, false) => std::cmp::Ordering::Greater,
+            (false, true) => std::cmp::Ordering::Less,
+            _ => if desc { b.cmp(&a) } else { a.cmp(&b) },
+        }
+    };
+
     match sort {
-        Some("rating_desc") => results.sort_by(|a, b| {
-            match (a.overall == 0.0, b.overall == 0.0) {
-                (true, false) => std::cmp::Ordering::Greater,
-                (false, true) => std::cmp::Ordering::Less,
-                _ => b.overall.partial_cmp(&a.overall).unwrap_or(std::cmp::Ordering::Equal),
-            }
-        }),
-        Some("rating_asc") => results.sort_by(|a, b| {
-            match (a.overall == 0.0, b.overall == 0.0) {
-                (true, false) => std::cmp::Ordering::Greater,
-                (false, true) => std::cmp::Ordering::Less,
-                _ => a.overall.partial_cmp(&b.overall).unwrap_or(std::cmp::Ordering::Equal),
-            }
-        }),
-        _ => {}
+        Some("name_asc")           => results.sort_by(|a, b| a.name.cmp(&b.name)),
+        Some("name_desc")          => results.sort_by(|a, b| b.name.cmp(&a.name)),
+        Some("reviews_desc")       => results.sort_by(|a, b| rcmp(a.reviews_count, b.reviews_count, true)),
+        Some("reviews_asc")        => results.sort_by(|a, b| rcmp(a.reviews_count, b.reviews_count, false)),
+        Some("rating_desc")        => results.sort_by(|a, b| fdesc(a.overall, b.overall)),
+        Some("rating_asc")         => results.sort_by(|a, b| fasc(a.overall, b.overall)),
+        Some("mentorship_desc")    => results.sort_by(|a, b| fdesc(a.mentorship, b.mentorship)),
+        Some("mentorship_asc")     => results.sort_by(|a, b| fasc(a.mentorship, b.mentorship)),
+        Some("availability_desc")  => results.sort_by(|a, b| fdesc(a.availability, b.availability)),
+        Some("availability_asc")   => results.sort_by(|a, b| fasc(a.availability, b.availability)),
+        Some("support_desc")       => results.sort_by(|a, b| fdesc(a.support, b.support)),
+        Some("support_asc")        => results.sort_by(|a, b| fasc(a.support, b.support)),
+        Some("research_desc")      => results.sort_by(|a, b| fdesc(a.research, b.research)),
+        Some("research_asc")       => results.sort_by(|a, b| fasc(a.research, b.research)),
+        Some("workload_desc")      => results.sort_by(|a, b| fdesc(a.workload, b.workload)),
+        Some("workload_asc")       => results.sort_by(|a, b| fasc(a.workload, b.workload)),
+        _ => results.sort_by(|a, b| fdesc(a.overall, b.overall)),
     }
 
     Ok(results)

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { getFaculty, getLabs, createFaculty } from '$lib/api';
-	import type { FacultyLean, LabLean } from '$lib/types';
+	import type { FacultyLean, FacultySort, LabLean } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import BrowseCard from '$lib/components/BrowseCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
+	import SortMenu from '$lib/components/SortMenu.svelte';
 	import { toast } from 'svelte-sonner';
 
 	const PER_PAGE = 9;
@@ -14,7 +16,7 @@
 	let all = $state<FacultyLean[]>([]);
 	let labs = $state<LabLean[]>([]);
 	let labfilter = $state('all');
-	let sort = $state<'' | 'rating_asc' | 'rating_desc'>('');
+	let sort = $state<FacultySort>('rating_desc');
 	let q = $state('');
 	let page = $state(1);
 
@@ -23,12 +25,33 @@
 	let newslug = $state('');
 	let saving = $state(false);
 
+	onMount(() => {
+		const params = new URLSearchParams(window.location.search);
+		const urlsort = params.get('sort') as FacultySort | null;
+		const lssort = localStorage.getItem('sort_faculty') as FacultySort | null;
+		if (urlsort) sort = urlsort;
+		else if (lssort) sort = lssort;
+	});
+
+	function applysort(v: string) {
+		sort = v as FacultySort;
+		const url = new URL(window.location.href);
+		if (v && v !== 'rating_desc') {
+			localStorage.setItem('sort_faculty', v);
+			url.searchParams.set('sort', v);
+		} else {
+			localStorage.removeItem('sort_faculty');
+			url.searchParams.delete('sort');
+		}
+		history.replaceState({}, '', url);
+	}
+
 	$effect(() => {
 		getLabs().then((data) => { if (Array.isArray(data)) labs = data; });
 	});
 
 	$effect(() => {
-		const params: { sort?: 'rating_asc' | 'rating_desc' } = {};
+		const params: { sort?: string } = {};
 		if (sort) params.sort = sort;
 		page = 1;
 		getFaculty(params).then((data) => { if (Array.isArray(data)) all = data; });
@@ -47,12 +70,6 @@
 
 	const totalpages = $derived(Math.max(1, Math.ceil(filtered.length / PER_PAGE)));
 	const visible = $derived(filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE));
-
-	function nextsort() {
-		if (sort === '') sort = 'rating_desc';
-		else if (sort === 'rating_desc') sort = 'rating_asc';
-		else sort = '';
-	}
 
 	function openadding() {
 		newname = '';
@@ -137,14 +154,7 @@
 			style="font-family: var(--mono);"
 		/>
 		<div class="flex flex-1 items-center gap-2 sm:flex-none">
-			<button
-				type="button"
-				onclick={nextsort}
-				class="shrink-0 rounded-[5px] border px-[10px] py-[5px] text-[11px] tracking-[0.04em] transition-[color,background,border-color] duration-[120ms] {sort ? 'border-[var(--accent-dim)] bg-[var(--accent-bg)] text-[var(--accent-2)]' : 'border-[var(--border)] text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-			>
-				{sort === 'rating_desc' ? 'rating ↓' : sort === 'rating_asc' ? 'rating ↑' : 'sort'}
-			</button>
+			<SortMenu kind="faculty" bind:value={sort} onchange={applysort} />
 			<div class="flex flex-1 items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[var(--bg-inset)] px-3 py-[7px] sm:w-[260px] sm:flex-none">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--fg-4)]" aria-hidden="true">
 					<circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
@@ -167,7 +177,7 @@
 	{:else}
 		<div class="grid grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
 			{#each visible as f (f.id)}
-				<BrowseCard kind="faculty" item={f} />
+				<BrowseCard kind="faculty" item={f} sortkey={sort} />
 			{/each}
 		</div>
 	{/if}

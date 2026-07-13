@@ -58,7 +58,7 @@ const listCache = {
 	}
 };
 
-export async function getCourses(params?: { q?: string; instructor?: string; sort?: 'rating_asc' | 'rating_desc' }): Promise<CourseLean[] | null> {
+export async function getCourses(params?: { q?: string; instructor?: string; sort?: string }): Promise<CourseLean[] | null> {
 	const p = new URLSearchParams();
 	if (params?.q?.trim()) p.set('q', params.q.trim());
 	if (params?.instructor) p.set('instructor', params.instructor);
@@ -83,7 +83,7 @@ export async function getCourseReviews(code: string): Promise<CourseReview[] | n
 	return apifetch<CourseReview[]>(`/courses/${encodeURIComponent(code)}/reviews`);
 }
 
-export async function getFaculty(params?: { q?: string; sort?: 'rating_asc' | 'rating_desc' }): Promise<FacultyLean[] | null> {
+export async function getFaculty(params?: { q?: string; sort?: string }): Promise<FacultyLean[] | null> {
 	const p = new URLSearchParams();
 	if (params?.q?.trim()) p.set('q', params.q.trim());
 	if (params?.sort) p.set('sort', params.sort);
