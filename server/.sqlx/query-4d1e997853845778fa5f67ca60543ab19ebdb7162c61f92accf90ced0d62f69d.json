@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.body,\n                  cr.edited_at as \"edited_at?: chrono::DateTime<chrono::Utc>\",\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name,\n                  COALESCE(SUM(v.vote), 0)::bigint as \"score!\",\n                    COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as \"upvotes!\",\n                    COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as \"downvotes!\",\n                  uv.vote as \"user_vote?\"\n           FROM course_reviews cr\n           JOIN offerings o ON o.id = cr.offering_id AND o.deleted_at IS NULL\n           JOIN users u ON u.id = cr.user_id\n           LEFT JOIN course_review_votes v ON v.review_id = cr.id\n           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $2\n           WHERE cr.offering_id = $1 AND o.approved = true AND cr.deleted_at IS NULL\n           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                    cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote\n           ORDER BY \"score!\" DESC, cr.created_at DESC",
+  "query": "SELECT cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                  cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                  cr.overall as \"overall!: f32\",\n                  cr.body,\n                  cr.edited_at as \"edited_at?: chrono::DateTime<chrono::Utc>\",\n                  cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                  u.display_name,\n                  COALESCE(SUM(v.vote), 0)::bigint as \"score!\",\n                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as \"upvotes!\",\n                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as \"downvotes!\",\n                  uv.vote as \"user_vote?\"\n           FROM course_reviews cr\n           JOIN users u ON u.id = cr.user_id\n           LEFT JOIN course_review_votes v ON v.review_id = cr.id\n           LEFT JOIN course_review_votes uv ON uv.review_id = cr.id AND uv.user_id = $1\n           WHERE cr.user_id = $1 AND cr.deleted_at IS NULL\n           GROUP BY cr.id, cr.offering_id, cr.user_id, cr.anonymous,\n                    cr.difficulty, cr.teaching, cr.grading, cr.content, cr.workload,\n                    cr.overall, cr.body, cr.edited_at, cr.created_at, u.display_name, uv.vote\n           ORDER BY cr.created_at DESC",
   "describe": {
     "columns": [
       {
@@ -50,52 +50,57 @@
       },
       {
         "ordinal": 9,
+        "name": "overall!: f32",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 10,
         "name": "body",
         "type_info": "Text"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "edited_at?: chrono::DateTime<chrono::Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "created_at!: chrono::DateTime<chrono::Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "display_name",
         "type_info": "Text"
       },
       {
-        "ordinal": 13,
+        "ordinal": 14,
         "name": "score!",
         "type_info": "Int8"
       },
       {
-        "ordinal": 14,
+        "ordinal": 15,
         "name": "upvotes!",
         "type_info": "Int8"
       },
       {
-        "ordinal": 15,
+        "ordinal": 16,
         "name": "downvotes!",
         "type_info": "Int8"
       },
       {
-        "ordinal": 16,
+        "ordinal": 17,
         "name": "user_vote?",
         "type_info": "Int2"
       }
     ],
     "parameters": {
       "Left": [
-        "Text",
         "Text"
       ]
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -115,5 +120,5 @@
       false
     ]
   },
-  "hash": "53933d6f90d90e232fa229adbb2f617a4c0319bc90123639536824c48cdc4c52"
+  "hash": "4d1e997853845778fa5f67ca60543ab19ebdb7162c61f92accf90ced0d62f69d"
 }

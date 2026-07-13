@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE advisor_reviews SET\n             research = COALESCE($1, research),\n             availability = COALESCE($2, availability),\n             mentorship = COALESCE($3, mentorship),\n             support = COALESCE($4, support),\n             workload = COALESCE($5, workload),\n             body = COALESCE($6, body),\n             overall = COALESCE($7, overall),\n             edited_at = now()\n           WHERE id = $8 AND user_id = $9 AND deleted_at IS NULL\n           RETURNING id, faculty_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "faculty_id",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Text",
+        "Float4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "1d4af499a2e54c7820dc4e3986a544645b6f6901c4499bef98dbafbd39e99f11"
+}

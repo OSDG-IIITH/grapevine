@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE course_reviews SET\n             difficulty = COALESCE($1, difficulty),\n             teaching = COALESCE($2, teaching),\n             grading = COALESCE($3, grading),\n             content = COALESCE($4, content),\n             workload = COALESCE($5, workload),\n             body = COALESCE($6, body),\n             overall = COALESCE($7, overall),\n             edited_at = now()\n           WHERE id = $8 AND user_id = $9 AND deleted_at IS NULL\n           RETURNING id, offering_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "offering_id",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Text",
+        "Float4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "5e585c17fd8873741d289f2080f3f055941ae57828499624183577a2c8f457e4"
+}

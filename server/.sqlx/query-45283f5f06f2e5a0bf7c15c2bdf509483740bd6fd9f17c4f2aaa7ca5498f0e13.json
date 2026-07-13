@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT cr.id, cr.body, cr.difficulty, cr.teaching, cr.grading,\n                      cr.content, cr.workload,\n                      cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                      cr.anonymous,\n                      u.display_name\n               FROM course_reviews cr\n               JOIN users u ON u.id = cr.user_id\n               WHERE cr.offering_id = $1 AND cr.deleted_at IS NULL\n               ORDER BY cr.created_at DESC",
+  "query": "SELECT cr.id, cr.body, cr.difficulty, cr.teaching, cr.grading,\n                      cr.content, cr.workload, cr.overall as \"overall!: f32\",\n                      cr.created_at as \"created_at!: chrono::DateTime<chrono::Utc>\",\n                      cr.anonymous,\n                      u.display_name\n               FROM course_reviews cr\n               JOIN users u ON u.id = cr.user_id\n               WHERE cr.offering_id = $1 AND cr.deleted_at IS NULL\n               ORDER BY cr.created_at DESC",
   "describe": {
     "columns": [
       {
@@ -40,16 +40,21 @@
       },
       {
         "ordinal": 7,
+        "name": "overall!: f32",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 8,
         "name": "created_at!: chrono::DateTime<chrono::Utc>",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "anonymous",
         "type_info": "Bool"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "display_name",
         "type_info": "Text"
       }
@@ -69,8 +74,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "3df8a5826e11f791244360f1999a7c272f48d1b86c80e1cb49df14b4ac59a5b9"
+  "hash": "45283f5f06f2e5a0bf7c15c2bdf509483740bd6fd9f17c4f2aaa7ca5498f0e13"
 }
