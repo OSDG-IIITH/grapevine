@@ -204,7 +204,7 @@
 	}
 
 	function reporttypelabel(type: ReportResponse['target_type']): string {
-		return type === 'course' || type === 'offering' ? 'course information' : `${type} information`;
+		return `${type} information`;
 	}
 
 	let totaldeleted = $derived(deleted.length + deletedfaculty.length + deletedlabs.length + deletedofferings.length);

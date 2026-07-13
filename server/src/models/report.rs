@@ -92,7 +92,7 @@ pub async fn list(pool: &PgPool) -> Result<Vec<ReportResponse>, AppError> {
                     WHEN r.course_id IS NOT NULL THEN c.code || ' · ' || c.name
                     WHEN r.faculty_id IS NOT NULL THEN f.name
                     WHEN r.lab_id IS NOT NULL THEN l.shortname || ' · ' || l.name
-                    ELSE oc.code || ' · ' || CASE o.season WHEN 'M' THEN 'Monsoon ' ELSE 'Spring ' END || o.year
+                    ELSE oc.code || ' · ' || oc.name || ' · ' || CASE o.season WHEN 'M' THEN 'Monsoon ' ELSE 'Spring ' END || o.year
                   END AS target_label,
                   r.reason, r.created_at,
                   u.id AS reporter_id, u.display_name AS reporter_name
@@ -125,7 +125,7 @@ pub async fn dismiss(pool: &PgPool, id: &str, admin_id: &str) -> Result<(), AppE
                     WHEN r.course_id IS NOT NULL THEN c.code || ' · ' || c.name
                     WHEN r.faculty_id IS NOT NULL THEN f.name
                     WHEN r.lab_id IS NOT NULL THEN l.shortname || ' · ' || l.name
-                    ELSE oc.code || ' · ' || CASE o.season WHEN 'M' THEN 'Monsoon ' ELSE 'Spring ' END || o.year
+                    ELSE oc.code || ' · ' || oc.name || ' · ' || CASE o.season WHEN 'M' THEN 'Monsoon ' ELSE 'Spring ' END || o.year
                   END AS target_label,
                   r.reason, r.created_at,
                   u.id AS reporter_id, u.display_name AS reporter_name
