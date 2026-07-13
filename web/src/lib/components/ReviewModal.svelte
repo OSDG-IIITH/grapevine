@@ -40,6 +40,8 @@
 	});
 	const editshownoverall = $derived(editoverall !== null ? editoverall : editcalcavg);
 
+	let hoveredoverall = $state<number | null>(null);
+
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
 	const baseup = $derived(review.upvotes - (initialvote === 1 ? 1 : 0));
@@ -153,14 +155,22 @@
 			{/each}
 			{#if editing}
 				<div class="col-span-3 mt-1 flex flex-col gap-[6px]">
-					<div class="flex items-center justify-between text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">
+					<div class="flex items-center justify-between gap-3 text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">
 						<span>overall {editoverall !== null ? '(adjusted)' : '(average)'}</span>
-						<span class="text-[var(--accent-2)]">{editshownoverall !== null ? editshownoverall.toFixed(1) : '—'}</span>
+						<span class="flex items-center gap-[6px]">
+							{#if hoveredoverall !== null && editshownoverall !== null && Math.abs(hoveredoverall - editshownoverall) >= 0.05}
+								<span class="line-through text-[var(--fg-4)]">{editshownoverall.toFixed(1)}</span>
+								<span class="text-[var(--accent-2)]">{hoveredoverall.toFixed(1)}</span>
+							{:else}
+								<span class="text-[var(--accent-2)]">{editshownoverall !== null ? editshownoverall.toFixed(1) : '—'}</span>
+							{/if}
+						</span>
 					</div>
 					<OverallBar
-						value={editshownoverall ?? 3}
+						value={editshownoverall ?? 0}
 						interactive
 						onchange={(v) => oneditoverall(v)}
+						onhover={(v) => { hoveredoverall = v; }}
 					/>
 				</div>
 			{/if}

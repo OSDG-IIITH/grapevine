@@ -36,6 +36,7 @@
 	let submitted = $state(false);
 	let submitting = $state(false);
 	let manualoverall = $state<number | null>(null);
+	let hoveredoverall = $state<number | null>(null);
 
 	let proposeSeason = $state('M');
 	let proposeYear = $state('');
@@ -377,17 +378,23 @@
 						</div>
 					{/each}
 					<div class="col-span-3 mt-3 flex flex-col gap-2">
-						<div class="flex items-center justify-between text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">
+						<div class="flex items-center justify-between gap-3 text-[12px] text-[var(--fg-3)]" style="font-family: var(--mono);">
 							<span>overall {manualoverall !== null ? '(adjusted)' : '(average)'}</span>
-							<span class="text-[13px] font-medium {overall !== null ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)]'}">
-								{overall !== null ? overall.toFixed(1) : '—'}
+							<span class="flex items-center gap-[6px]">
+								{#if hoveredoverall !== null && overall !== null && Math.abs(hoveredoverall - overall) >= 0.05}
+									<span class="text-[13px] line-through text-[var(--fg-4)]">{overall.toFixed(1)}</span>
+									<span class="text-[13px] font-medium text-[var(--accent-2)]">{hoveredoverall.toFixed(1)}</span>
+								{:else}
+									<span class="text-[13px] font-medium {overall !== null ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)]'}">{overall !== null ? overall.toFixed(1) : '—'}</span>
+								{/if}
 							</span>
 						</div>
 						<OverallBar
-							value={overall ?? 3}
+							value={overall ?? 0}
 							interactive
 							disabled={calculatedaverage === null}
 							onchange={(v) => { manualoverall = v; }}
+							onhover={(v) => { hoveredoverall = v; }}
 						/>
 						{#if manualoverall !== null}
 							<button
