@@ -47,6 +47,21 @@ function json(body: unknown, method = 'POST'): RequestInit {
 	return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
 
+const P = 'gv_';
+function lswrite(key: string, data: unknown) {
+	try { localStorage.setItem(P + key, JSON.stringify(data)); } catch {}
+}
+function lsread<T>(key: string): T | null {
+	try { const v = localStorage.getItem(P + key); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function lsclear(prefix?: string) {
+	try {
+		const full = P + (prefix ?? '');
+		const keys = Object.keys(localStorage).filter(k => k.startsWith(full));
+		keys.forEach(k => localStorage.removeItem(k));
+	} catch {}
+}
+
 const listCache = {
 	courses: new Map<string, CourseLean[]>(),
 	faculty: new Map<string, FacultyLean[]>(),
@@ -55,6 +70,7 @@ const listCache = {
 		this.courses.clear();
 		this.faculty.clear();
 		this.labs = null;
+		lsclear();
 	}
 };
 
@@ -71,8 +87,12 @@ export async function getCourses(params?: { q?: string; instructor?: string; sor
 	const data = await apifetch<CourseLean[]>(`/courses${qs}`);
 	if (data) {
 		listCache.courses.set(qs, data);
+		lswrite(`courses${qs}`, data);
+		return data;
 	}
-	return data;
+	const cached = lsread<CourseLean[]>(`courses${qs}`);
+	if (cached) { toast.info('Offline — showing cached courses'); return cached; }
+	return null;
 }
 
 export async function getCourse(code: string): Promise<CourseDetail | null> {
@@ -95,8 +115,12 @@ export async function getFaculty(params?: { q?: string; sort?: string }): Promis
 	const data = await apifetch<FacultyLean[]>(`/faculty${qs}`);
 	if (data) {
 		listCache.faculty.set(qs, data);
+		lswrite(`faculty${qs}`, data);
+		return data;
 	}
-	return data;
+	const cached = lsread<FacultyLean[]>(`faculty${qs}`);
+	if (cached) { toast.info('Offline — showing cached faculty'); return cached; }
+	return null;
 }
 
 export async function getFacultyMember(slug: string): Promise<FacultyDetail | null> {
@@ -109,13 +133,16 @@ export async function getAdvisorReviews(slug: string): Promise<AdvisorReview[] |
 
 export async function getLabs(q?: string): Promise<LabLean[] | null> {
 	const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
-	if (!qs) {
-		if (listCache.labs) return listCache.labs;
-		const data = await apifetch<LabLean[]>(`/labs${qs}`);
-		if (data) listCache.labs = data;
+	if (!qs && listCache.labs) return listCache.labs;
+	const data = await apifetch<LabLean[]>(`/labs${qs}`);
+	if (data) {
+		if (!qs) listCache.labs = data;
+		lswrite(`labs${qs}`, data);
 		return data;
 	}
-	return apifetch<LabLean[]>(`/labs${qs}`);
+	const cached = lsread<LabLean[]>(`labs${qs}`);
+	if (cached) { toast.info('Offline — showing cached labs'); return cached; }
+	return null;
 }
 
 export async function search(q: string): Promise<SearchResult[]> {
