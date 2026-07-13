@@ -155,6 +155,7 @@ pub async fn dismiss(pool: &PgPool, id: &str, admin_id: &str) -> Result<(), AppE
         "target_label": report.target_label,
         "reason": report.reason,
         "reporter_id": report.reporter_id,
+        "reporter_name": report.reporter_name,
     });
     sqlx::query(
         "INSERT INTO audit_logs (id, admin_id, action, target_type, target_id, previous_state) VALUES ($1, $2, 'DISMISS_REPORT', 'report', $3, $4)",
