@@ -1,4 +1,4 @@
-import changelogRaw from '../../../../docs/changelog.md?raw';
+import changelogRaw from '../../lib/changelog.md?raw';
 
 interface Feature {
 	title: string;
