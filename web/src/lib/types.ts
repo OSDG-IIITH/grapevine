@@ -239,6 +239,7 @@ export interface AuthUser {
 	is_admin: boolean;
 	verified: boolean;
 	username: string | null;
+	cas_id: string | null;
 	auth_method: 'cas' | 'local';
 	security_question: string | null;
 	has_recovery_code: boolean;

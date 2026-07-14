@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { IconLock, IconHelpCircle, IconKey, IconEye, IconEyeOff } from '@tabler/icons-svelte';
+	import { IconLock, IconHelpCircle, IconKey, IconEye, IconEyeOff, IconLink } from '@tabler/icons-svelte';
 	import { currentUser } from '$lib/stores';
-	import { changePassword, newRecoveryCode, updateSecurityQuestion } from '$lib/api';
+	import { changePassword, newRecoveryCode, updateSecurityQuestion, casLinkUrl, unlinkCas, getMe } from '$lib/api';
 	import type { AuthUser } from '$lib/types';
 
 	interface Props { onclose: () => void; user: AuthUser; }
 	let { onclose, user }: Props = $props();
 
-	type Tab = 'password' | 'question' | 'code';
+	type Tab = 'password' | 'question' | 'code' | 'cas';
 	let tab = $state<Tab>('password');
 
 	// ── password tab ─────────────────────────────
@@ -96,6 +96,29 @@
 		toast.success('Security question removed');
 	}
 
+	// ── CAS tab ──────────────────────────────────
+	let unlinkusername = $state('');
+	let unlinkpw = $state('');
+	let unlinkconfirm = $state('');
+	let unlinksaving = $state(false);
+	let unlinkerror = $state('');
+	let showunlinkpw = $state(false);
+	let showunlinkconfirm = $state(false);
+
+	async function dounlink() {
+		unlinkerror = '';
+		if (unlinkpw.length < 8) { unlinkerror = 'Password must be at least 8 characters.'; return; }
+		if (unlinkpw !== unlinkconfirm) { unlinkerror = 'Passwords do not match.'; return; }
+		unlinksaving = true;
+		const ok = await unlinkCas(unlinkusername, unlinkpw);
+		unlinksaving = false;
+		if (!ok) { unlinkerror = 'Failed to unlink. Check your username is valid.'; return; }
+		const updated = await getMe();
+		if (updated) currentUser.set(updated);
+		toast.success('CAS unlinked — you are now a local account');
+		unlinkusername = ''; unlinkpw = ''; unlinkconfirm = '';
+	}
+
 	// ── recovery code tab ────────────────────────
 	let codeloading = $state(false);
 	let codedone = $state(false);
@@ -131,6 +154,7 @@
 		{ id: 'password' as Tab, label: 'Password',         Icon: IconLock        },
 		{ id: 'question' as Tab, label: 'Security question', Icon: IconHelpCircle  },
 		{ id: 'code'     as Tab, label: 'Recovery code',     Icon: IconKey         },
+		{ id: 'cas'      as Tab, label: 'CAS link',          Icon: IconLink        },
 	];
 </script>
 
@@ -145,7 +169,7 @@
 >
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
-		class="flex w-[min(620px,100%)] flex-col rounded-xl border border-[var(--border-strong)] shadow-2xl"
+		class="flex w-[min(720px,100%)] flex-col rounded-xl border border-[var(--border-strong)] shadow-2xl"
 		style="background: var(--bg-2); animation: fadeUp 180ms cubic-bezier(.2,.6,.2,1);"
 		onclick={(e) => e.stopPropagation()}
 		role="dialog"
@@ -168,9 +192,9 @@
 		</div>
 
 		<!-- body: sidebar + content, fixed height for consistent size -->
-		<div class="flex" style="height: 380px;">
+		<div class="flex" style="height: 440px;">
 			<!-- sidebar tabs -->
-			<div class="flex w-[170px] shrink-0 flex-col gap-[2px] border-r border-[var(--border)] p-2">
+			<div class="flex w-[185px] shrink-0 flex-col gap-[2px] border-r border-[var(--border)] p-2">
 				{#each tabs as t}
 					<button
 						type="button"
@@ -369,6 +393,68 @@
 							{codeloading ? 'Generating…' : user.has_recovery_code ? 'Generate new code' : 'Generate code'}
 						</button>
 					</div>
+
+				{:else if tab === 'cas'}
+					{#if user.auth_method === 'local'}
+						<div class="space-y-4">
+							<p class="text-[13px] leading-[1.6] text-[var(--fg-3)]">
+								Your account is currently local-only. Connect with CAS to switch to IIIT CAS authentication.
+							</p>
+							<div class="rounded-[8px] border border-[var(--border-2)] px-[13px] py-[10px] text-[13px] leading-[1.5] text-[var(--fg-3)]" style="background: var(--bg-inset);">
+								This will <span class="text-[var(--fg-2)]">delete your username and password</span>. You will log in using CAS only.
+							</div>
+							<a
+								href={casLinkUrl()}
+								class="inline-flex items-center gap-2 rounded-[8px] border px-[14px] py-[9px] text-[13px] font-semibold transition-[background,border-color,opacity] duration-[120ms]"
+								style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border-color: #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
+							>
+								<IconLink size={14} stroke={1.8} />
+								Connect with CAS
+							</a>
+						</div>
+					{:else}
+						<div class="space-y-4">
+							<div class="rounded-[8px] border border-[var(--border-2)] px-[13px] py-[10px]" style="background: var(--bg-inset);">
+								<p class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-4)]" style="font-family: var(--mono);">Linked account</p>
+								<p class="mt-1 text-[13px] text-[var(--fg-2)]">{user.cas_id}</p>
+							</div>
+							<div class="space-y-3">
+								<div>
+									<label class="block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);" for="unlink-user">Choose username</label>
+									<input id="unlink-user" type="text" autocomplete="username" bind:value={unlinkusername} placeholder="e.g. alice99" class="mt-1.5 w-full rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[13px] py-[9px] text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]" />
+								</div>
+								<div>
+									<label class="block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);" for="unlink-pw">Choose password</label>
+									<div class="relative mt-1.5">
+										<input id="unlink-pw" type={showunlinkpw ? 'text' : 'password'} autocomplete="new-password" bind:value={unlinkpw} placeholder="••••••••" class="w-full rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[9px] pl-[13px] pr-[38px] text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]" />
+										<button type="button" tabindex="-1" aria-label={showunlinkpw ? 'Hide' : 'Show'} onclick={() => showunlinkpw = !showunlinkpw} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
+											{#if showunlinkpw}<IconEyeOff size={15} stroke={1.6} />{:else}<IconEye size={15} stroke={1.6} />{/if}
+										</button>
+									</div>
+								</div>
+								<div>
+									<label class="block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);" for="unlink-confirm">Confirm password</label>
+									<div class="relative mt-1.5">
+										<input id="unlink-confirm" type={showunlinkconfirm ? 'text' : 'password'} autocomplete="new-password" bind:value={unlinkconfirm} placeholder="••••••••" class="w-full rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[9px] pl-[13px] pr-[38px] text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]" />
+										<button type="button" tabindex="-1" aria-label={showunlinkconfirm ? 'Hide' : 'Show'} onclick={() => showunlinkconfirm = !showunlinkconfirm} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
+											{#if showunlinkconfirm}<IconEyeOff size={15} stroke={1.6} />{:else}<IconEye size={15} stroke={1.6} />{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+							{#if unlinkerror}
+								<p class="rounded-[7px] border px-[12px] py-[8px] text-[13px]" style="border-color: rgba(201,122,122,0.32); background: var(--danger-bg); color: var(--danger);">{unlinkerror}</p>
+							{/if}
+							<button
+								type="button"
+								onclick={dounlink}
+								disabled={unlinksaving || !unlinkusername || !unlinkpw || !unlinkconfirm}
+								class="inline-flex items-center rounded-[8px] border border-[rgba(201,122,122,0.4)] px-[14px] py-[9px] text-[13px] text-[var(--danger)] transition-[background,border-color,opacity] duration-[120ms] hover:bg-[var(--danger-bg)] disabled:cursor-not-allowed disabled:opacity-40"
+							>
+								{unlinksaving ? 'Converting…' : 'Convert to local account'}
+							</button>
+						</div>
+					{/if}
 				{/if}
 			</div>
 		</div>

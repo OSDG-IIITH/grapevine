@@ -1,5 +1,6 @@
 use axum::{
     extract::{Query, State},
+    http::StatusCode,
     response::Redirect,
     Json,
 };
@@ -9,8 +10,9 @@ use sha2::Sha256;
 use tower_sessions::Session;
 use ulid::Ulid;
 use crate::{error::AppError, state::AppState};
+use super::password;
 use super::session::{AuthUser, AUTH_METHOD_KEY, IS_ADMIN_KEY, USER_ID_KEY, VERIFIED_KEY};
-use super::validate::is_allowed_email_domain;
+use super::validate::{is_allowed_email_domain, normalize_username, validate_password};
 
 const CAS_PENDING_ID: &str = "cas_pending_id";
 const CAS_PENDING_NAME: &str = "cas_pending_name";
@@ -69,8 +71,6 @@ pub async fn callback(
         return Ok(Redirect::to(&format!("{}/login?error=domain", s.cfg.frontend_url)));
     }
 
-    // Read-only check: if this email already backs an anonymous (local) account,
-    // reject the CAS login. CAS never writes to verified_emails.
     let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
     let already_used = sqlx::query_scalar!(
         "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
@@ -266,6 +266,143 @@ pub async fn verify_callback(
     session.cycle_id().await.map_err(|_| AppError::Internal)?;
 
     Ok(Redirect::to(&s.cfg.frontend_url))
+}
+
+/// Start the link flow: redirect a logged-in local user to CAS with a distinct service URL.
+pub async fn link_login(State(s): State<AppState>, user: AuthUser) -> Result<Redirect, AppError> {
+    let is_cas = sqlx::query_scalar!("SELECT cas_id FROM users WHERE id = $1", user.id)
+        .fetch_optional(&s.pool)
+        .await?
+        .ok_or(AppError::Unauthorized)?
+        .is_some();
+    if is_cas {
+        return Err(AppError::BadRequest("already a CAS account".into()));
+    }
+    let service = format!("{}/auth/link/callback", s.cfg.app_url);
+    Ok(Redirect::to(&format!("{}/login?service={}", s.cfg.cas_base_url, urlenc(&service))))
+}
+
+/// Finish the link flow: validate CAS ticket, check email availability, then transition
+/// the local account to CAS-Only (sets cas_id, clears username/password_hash).
+pub async fn link_callback(
+    Query(q): Query<TicketQuery>,
+    State(s): State<AppState>,
+    session: Session,
+    user: AuthUser,
+) -> Result<Redirect, AppError> {
+    let service = format!("{}/auth/link/callback", s.cfg.app_url);
+    let validate_url = format!(
+        "{}/serviceValidate?ticket={}&service={}",
+        s.cfg.cas_base_url, q.ticket, urlenc(&service)
+    );
+
+    let xml = reqwest::get(&validate_url)
+        .await
+        .map_err(|_| AppError::Internal)?
+        .text()
+        .await
+        .map_err(|_| AppError::Internal)?;
+
+    let cas_id = parse_cas_user(&xml).ok_or(AppError::Unauthorized)?;
+
+    if !is_allowed_email_domain(&cas_id, &s.cfg.allowed_email_domains) {
+        return Ok(Redirect::to(&format!("{}/login?error=domain", s.cfg.frontend_url)));
+    }
+
+    let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
+    let mut tx = s.pool.begin().await?;
+
+    let email_taken = sqlx::query_scalar!(
+        "SELECT 1 AS one FROM users WHERE cas_id = $1 AND id != $2",
+        cas_id, user.id
+    )
+    .fetch_optional(&mut *tx)
+    .await?
+    .is_some();
+    if email_taken {
+        return Ok(Redirect::to(&format!("{}/login?error=email_taken", s.cfg.frontend_url)));
+    }
+
+    let email_used = sqlx::query_scalar!(
+        "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
+        hash
+    )
+    .fetch_optional(&mut *tx)
+    .await?
+    .is_some();
+    if email_used && !user.verified {
+        return Ok(Redirect::to(&format!("{}/login?error=email_has_local", s.cfg.frontend_url)));
+    }
+
+    sqlx::query!(
+        "DELETE FROM verified_emails WHERE email_hash = $1",
+        hash
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query!(
+        "UPDATE users SET cas_id = $1, username = NULL, password_hash = NULL, verified = true WHERE id = $2",
+        cas_id, user.id
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    session.insert(AUTH_METHOD_KEY, "cas").await.map_err(|_| AppError::Internal)?;
+    session.insert(VERIFIED_KEY, true).await.map_err(|_| AppError::Internal)?;
+
+    Ok(Redirect::to(&s.cfg.frontend_url))
+}
+
+#[derive(Deserialize)]
+pub struct UnlinkBody {
+    pub username: String,
+    pub password: String,
+}
+
+/// Transition a CAS-Only account to Local-Only. The user must provide a new username
+/// and password. The CAS email hash is permanently stored in verified_emails.
+pub async fn unlink(
+    State(s): State<AppState>,
+    session: Session,
+    user: AuthUser,
+    Json(body): Json<UnlinkBody>,
+) -> Result<StatusCode, AppError> {
+    validate_password(&body.password).map_err(AppError::BadRequest)?;
+    let username = normalize_username(&body.username).map_err(AppError::BadRequest)?;
+
+    let cas_id = sqlx::query_scalar!("SELECT cas_id FROM users WHERE id = $1", user.id)
+        .fetch_optional(&s.pool)
+        .await?
+        .ok_or(AppError::Unauthorized)?
+        .ok_or_else(|| AppError::BadRequest("not a CAS account".into()))?;
+
+    let new_hash = password::hash(&body.password).map_err(|_| AppError::Internal)?;
+    let email_hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
+
+    let mut tx = s.pool.begin().await?;
+
+    sqlx::query!(
+        "INSERT INTO verified_emails (email_hash) VALUES ($1) ON CONFLICT DO NOTHING",
+        email_hash
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query!(
+        "UPDATE users SET cas_id = NULL, username = $1, password_hash = $2 WHERE id = $3",
+        username, new_hash, user.id
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    session.insert(AUTH_METHOD_KEY, "local").await.map_err(|_| AppError::Internal)?;
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn logout(State(s): State<AppState>, session: Session) -> Result<Json<LogoutResponse>, AppError> {
