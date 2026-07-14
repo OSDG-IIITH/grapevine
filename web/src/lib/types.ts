@@ -155,6 +155,28 @@ export interface AdvisorReview {
 	created_at: string;
 }
 
+export interface LegacyCourseReview {
+	id: string;
+	body: string | null;
+	original_rating: number | null;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	user_vote: 1 | -1 | null;
+	created_at: string;
+}
+
+export interface LegacyAdvisorReview {
+	id: string;
+	body: string | null;
+	original_rating: number | null;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	user_vote: 1 | -1 | null;
+	created_at: string;
+}
+
 export const COURSE_AXIS_ORDER = ['difficulty', 'workload', 'teaching', 'grading', 'content'] as const;
 
 export const COURSE_AXIS_LABELS: Record<string, string> = {

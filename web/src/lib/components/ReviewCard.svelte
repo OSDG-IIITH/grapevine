@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { CourseReview, AdvisorReview, EditCourseReview, EditAdvisorReview } from '$lib/types';
+	import type { CourseReview, AdvisorReview, LegacyCourseReview, LegacyAdvisorReview, EditCourseReview, EditAdvisorReview } from '$lib/types';
 	import {
 		voteCourseReview, unvoteCourseReview,
 		voteAdvisorReview, unvoteAdvisorReview,
+		voteLegacyCourseReview, unvoteLegacyCourseReview,
+		voteLegacyAdvisorReview, unvoteLegacyAdvisorReview,
 		flagCourseReview, flagAdvisorReview,
 		deleteCourseReview, deleteAdvisorReview,
 		editCourseReview, editAdvisorReview
@@ -11,24 +13,35 @@
 	import { currentUser } from '$lib/stores';
 	import { IconFlag, IconTrash, IconPencil } from '@tabler/icons-svelte';
 	import ReviewModal from './ReviewModal.svelte';
+	import LegacyReviewModal from './LegacyReviewModal.svelte';
 	import FlagModal from './FlagModal.svelte';
 
+	type AnyReview = CourseReview | AdvisorReview | LegacyCourseReview | LegacyAdvisorReview;
+	type RegularReview = CourseReview | AdvisorReview;
+
 	interface Props {
-		review: CourseReview | AdvisorReview;
+		review: AnyReview;
 		axisorder: string[];
 		axislabels: Record<string, string>;
 		showoffering?: boolean;
 		offeringcode?: string;
 		coursecode?: string;
 		ondelete?: (id: string) => void;
-		onedit?: (updated: CourseReview | AdvisorReview) => void;
+		onedit?: (updated: RegularReview) => void;
 	}
 
 	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, ondelete, onedit }: Props = $props();
 
+	function islegacyfn(r: AnyReview): r is LegacyCourseReview | LegacyAdvisorReview {
+		return !('anonymous' in r);
+	}
+
+	const islegacy = $derived(islegacyfn(review));
+	const reg = $derived(islegacy ? null : review as RegularReview);
+
 	let open = $state(false);
 	// svelte-ignore state_referenced_locally
-	let vote = $state<0 | 1 | -1>((review.user_vote ?? 0) as 0 | 1 | -1);
+	let vote = $state<0 | 1 | -1>(((review as { user_vote?: number | null }).user_vote ?? 0) as 0 | 1 | -1);
 	let flagged = $state(false);
 	let flagopen = $state(false);
 	let flagsending = $state(false);
@@ -39,15 +52,32 @@
 	let editvalues = $state<Record<string, number>>({});
 	let editoverall = $state<number | null>(null);
 
-	const kind = $derived<'course' | 'advisor'>('offering_id' in review ? 'course' : 'advisor');
-	const stars = $derived(Math.round(review.overall ?? 0));
-	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
-	const baseup = $derived(review.upvotes - (initialvote === 1 ? 1 : 0));
-	const basedown = $derived(review.downvotes - (initialvote === -1 ? 1 : 0));
+	const kind = $derived<'course' | 'advisor'>(
+		!islegacy && 'offering_id' in review ? 'course' : 'advisor'
+	);
+	const legacykind = $derived<'course' | 'advisor'>(
+		axisorder.includes('research') ? 'advisor' : 'course'
+	);
+	const stars = $derived(
+		islegacy
+			? ((review as LegacyCourseReview).original_rating ?? 0)
+			: Math.round((reg?.overall ?? 0))
+	);
+	const overallval = $derived(
+		islegacy
+			? ((review as LegacyCourseReview).original_rating ?? 0)
+			: (reg?.overall ?? 0)
+	);
+	const initialvote = $derived(((review as { user_vote?: number | null }).user_vote ?? 0) as 0 | 1 | -1);
+	const allupvotes = $derived(islegacy ? (review as LegacyCourseReview).upvotes : (reg?.upvotes ?? 0));
+	const alldownvotes = $derived(islegacy ? (review as LegacyCourseReview).downvotes : (reg?.downvotes ?? 0));
+	const baseup = $derived(allupvotes - (initialvote === 1 ? 1 : 0));
+	const basedown = $derived(alldownvotes - (initialvote === -1 ? 1 : 0));
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
-	const canDelete = $derived(!!$currentUser && !!review.author && $currentUser.id === review.author.id);
-	const canflag = $derived(!canDelete);
+	const canDelete = $derived(!islegacy && !!$currentUser && !!reg?.author && $currentUser.id === reg.author.id);
+	const canflag = $derived(!islegacy && !canDelete);
+	const canvote = $derived(!!$currentUser);
 	const cansave = $derived(editmode && !saving && editbody.trim().length > 20);
 
 	function fmtdate(iso: string): string {
@@ -65,13 +95,22 @@
 	}
 
 	async function handlevote(newvote: 0 | 1 | -1) {
+		if (!canvote) return;
 		const prev = vote;
 		vote = newvote;
 		let ok: boolean;
-		if (newvote === 0) {
-			ok = kind === 'course' ? await unvoteCourseReview(review.id) : await unvoteAdvisorReview(review.id);
+		if (islegacy) {
+			if (newvote === 0) {
+				ok = legacykind === 'course' ? await unvoteLegacyCourseReview(review.id) : await unvoteLegacyAdvisorReview(review.id);
+			} else {
+				ok = legacykind === 'course' ? await voteLegacyCourseReview(review.id, newvote) : await voteLegacyAdvisorReview(review.id, newvote);
+			}
 		} else {
-			ok = kind === 'course' ? await voteCourseReview(review.id, newvote) : await voteAdvisorReview(review.id, newvote);
+			if (newvote === 0) {
+				ok = kind === 'course' ? await unvoteCourseReview(review.id) : await unvoteAdvisorReview(review.id);
+			} else {
+				ok = kind === 'course' ? await voteCourseReview(review.id, newvote) : await voteAdvisorReview(review.id, newvote);
+			}
 		}
 		if (!ok) vote = prev;
 	}
@@ -91,7 +130,7 @@
 		if (e) stop(e);
 		if (!canDelete) return;
 		editmode = true;
-		editbody = review.body;
+		editbody = review.body ?? '';
 		editvalues = axisfromreview();
 		editoverall = null;
 		open = true;
@@ -152,12 +191,14 @@
 	<!-- meta row -->
 	<div class="flex min-w-0 items-center justify-between gap-2">
 		<div class="flex min-w-0 flex-wrap items-center gap-[5px] text-[12px] text-[var(--fg-3)]">
-			{#if review.anonymous || !review.author}
+			{#if islegacy}
+				<span class="text-[13px] font-medium text-[var(--fg-2)]">Archive Review</span>
+			{:else if reg?.anonymous || !reg?.author}
 				<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">anonymous</span>
 			{:else}
-				<span class="text-[13px] font-medium text-[var(--fg-2)]">{review.author.display_name}</span>
+				<span class="text-[13px] font-medium text-[var(--fg-2)]">{reg.author.display_name}</span>
 			{/if}
-			{#if showoffering && (coursecode || offeringcode)}
+			{#if !islegacy && showoffering && (coursecode || offeringcode)}
 				<span class="text-[var(--fg-4)]">·</span>
 				{#if coursecode}
 					<a
@@ -183,12 +224,18 @@
 					<path d="M12 2l2.9 6.3 6.8.7-5.1 4.6 1.4 6.8L12 17l-6 3.4 1.4-6.8L2.3 9l6.8-.7L12 2z" />
 				</svg>
 			{/each}
-			<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{(review.overall ?? 0).toFixed(1)}</span>
+			<span class="ml-[5px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{islegacy ? `${overallval}.0` : overallval.toFixed(1)}</span>
 		</div>
 	</div>
 
 	<!-- excerpt -->
-	<div class="line-clamp-3 flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]">{review.body}</div>
+	<div class="line-clamp-3 flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]">
+		{#if review.body}
+			{review.body}
+		{:else}
+			<span class="italic text-[var(--fg-4)]">No written review.</span>
+		{/if}
+	</div>
 
 	<!-- actions -->
 	<div class="mt-auto flex items-center gap-[2px]">
@@ -225,7 +272,7 @@
 			>
 				<IconFlag size={13} stroke={1.7} fill={flagged ? 'currentColor' : 'none'} />
 			</button>
-		{:else}
+		{:else if canDelete}
 			<button
 				type="button"
 				aria-label="Edit review"
@@ -234,8 +281,6 @@
 			>
 				<IconPencil size={13} stroke={1.7} />
 			</button>
-		{/if}
-		{#if canDelete}
 			<button
 				type="button"
 				aria-label="Delete review"
@@ -250,32 +295,43 @@
 </div>
 
 {#if open}
-	<ReviewModal
-		{review}
-		{axisorder}
-		{axislabels}
-		{showoffering}
-		{offeringcode}
-		{coursecode}
-		{vote}
-		{flagged}
-		{canDelete}
-		{deleting}
-		editing={editmode}
-		saving={saving}
-		editbody={editbody}
-		editvalues={editvalues}
-		editoverall={editoverall}
-		onvote={(v) => handlevote(v)}
-		onflag={() => { if (canflag && !flagged) flagopen = true; }}
-		oneditstart={startedit}
-		oneditvalue={seteditvalue}
-		oneditoverall={(v) => (editoverall = v)}
-		oneditbody={(v) => (editbody = v)}
-		onsaved={handlesave}
-		ondelete={handledelete}
-		onclose={() => { open = false; editmode = false; saving = false; }}
-	/>
+	{#if islegacy}
+		<LegacyReviewModal
+			review={review as LegacyCourseReview | LegacyAdvisorReview}
+			{vote}
+			{shownup}
+			{showndown}
+			onvote={(v) => handlevote(v)}
+			onclose={() => (open = false)}
+		/>
+	{:else}
+		<ReviewModal
+			review={reg!}
+			{axisorder}
+			{axislabels}
+			{showoffering}
+			{offeringcode}
+			{coursecode}
+			{vote}
+			{flagged}
+			{canDelete}
+			{deleting}
+			editing={editmode}
+			saving={saving}
+			editbody={editbody}
+			editvalues={editvalues}
+			editoverall={editoverall}
+			onvote={(v) => handlevote(v)}
+			onflag={() => { if (canflag && !flagged) flagopen = true; }}
+			oneditstart={startedit}
+			oneditvalue={seteditvalue}
+			oneditoverall={(v) => (editoverall = v)}
+			oneditbody={(v) => (editbody = v)}
+			onsaved={handlesave}
+			ondelete={handledelete}
+			onclose={() => { open = false; editmode = false; saving = false; }}
+		/>
+	{/if}
 {/if}
 
 {#if flagopen}

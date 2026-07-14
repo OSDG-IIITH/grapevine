@@ -10,7 +10,7 @@ import type {
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
 	ProposedOfferingResponse, ProposedOfferingLean,
-	AuditLog
+	AuditLog, LegacyCourseReview, LegacyAdvisorReview
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -103,6 +103,10 @@ export async function getCourseReviews(code: string): Promise<CourseReview[] | n
 	return apifetch<CourseReview[]>(`/courses/${encodeURIComponent(code)}/reviews`);
 }
 
+export async function getLegacyCourseReviews(code: string): Promise<LegacyCourseReview[] | null> {
+	return apifetch<LegacyCourseReview[]>(`/courses/${encodeURIComponent(code)}/legacy-reviews`);
+}
+
 export async function getFaculty(params?: { q?: string; sort?: string }): Promise<FacultyLean[] | null> {
 	const p = new URLSearchParams();
 	if (params?.q?.trim()) p.set('q', params.q.trim());
@@ -129,6 +133,10 @@ export async function getFacultyMember(slug: string): Promise<FacultyDetail | nu
 
 export async function getAdvisorReviews(slug: string): Promise<AdvisorReview[] | null> {
 	return apifetch<AdvisorReview[]>(`/faculty/${slug}/reviews`);
+}
+
+export async function getLegacyAdvisorReviews(slug: string): Promise<LegacyAdvisorReview[] | null> {
+	return apifetch<LegacyAdvisorReview[]>(`/faculty/${slug}/legacy-reviews`);
 }
 
 export async function getLabs(q?: string): Promise<LabLean[] | null> {
@@ -273,6 +281,22 @@ export async function unvoteAdvisorReview(id: string): Promise<boolean> {
 	const res = await apivoid(`/reviews/advisor/${id}/vote`, { method: 'DELETE' });
 	if (res) listCache.clear();
 	return res;
+}
+
+export async function voteLegacyCourseReview(id: string, value: 1 | -1): Promise<boolean> {
+	return apivoid(`/reviews/legacy/course/${id}/vote`, json({ value }));
+}
+
+export async function unvoteLegacyCourseReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/legacy/course/${id}/vote`, { method: 'DELETE' });
+}
+
+export async function voteLegacyAdvisorReview(id: string, value: 1 | -1): Promise<boolean> {
+	return apivoid(`/reviews/legacy/advisor/${id}/vote`, json({ value }));
+}
+
+export async function unvoteLegacyAdvisorReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/legacy/advisor/${id}/vote`, { method: 'DELETE' });
 }
 
 export async function flagCourseReview(id: string, reason: string): Promise<boolean> {

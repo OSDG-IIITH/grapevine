@@ -98,6 +98,30 @@ pub struct EditAdvisorReview {
     pub body: Option<String>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct LegacyCourseReview {
+    pub id: String,
+    pub body: Option<String>,
+    pub original_rating: Option<i16>,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub user_vote: Option<i16>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct LegacyAdvisorReview {
+    pub id: String,
+    pub body: Option<String>,
+    pub original_rating: Option<i16>,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub user_vote: Option<i16>,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct VoteBody {
     pub value: i16,
@@ -409,6 +433,104 @@ pub async fn upsert_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str, 
 pub async fn delete_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
     sqlx::query!(
         "DELETE FROM advisor_review_votes WHERE user_id = $1 AND review_id = $2",
+        user_id, review_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn legacy_course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &str) -> Result<Vec<LegacyCourseReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT lcr.id, lcr.body, lcr.original_rating,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?",
+                  lcr.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM legacy_course_reviews lcr
+           LEFT JOIN legacy_course_review_votes v ON v.review_id = lcr.id
+           LEFT JOIN legacy_course_review_votes uv ON uv.review_id = lcr.id AND uv.user_id = $2
+           WHERE lcr.course_id = $1
+           GROUP BY lcr.id, lcr.body, lcr.original_rating, lcr.created_at, uv.vote
+           ORDER BY "score!" DESC, lcr.created_at DESC"#,
+        course_id, user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| LegacyCourseReview {
+        id: r.id, body: r.body, original_rating: r.original_rating,
+        score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+        user_vote: r.user_vote, created_at: r.created_at
+    }).collect())
+}
+
+pub async fn legacy_advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id: &str) -> Result<Vec<LegacyAdvisorReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT lar.id, lar.body, lar.original_rating,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?",
+                  lar.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM legacy_advisor_reviews lar
+           LEFT JOIN legacy_advisor_review_votes v ON v.review_id = lar.id
+           LEFT JOIN legacy_advisor_review_votes uv ON uv.review_id = lar.id AND uv.user_id = $2
+           WHERE lar.faculty_id = $1
+           GROUP BY lar.id, lar.body, lar.original_rating, lar.created_at, uv.vote
+           ORDER BY "score!" DESC, lar.created_at DESC"#,
+        faculty_id, user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| LegacyAdvisorReview {
+        id: r.id, body: r.body, original_rating: r.original_rating,
+        score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
+        user_vote: r.user_vote, created_at: r.created_at
+    }).collect())
+}
+
+pub async fn upsert_legacy_course_vote(pool: &PgPool, review_id: &str, user_id: &str, value: i16) -> Result<(), AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        r#"INSERT INTO legacy_course_review_votes (id, user_id, review_id, vote)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, review_id) DO UPDATE SET vote = EXCLUDED.vote"#,
+        id, user_id, review_id, value
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete_legacy_course_vote(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        "DELETE FROM legacy_course_review_votes WHERE user_id = $1 AND review_id = $2",
+        user_id, review_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn upsert_legacy_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str, value: i16) -> Result<(), AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        r#"INSERT INTO legacy_advisor_review_votes (id, user_id, review_id, vote)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, review_id) DO UPDATE SET vote = EXCLUDED.vote"#,
+        id, user_id, review_id, value
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete_legacy_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        "DELETE FROM legacy_advisor_review_votes WHERE user_id = $1 AND review_id = $2",
         user_id, review_id
     )
     .execute(pool)

@@ -93,3 +93,12 @@ pub async fn reviews(
     let fac_id = faculty::id_by_slug(&s.pool, &slug).await?;
     Ok(Json(review::advisor_reviews_by_faculty(&s.pool, &fac_id, &user_id).await?))
 }
+
+pub async fn legacy_reviews(
+    State(s): State<AppState>,
+    MaybeAuth(user_id): MaybeAuth,
+    Path(slug): Path<String>,
+) -> Result<Json<Vec<review::LegacyAdvisorReview>>, AppError> {
+    let fac_id = faculty::id_by_slug(&s.pool, &slug).await?;
+    Ok(Json(review::legacy_advisor_reviews_by_faculty(&s.pool, &fac_id, &user_id).await?))
+}

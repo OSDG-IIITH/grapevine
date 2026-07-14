@@ -107,6 +107,15 @@ pub async fn proposed_reviews(
     Ok(Json(review::proposed_course_reviews_by_course(&s.pool, &id, &user_id).await?))
 }
 
+pub async fn legacy_reviews(
+    State(s): State<AppState>,
+    MaybeAuth(user_id): MaybeAuth,
+    Path(code): Path<String>,
+) -> Result<Json<Vec<review::LegacyCourseReview>>, AppError> {
+    let id = course::id_by_code(&s.pool, &code).await?;
+    Ok(Json(review::legacy_course_reviews_by_course(&s.pool, &id, &user_id).await?))
+}
+
 #[derive(Deserialize)]
 pub struct ProposeReviewRequest {
     pub season: Season,

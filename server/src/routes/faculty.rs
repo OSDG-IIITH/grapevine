@@ -6,4 +6,5 @@ pub fn router() -> Router<AppState> {
         .route("/faculty", get(faculty::list).post(faculty::create))
         .route("/faculty/:slug", get(faculty::get).patch(faculty::update).delete(faculty::delete))
         .route("/faculty/:slug/reviews", get(faculty::reviews).post(reviews::create_advisor_review))
+        .route("/faculty/:slug/legacy-reviews", get(faculty::legacy_reviews))
 }

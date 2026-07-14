@@ -9,4 +9,6 @@ pub fn router() -> Router<AppState> {
         .route("/reviews/advisor/:id", patch(reviews::edit_advisor_review).delete(reviews::delete_advisor_review))
         .route("/reviews/advisor/:id/vote", post(reviews::vote_advisor_review).delete(reviews::unvote_advisor_review))
         .route("/reviews/advisor/:id/flag", post(reviews::flag_advisor_review))
+        .route("/reviews/legacy/course/:id/vote", post(reviews::vote_legacy_course_review).delete(reviews::unvote_legacy_course_review))
+        .route("/reviews/legacy/advisor/:id/vote", post(reviews::vote_legacy_advisor_review).delete(reviews::unvote_legacy_advisor_review))
 }

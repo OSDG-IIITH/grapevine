@@ -94,7 +94,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, sort: Option<&str>) -> Result<
                   COALESCE(AVG(r.mentorship::float8), 0.0)::float8 as "mentorship!: f64",
                   COALESCE(AVG(r.support::float8), 0.0)::float8 as "support!: f64",
                   COALESCE(AVG(r.workload::float8), 0.0)::float8 as "workload!: f64",
-                  COUNT(r.id)::int8 as "reviews_count!: i64"
+                  (COUNT(r.id) + COALESCE((SELECT COUNT(*) FROM legacy_advisor_reviews lr WHERE lr.faculty_id = f.id), 0))::int8 as "reviews_count!: i64"
            FROM faculty f
            LEFT JOIN advisor_reviews r ON r.faculty_id = f.id AND r.deleted_at IS NULL
            WHERE f.deleted_at IS NULL AND ($1::text IS NULL OR f.name ILIKE $1)

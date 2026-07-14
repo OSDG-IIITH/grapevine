@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport } from '$lib/api';
+	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews } from '$lib/api';
 	import { toast } from 'svelte-sonner';
-	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean } from '$lib/types';
+	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean, LegacyAdvisorReview } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS, COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -19,6 +19,7 @@
 
 	let faculty = $state<FacultyDetail | null>(null);
 	let advisorreviews = $state<AdvisorReview[]>([]);
+	let legacyadvisorreviews = $state<LegacyAdvisorReview[]>([]);
 	let instructorreviews = $state<(CourseReview & { offeringcode: string; coursecode: string })[]>([]);
 	let tab = $state('advisor');
 	let error = $state('');
@@ -51,6 +52,7 @@
 		if (!s) return;
 		faculty = null;
 		advisorreviews = [];
+		legacyadvisorreviews = [];
 		instructorreviews = [];
 		reportopen = false;
 		tab = 'advisor';
@@ -72,6 +74,7 @@
 			.then((all) => { if (all) instructorreviews = all.flat(); });
 
 		getAdvisorReviews(s).then((r) => { if (r) advisorreviews = r; });
+		getLegacyAdvisorReviews(s).then((r) => { if (r) legacyadvisorreviews = r; });
 	});
 
 	async function startEdit() {
@@ -140,13 +143,13 @@
 	})());
 
 	const tabs = $derived([
-		{ id: 'advisor', label: 'As Advisor', count: advisorreviews.length },
+		{ id: 'advisor', label: 'As Advisor', count: advisorreviews.length + legacyadvisorreviews.length },
 		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length }
 	]);
 
 	const PER_PAGE = 10;
 	let reviewpage = $state(1);
-	const showncount = $derived(tab === 'advisor' ? advisorreviews.length : instructorreviews.length);
+	const showncount = $derived(tab === 'advisor' ? advisorreviews.length + legacyadvisorreviews.length : instructorreviews.length);
 	const reviewpages = $derived(Math.max(1, Math.ceil(showncount / PER_PAGE)));
 
 	const taughtcourses = $derived((() => {
@@ -344,13 +347,14 @@
 		<Tabs items={tabs} active={tab} mono={false} onchange={(id) => { tab = id; reviewpage = 1; }} />
 
 		{#if tab === 'advisor'}
-			{#if advisorreviews.length === 0}
+			{#if advisorreviews.length === 0 && legacyadvisorreviews.length === 0}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
 					No advisor reviews yet.
 				</div>
 			{:else}
+				{@const alladvisor = [...advisorreviews, ...legacyadvisorreviews]}
 				<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
-					{#each advisorreviews.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE) as r (r.id)}
+					{#each alladvisor.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE) as r (r.id)}
 						<ReviewCard
 							review={r}
 							axisorder={[...ADVISOR_AXIS_ORDER]}

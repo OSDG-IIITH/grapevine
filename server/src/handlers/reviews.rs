@@ -124,6 +124,50 @@ pub async fn unvote_advisor_review(
     Ok(StatusCode::NO_CONTENT)
 }
 
+pub async fn vote_legacy_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<VoteBody>,
+) -> Result<StatusCode, AppError> {
+    if body.value != 1 && body.value != -1 {
+        return Err(AppError::BadRequest("value must be 1 or -1".into()));
+    }
+    review::upsert_legacy_course_vote(&s.pool, &id, &user.id, body.value).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn unvote_legacy_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    review::delete_legacy_course_vote(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn vote_legacy_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<VoteBody>,
+) -> Result<StatusCode, AppError> {
+    if body.value != 1 && body.value != -1 {
+        return Err(AppError::BadRequest("value must be 1 or -1".into()));
+    }
+    review::upsert_legacy_advisor_vote(&s.pool, &id, &user.id, body.value).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn unvote_legacy_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    review::delete_legacy_advisor_vote(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn flag_advisor_review(
     State(s): State<AppState>,
     user: AuthUser,

@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport } from '$lib/api';
-	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission } from '$lib/types';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission, LegacyCourseReview } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
@@ -21,6 +21,7 @@
 	let course = $state<CourseDetail | null>(null);
 	let reviews = $state<CourseReview[]>([]);
 	let proposedReviews = $state<CourseReview[]>([]);
+	let legacyreviews = $state<LegacyCourseReview[]>([]);
 	let tab = $state('all');
 	let error = $state('');
 	let reportopen = $state(false);
@@ -127,18 +128,20 @@
 		course = null;
 		reviews = [];
 		proposedReviews = [];
+		legacyreviews = [];
 		reportopen = false;
 		proposing = false;
 		tab = 'all';
 		editing = false;
 
 		const decoded = decodeURIComponent(c);
-		Promise.all([getCourse(decoded), getCourseReviews(decoded), getProposedReviews(decoded)])
-			.then(([d, r, pr]) => {
+		Promise.all([getCourse(decoded), getCourseReviews(decoded), getProposedReviews(decoded), getLegacyCourseReviews(decoded)])
+			.then(([d, r, pr, lr]) => {
 				if (!d) { error = 'Course not found.'; return; }
 				course = d;
 				reviews = r ?? [];
 				proposedReviews = pr ?? [];
+				legacyreviews = lr ?? [];
 			});
 
 		if (!facultyloaded) {
@@ -284,21 +287,21 @@
 
 	const tabs = $derived(
 		course ? [
-			{ id: 'all', label: 'All', count: reviews.length + proposedReviews.length },
+			{ id: 'all', label: 'All', count: reviews.length + proposedReviews.length + legacyreviews.length },
 			...course.offerings.map((o) => ({
 				id: o.id,
 				label: o.code,
 				count: reviews.filter((r) => r.offering_id === o.id).length
 			})),
-			...(course.proposed_offerings.length > 0 || proposedReviews.length > 0 ? [
-				{ id: 'other', label: 'Other', count: proposedReviews.length }
+			...(course.proposed_offerings.length > 0 || proposedReviews.length > 0 || legacyreviews.length > 0 ? [
+				{ id: 'other', label: 'Other', count: proposedReviews.length + legacyreviews.length }
 			] : [])
 		] : []
 	);
 
 	const shown = $derived(
-		tab === 'all' ? [...reviews, ...proposedReviews].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) :
-		tab === 'other' ? proposedReviews :
+		tab === 'all' ? [...reviews, ...proposedReviews, ...legacyreviews].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) :
+		tab === 'other' ? [...proposedReviews, ...legacyreviews] :
 		reviews.filter((r) => r.offering_id === tab)
 	);
 	const selectedoffering = $derived(course && tab !== 'all' && tab !== 'other' ? course.offerings.find((o) => o.id === tab) : null);
@@ -781,7 +784,7 @@
 						axisorder={[...COURSE_AXIS_ORDER]}
 						axislabels={COURSE_AXIS_LABELS}
 						showoffering={tab === 'all' || tab === 'other'}
-						offeringcode={offeringmap[r.offering_id]}
+						offeringcode={'offering_id' in r ? offeringmap[(r as CourseReview).offering_id] : undefined}
 						ondelete={(id) => {
 							reviews = reviews.filter((item) => item.id !== id);
 							proposedReviews = proposedReviews.filter((item) => item.id !== id);
