@@ -341,6 +341,14 @@ export async function updateLab(shortname: string, body: PatchLab): Promise<LabD
 	return res;
 }
 
+export function casLinkUrl(): string {
+	return `${BASE}/auth/link`;
+}
+
+export async function unlinkCas(username: string, password: string): Promise<boolean> {
+	return apivoid('/auth/unlink', json({ username, password }));
+}
+
 export async function changePassword(current_password: string, new_password: string): Promise<boolean> {
 	return apivoid('/me/password', json({ current_password, new_password }));
 }
