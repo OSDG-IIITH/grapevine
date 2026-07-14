@@ -256,8 +256,8 @@ export async function flagAdvisorReview(id: string, reason: string): Promise<boo
 	return apivoid(`/reviews/advisor/${id}/flag`, json({ reason }));
 }
 
-export async function submitReport(target_type: ReportTarget, target_id: string, reason: string): Promise<boolean> {
-	return apivoid('/reports', json({ target_type, target_id, reason }));
+export async function submitReport(target_type: ReportTarget, target_id: string, reason: string, faculty_ids?: string[]): Promise<boolean> {
+	return apivoid('/reports', json({ target_type, target_id, reason, faculty_ids }));
 }
 
 export async function createOffering(code: string, body: { season: string; year: number }): Promise<Offering | null> {

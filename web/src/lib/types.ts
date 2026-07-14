@@ -215,7 +215,14 @@ export interface ReportResponse {
 	created_at: string;
 	reporter_id: string;
 	reporter_name: string;
+	has_faculty_suggestion: boolean;
+	current_faculty: { id: string; name: string }[];
+	suggested_faculty: { id: string; name: string }[];
 }
+
+export type CourseReportSubmission =
+	| { kind: 'course'; reason: string }
+	| { kind: 'offering'; offering_id: string; reason: string; faculty_ids?: string[] };
 
 export interface SearchResult {
 	type: 'course' | 'faculty' | 'lab';

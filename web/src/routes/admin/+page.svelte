@@ -203,6 +203,14 @@
 		return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 	}
 
+	function auditvalue(value: unknown): string {
+		if (Array.isArray(value)) {
+			return value.map((item) => typeof item === 'object' && item !== null && 'name' in item ? String(item.name) : String(item)).join(', ') || 'none';
+		}
+		if (typeof value === 'object' && value !== null) return JSON.stringify(value);
+		return String(value);
+	}
+
 	function reporttypelabel(type: ReportResponse['target_type']): string {
 		return `${type} information`;
 	}
@@ -280,7 +288,7 @@
 							</div>
 							{#if log.previous_state}
 								<div class="mt-1 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">
-									{Object.entries(log.previous_state).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+									{Object.entries(log.previous_state).map(([k, v]) => `${k}: ${auditvalue(v)}`).join(' · ')}
 								</div>
 							{/if}
 						</div>
@@ -313,7 +321,19 @@
 							<span class="ml-auto text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">reported {reltime(report.created_at)}</span>
 						</div>
 						<div class="mb-3 text-[12px] text-[var(--fg-3)]">reported by <span class="text-[var(--fg-2)]">{report.reporter_name}</span></div>
-						<p class="m-0 whitespace-pre-wrap text-[14px] leading-[1.65] text-[var(--fg)]">{report.reason}</p>
+						{#if report.has_faculty_suggestion}
+							<div class="mb-3 grid gap-3 rounded-[8px] border border-[var(--border)] bg-[var(--bg-3)] p-3 text-[12px] sm:grid-cols-2">
+								<div>
+									<div class="mb-1 uppercase tracking-[0.08em] text-[var(--fg-4)]" style="font-family: var(--mono); font-size: 10px;">Current instructors</div>
+									<div class="text-[var(--fg-2)]">{report.current_faculty.length ? report.current_faculty.map((member) => member.name).join(', ') : 'None listed'}</div>
+								</div>
+								<div>
+									<div class="mb-1 uppercase tracking-[0.08em] text-[var(--accent-2)]" style="font-family: var(--mono); font-size: 10px;">Suggested instructors</div>
+									<div class="text-[var(--fg)]">{report.suggested_faculty.length ? report.suggested_faculty.map((member) => member.name).join(', ') : 'No instructors'}</div>
+								</div>
+							</div>
+						{/if}
+						{#if report.reason}<p class="m-0 whitespace-pre-wrap text-[14px] leading-[1.65] text-[var(--fg)]">{report.reason}</p>{/if}
 						<div class="mt-4">
 							<button type="button" onclick={() => dismissInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] text-[var(--fg)] transition-colors hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]">Dismiss report</button>
 						</div>
