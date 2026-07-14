@@ -1,16 +1,20 @@
 <script lang="ts">
 	import type { LegacyCourseReview, LegacyAdvisorReview } from '$lib/types';
+	import { IconTrash } from '@tabler/icons-svelte';
 
 	interface Props {
 		review: LegacyCourseReview | LegacyAdvisorReview;
 		vote: 0 | 1 | -1;
 		shownup: number;
 		showndown: number;
+		isModerator: boolean;
+		deleting: boolean;
 		onvote: (v: 0 | 1 | -1) => void;
+		ondelete: () => void;
 		onclose: () => void;
 	}
 
-	let { review, vote, shownup, showndown, onvote, onclose }: Props = $props();
+	let { review, vote, shownup, showndown, isModerator, deleting, onvote, ondelete, onclose }: Props = $props();
 
 	const stars = $derived(review.original_rating ?? 0);
 
@@ -86,31 +90,46 @@
 		</div>
 
 		<!-- footer -->
-		<div class="flex items-center gap-1 border-t border-[var(--border)] p-[12px_22px]">
-			<button
-				type="button"
-				onclick={() => onvote(vote === 1 ? 0 : 1)}
-				class="inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === 1 ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-				aria-label="Upvote"
-			>
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 19V5M5 12l7-7 7 7" />
-				</svg>
-				<span class="min-w-[14px] text-left">{shownup}</span>
-			</button>
-			<button
-				type="button"
-				onclick={() => onvote(vote === -1 ? 0 : -1)}
-				class="inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === -1 ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
-				style="font-family: var(--mono);"
-				aria-label="Downvote"
-			>
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 5v14M19 12l-7 7-7-7" />
-				</svg>
-				<span class="min-w-[14px] text-left">{showndown}</span>
-			</button>
+		<div class="flex items-center justify-between gap-2 border-t border-[var(--border)] p-[12px_22px]">
+			<div class="flex items-center gap-1">
+				<button
+					type="button"
+					onclick={() => onvote(vote === 1 ? 0 : 1)}
+					class="inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === 1 ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+					style="font-family: var(--mono);"
+					aria-label="Upvote"
+				>
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 19V5M5 12l7-7 7 7" />
+					</svg>
+					<span class="min-w-[14px] text-left">{shownup}</span>
+				</button>
+				<button
+					type="button"
+					onclick={() => onvote(vote === -1 ? 0 : -1)}
+					class="inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {vote === -1 ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+					style="font-family: var(--mono);"
+					aria-label="Downvote"
+				>
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 5v14M19 12l-7 7-7-7" />
+					</svg>
+					<span class="min-w-[14px] text-left">{showndown}</span>
+				</button>
+			</div>
+			{#if isModerator}
+				<button
+					type="button"
+					onclick={ondelete}
+					disabled={deleting}
+					class="inline-flex items-center gap-[6px] rounded-md px-3 py-[6px] text-[12px] text-[var(--fg-3)] transition-[color,background] duration-[120ms] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]"
+					style="font-family: var(--mono);"
+					aria-label="Delete review"
+				>
+					<IconTrash size={13} stroke={1.7} />
+					{deleting ? 'deleting…' : 'delete'}
+				</button>
+			{/if}
 		</div>
 	</div>
 </div>

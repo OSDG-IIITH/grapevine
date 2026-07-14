@@ -259,6 +259,18 @@ export async function deleteAdvisorReview(id: string): Promise<boolean> {
 	return res;
 }
 
+export async function deleteLegacyCourseReview(id: string): Promise<boolean> {
+	const res = await apivoid(`/reviews/legacy/course/${id}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
+}
+
+export async function deleteLegacyAdvisorReview(id: string): Promise<boolean> {
+	const res = await apivoid(`/reviews/legacy/advisor/${id}`, { method: 'DELETE' });
+	if (res) listCache.clear();
+	return res;
+}
+
 export async function voteCourseReview(id: string, value: 1 | -1): Promise<boolean> {
 	const res = await apivoid(`/reviews/course/${id}/vote`, json({ value }));
 	if (res) listCache.clear();

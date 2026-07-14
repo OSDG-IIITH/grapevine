@@ -37,7 +37,7 @@ pub async fn delete_course_review(
     user: AuthUser,
     Path(id): Path<String>,
 ) -> Result<StatusCode, AppError> {
-    review::delete_course_review(&s.pool, &id, &user.id).await?;
+    review::delete_course_review(&s.pool, &id, &user.id, user.is_admin).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -98,7 +98,7 @@ pub async fn delete_advisor_review(
     user: AuthUser,
     Path(id): Path<String>,
 ) -> Result<StatusCode, AppError> {
-    review::delete_advisor_review(&s.pool, &id, &user.id).await?;
+    review::delete_advisor_review(&s.pool, &id, &user.id, user.is_admin).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -175,5 +175,25 @@ pub async fn flag_advisor_review(
     Json(body): Json<FlagBody>,
 ) -> Result<StatusCode, AppError> {
     review::flag_advisor_review(&s.pool, &id, &user.id, body.reason).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn delete_legacy_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    review::delete_legacy_course_review(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn delete_legacy_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    review::delete_legacy_advisor_review(&s.pool, &id, &user.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }

@@ -281,14 +281,37 @@ pub async fn edit_course_review(pool: &PgPool, review_id: &str, user_id: &str, r
     reviews.into_iter().find(|r| r.id == row.id).ok_or(AppError::Internal)
 }
 
-pub async fn delete_course_review(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
-    let rows = sqlx::query!(
-        "DELETE FROM course_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
-        review_id, user_id
-    )
-    .execute(pool)
-    .await?
-    .rows_affected();
+pub async fn delete_course_review(pool: &PgPool, review_id: &str, user_id: &str, is_admin: bool) -> Result<(), AppError> {
+    let rows = if is_admin {
+        let review = sqlx::query!(
+            "SELECT body FROM course_reviews WHERE id = $1 AND deleted_at IS NULL",
+            review_id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        if review.is_none() { return Err(AppError::NotFound); }
+
+        let count = sqlx::query!(
+            "UPDATE course_reviews SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND deleted_at IS NULL",
+            user_id, review_id
+        )
+        .execute(pool)
+        .await?
+        .rows_affected();
+
+        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "course_review", review_id, prev).await?;
+        count
+    } else {
+        sqlx::query!(
+            "DELETE FROM course_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
+            review_id, user_id
+        )
+        .execute(pool)
+        .await?
+        .rows_affected()
+    };
 
     if rows == 0 { return Err(AppError::Forbidden); }
     Ok(())
@@ -404,14 +427,37 @@ pub async fn edit_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
     reviews.into_iter().find(|r| r.id == row.id).ok_or(AppError::Internal)
 }
 
-pub async fn delete_advisor_review(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
-    let rows = sqlx::query!(
-        "DELETE FROM advisor_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
-        review_id, user_id
-    )
-    .execute(pool)
-    .await?
-    .rows_affected();
+pub async fn delete_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, is_admin: bool) -> Result<(), AppError> {
+    let rows = if is_admin {
+        let review = sqlx::query!(
+            "SELECT body FROM advisor_reviews WHERE id = $1 AND deleted_at IS NULL",
+            review_id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        if review.is_none() { return Err(AppError::NotFound); }
+
+        let count = sqlx::query!(
+            "UPDATE advisor_reviews SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2 AND deleted_at IS NULL",
+            user_id, review_id
+        )
+        .execute(pool)
+        .await?
+        .rows_affected();
+
+        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "advisor_review", review_id, prev).await?;
+        count
+    } else {
+        sqlx::query!(
+            "DELETE FROM advisor_reviews WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
+            review_id, user_id
+        )
+        .execute(pool)
+        .await?
+        .rows_affected()
+    };
 
     if rows == 0 { return Err(AppError::Forbidden); }
     Ok(())
@@ -621,4 +667,54 @@ pub async fn my_advisor_reviews(pool: &PgPool, user_id: &str) -> Result<Vec<Advi
             workload: r.workload, overall: r.overall, body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes,
             user_vote: r.user_vote, edited_at: r.edited_at, created_at: r.created_at }
     }).collect())
+}
+
+pub async fn delete_legacy_course_review(pool: &PgPool, id: &str, user_id: &str) -> Result<(), AppError> {
+    let review = sqlx::query!(
+        "SELECT body FROM legacy_course_reviews WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if review.is_none() { return Err(AppError::NotFound); }
+
+    let rows = sqlx::query!(
+        "DELETE FROM legacy_course_reviews WHERE id = $1",
+        id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if rows == 0 { return Err(AppError::NotFound); }
+
+    let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+    crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "legacy_course_review", id, prev).await?;
+    Ok(())
+}
+
+pub async fn delete_legacy_advisor_review(pool: &PgPool, id: &str, user_id: &str) -> Result<(), AppError> {
+    let review = sqlx::query!(
+        "SELECT body FROM legacy_advisor_reviews WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if review.is_none() { return Err(AppError::NotFound); }
+
+    let rows = sqlx::query!(
+        "DELETE FROM legacy_advisor_reviews WHERE id = $1",
+        id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if rows == 0 { return Err(AppError::NotFound); }
+
+    let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+    crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "legacy_advisor_review", id, prev).await?;
+    Ok(())
 }

@@ -13,6 +13,7 @@
 		coursecode?: string;
 		vote: 0 | 1 | -1;
 		flagged: boolean;
+		canEdit: boolean;
 		canDelete: boolean;
 		deleting: boolean;
 		editing: boolean;
@@ -31,7 +32,7 @@
 		onclose: () => void;
 	}
 
-	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canDelete, deleting, editing, saving, editbody, editvalues, editoverall, onvote, onflag, oneditstart, oneditvalue, oneditoverall, oneditbody, onsaved, ondelete, onclose }: Props = $props();
+	let { review, axisorder, axislabels, showoffering = false, offeringcode, coursecode, vote, flagged, canEdit, canDelete, deleting, editing, saving, editbody, editvalues, editoverall, onvote, onflag, oneditstart, oneditvalue, oneditoverall, oneditbody, onsaved, ondelete, onclose }: Props = $props();
 
 	const editcalcavg = $derived.by(() => {
 		if (!editing) return null;
@@ -48,7 +49,7 @@
 	const basedown = $derived(review.downvotes - (initialvote === -1 ? 1 : 0));
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
-	const canflag = $derived(!canDelete);
+	const canflag = $derived(!canEdit);
 	const cansave = $derived(editing && !saving && editbody.trim().length > 20);
 
 	function portal(node: HTMLElement) {
@@ -235,7 +236,7 @@
 						{flagged ? 'flagged' : 'flag'}
 					</button>
 				{/if}
-				{#if canDelete}
+				{#if canEdit}
 					{#if editing}
 						<button
 							type="button"
@@ -260,6 +261,8 @@
 							edit
 						</button>
 					{/if}
+				{/if}
+				{#if canDelete}
 					<button
 						type="button"
 						onclick={ondelete}

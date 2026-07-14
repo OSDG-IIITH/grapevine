@@ -8,6 +8,7 @@
 		voteLegacyAdvisorReview, unvoteLegacyAdvisorReview,
 		flagCourseReview, flagAdvisorReview,
 		deleteCourseReview, deleteAdvisorReview,
+		deleteLegacyCourseReview, deleteLegacyAdvisorReview,
 		editCourseReview, editAdvisorReview
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
@@ -75,8 +76,11 @@
 	const basedown = $derived(alldownvotes - (initialvote === -1 ? 1 : 0));
 	const shownup = $derived(baseup + (vote === 1 ? 1 : 0));
 	const showndown = $derived(basedown + (vote === -1 ? 1 : 0));
-	const canDelete = $derived(!islegacy && !!$currentUser && !!reg?.author && $currentUser.id === reg.author.id);
-	const canflag = $derived(!islegacy && !canDelete);
+	const isAuthor = $derived(!islegacy && !!$currentUser && !!reg?.author && $currentUser.id === reg.author.id);
+	const isModerator = $derived(!!$currentUser?.is_admin);
+	const canDelete = $derived(isAuthor || isModerator);
+	const canEdit = $derived(isAuthor);
+	const canflag = $derived(!islegacy && !isAuthor);
 	const canvote = $derived(!!$currentUser);
 	const cansave = $derived(editmode && !saving && editbody.trim().length > 20);
 
@@ -128,7 +132,7 @@
 
 	function startedit(e?: Event) {
 		if (e) stop(e);
-		if (!canDelete) return;
+		if (!canEdit) return;
 		editmode = true;
 		editbody = review.body ?? '';
 		editvalues = axisfromreview();
@@ -141,7 +145,7 @@
 	}
 
 	async function handlesave() {
-		if (!canDelete || !cansave) return;
+		if (!canEdit || !cansave) return;
 		saving = true;
 		const payload = { body: editbody.trim() } as EditCourseReview | EditAdvisorReview;
 		const base = axisfromreview();
@@ -160,17 +164,29 @@
 	}
 
 	async function handledelete() {
-		if (!canDelete || deleting) return;
-		deleting = true;
-		const ok = kind === 'course'
-			? await deleteCourseReview(review.id)
-			: await deleteAdvisorReview(review.id);
-		deleting = false;
-		if (!ok) return;
-		ondelete?.(review.id);
-		editmode = false;
-		saving = false;
-		open = false;
+		if (islegacy) {
+			if (!isModerator || deleting) return;
+			deleting = true;
+			const ok = legacykind === 'course'
+				? await deleteLegacyCourseReview(review.id)
+				: await deleteLegacyAdvisorReview(review.id);
+			deleting = false;
+			if (!ok) return;
+			ondelete?.(review.id);
+			open = false;
+		} else {
+			if (!canDelete || deleting) return;
+			deleting = true;
+			const ok = kind === 'course'
+				? await deleteCourseReview(review.id)
+				: await deleteAdvisorReview(review.id);
+			deleting = false;
+			if (!ok) return;
+			ondelete?.(review.id);
+			editmode = false;
+			saving = false;
+			open = false;
+		}
 	}
 </script>
 
@@ -272,21 +288,24 @@
 			>
 				<IconFlag size={13} stroke={1.7} fill={flagged ? 'currentColor' : 'none'} />
 			</button>
-		{:else if canDelete}
+		{/if}
+		{#if canEdit}
 			<button
 				type="button"
 				aria-label="Edit review"
 				onclick={startedit}
-				class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--fg)]"
+				class="relative z-[2] {canflag ? '' : 'ml-auto'} inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--fg)]"
 			>
 				<IconPencil size={13} stroke={1.7} />
 			</button>
+		{/if}
+		{#if canDelete}
 			<button
 				type="button"
 				aria-label="Delete review"
 				onclick={(e) => { stop(e); handledelete(); }}
 				disabled={deleting}
-				class="relative z-[2] inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--danger)]"
+				class="relative z-[2] {(canflag || canEdit) ? '' : 'ml-auto'} inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--danger)]"
 			>
 				<IconTrash size={13} stroke={1.7} />
 			</button>
@@ -301,7 +320,10 @@
 			{vote}
 			{shownup}
 			{showndown}
+			isModerator={isModerator}
+			deleting={deleting}
 			onvote={(v) => handlevote(v)}
+			ondelete={handledelete}
 			onclose={() => (open = false)}
 		/>
 	{:else}
@@ -314,6 +336,7 @@
 			{coursecode}
 			{vote}
 			{flagged}
+			{canEdit}
 			{canDelete}
 			{deleting}
 			editing={editmode}
