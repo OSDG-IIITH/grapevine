@@ -76,7 +76,7 @@
 			{@render trigger()}
 		</Popover.Trigger>
 		<Popover.Content
-			class="w-auto p-0 rounded-[8px] bg-[var(--bg-inset)] border border-[var(--border-2)] shadow-lg ring-0"
+			class="z-[220] w-auto p-0 rounded-[8px] bg-[var(--bg-inset)] border border-[var(--border-2)] shadow-lg ring-0"
 			style="width: {popoverwidth ?? 'var(--bits-floating-anchor-width, 200px)'};"
 			sideOffset={5}
 			align="start"
@@ -93,7 +93,7 @@
 		>
 			{@render trigger()}
 		</Drawer.Trigger>
-		<Drawer.Content class="border-[var(--border)]">
+		<Drawer.Content class="z-[220] border-[var(--border)]" overlayClass="z-[219]">
 			<div class="mt-4 border-t border-[var(--border)]">
 				{@render commandlist()}
 			</div>

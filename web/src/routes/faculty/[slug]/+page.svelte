@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty } from '$lib/api';
+	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport } from '$lib/api';
 	import { toast } from 'svelte-sonner';
 	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS, COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
@@ -13,6 +13,7 @@
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import ReportModal from '$lib/components/ReportModal.svelte';
 
 	const slug = $derived($page.params.slug);
 
@@ -21,6 +22,19 @@
 	let instructorreviews = $state<(CourseReview & { offeringcode: string; coursecode: string })[]>([]);
 	let tab = $state('advisor');
 	let error = $state('');
+	let reportopen = $state(false);
+	let reportsubmitting = $state(false);
+
+	async function sendReport(reason: string) {
+		if (!faculty) return;
+		reportsubmitting = true;
+		const ok = await submitReport('faculty', faculty.id, reason);
+		reportsubmitting = false;
+		if (ok) {
+			toast.success('Report sent to the moderators.');
+			reportopen = false;
+		}
+	}
 
 	let editing = $state(false);
 	let saving = $state(false);
@@ -38,6 +52,7 @@
 		faculty = null;
 		advisorreviews = [];
 		instructorreviews = [];
+		reportopen = false;
 		tab = 'advisor';
 		error = '';
 		editing = false;
@@ -285,6 +300,11 @@
 							Edit
 						</button>
 					{/if}
+					<button
+						type="button"
+						onclick={() => { reportopen = true; }}
+						class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>Report info</button>
 					<a
 						href="{base}/review?faculty={faculty.slug}"
 						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
@@ -386,6 +406,10 @@
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 	{/if}
 </div>
+
+{#if reportopen && faculty}
+	<ReportModal target={faculty.name} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) reportopen = false; }} onsubmit={sendReport} />
+{/if}
 
 {#if confirmdel}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">

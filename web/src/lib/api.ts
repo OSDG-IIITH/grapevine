@@ -3,7 +3,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
 import type {
 	CourseLean, CourseDetail, CourseReview, Offering,
 	FacultyLean, FacultyDetail, AdvisorReview,
-	LabLean, LabDetail, FlagResponse, AuthUser,
+	LabLean, LabDetail, FlagResponse, ReportResponse, ReportTarget, AuthUser,
 	SearchResult, MyReviews,
 	CreateCourse, CreateFaculty, CreateLab,
 	CreateCourseReview, EditCourseReview,
@@ -283,6 +283,10 @@ export async function flagAdvisorReview(id: string, reason: string): Promise<boo
 	return apivoid(`/reviews/advisor/${id}/flag`, json({ reason }));
 }
 
+export async function submitReport(target_type: ReportTarget, target_id: string, reason: string, faculty_ids?: string[]): Promise<boolean> {
+	return apivoid('/reports', json({ target_type, target_id, reason, faculty_ids }));
+}
+
 export async function createOffering(code: string, body: { season: string; year: number }): Promise<Offering | null> {
 	const res = await apifetch<Offering>(`/courses/${encodeURIComponent(code)}/offerings`, json(body));
 	if (res) listCache.clear();
@@ -359,6 +363,18 @@ export async function getFlags(): Promise<FlagResponse[] | null> {
 
 export async function dismissFlag(id: string): Promise<boolean> {
 	return apivoid(`/admin/flags/${id}/dismiss`, { method: 'POST' });
+}
+
+export async function getReports(): Promise<ReportResponse[] | null> {
+	return apifetch<ReportResponse[]>('/admin/reports');
+}
+
+export async function dismissReport(id: string): Promise<boolean> {
+	return apivoid(`/admin/reports/${id}/dismiss`, { method: 'POST' });
+}
+
+export async function approveReport(id: string): Promise<boolean> {
+	return apivoid(`/admin/reports/${id}/approve`, { method: 'POST' });
 }
 
 export async function deleteFlaggedReview(id: string): Promise<boolean> {

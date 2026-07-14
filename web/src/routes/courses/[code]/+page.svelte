@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse } from '$lib/api';
-	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef } from '$lib/types';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
@@ -14,6 +14,7 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import CourseReportModal from '$lib/components/CourseReportModal.svelte';
 
 	const code = $derived($page.params.code);
 
@@ -22,6 +23,29 @@
 	let proposedReviews = $state<CourseReview[]>([]);
 	let tab = $state('all');
 	let error = $state('');
+	let reportopen = $state(false);
+	let reportsubmitting = $state(false);
+
+	async function submitCourseReport(submission: CourseReportSubmission) {
+		if (!course) return;
+		reportsubmitting = true;
+		let ok = false;
+		if (submission.kind === 'course') {
+			ok = await submitReport('course', course.id, submission.reason);
+		} else {
+			ok = await submitReport('offering', submission.offering_id, submission.reason, submission.faculty_ids);
+		}
+		reportsubmitting = false;
+		if (ok) {
+			toast.success('Report sent to the moderators.');
+			reportopen = false;
+		}
+	}
+
+	function reportCourseInfo() {
+		if (!course) return;
+		reportopen = true;
+	}
 
 	let editing = $state(false);
 	let saving = $state(false);
@@ -62,35 +86,37 @@
 	let proposeYearError = $state(false);
 	let proposeFaculty = $state<FacultyLean[]>([]);
 
-	function removeProposeFaculty(fid: string) {
-		proposeFaculty = proposeFaculty.filter((f) => f.id !== fid);
+	function removeProposeFaculty(id: string) {
+		proposeFaculty = proposeFaculty.filter((member) => member.id !== id);
 	}
 
-	function addProposeFaculty(fid: string) {
-		const f = allfaculty.find((fac) => fac.id === fid);
-		if (f && !proposeFaculty.some((fac) => fac.id === fid)) {
-			proposeFaculty = [...proposeFaculty, f];
+	function addProposeFaculty(id: string) {
+		const member = allfaculty.find((faculty) => faculty.id === id);
+		if (member && !proposeFaculty.some((faculty) => faculty.id === id)) {
+			proposeFaculty = [...proposeFaculty, member];
 		}
 	}
 
 	const availableProposeFaculty = $derived(
-		allfaculty.filter((f) => !proposeFaculty.some((pf) => pf.id === f.id))
+		allfaculty.filter((faculty) => !proposeFaculty.some((selected) => selected.id === faculty.id))
 	);
 
 	async function submitProposal() {
 		if (!course) return;
 		const year = parseyear(proposeYear);
-		if (year === null) { proposeYearError = true; return; }
+		if (year === null) {
+			proposeYearError = true;
+			return;
+		}
 		proposeYearError = false;
-		const fids = proposeFaculty.map((f) => f.id);
-		const res = await proposeOffering(course.code, proposeSeason, year, fids);
-		if (res) {
+		const result = await proposeOffering(course.code, proposeSeason, year, proposeFaculty.map((faculty) => faculty.id));
+		if (result) {
 			toast.success('Semester proposal submitted to moderators.');
 			proposing = false;
 			proposeYear = '';
 			proposeFaculty = [];
-			const d = await getCourse(course.code);
-			if (d) course = d;
+			const updated = await getCourse(course.code);
+			if (updated) course = updated;
 		}
 	}
 
@@ -101,6 +127,8 @@
 		course = null;
 		reviews = [];
 		proposedReviews = [];
+		reportopen = false;
+		proposing = false;
 		tab = 'all';
 		editing = false;
 
@@ -366,6 +394,11 @@
 							Edit
 						</button>
 					{/if}
+					<button
+						type="button"
+						onclick={reportCourseInfo}
+						class="inline-flex items-center gap-[6px] self-start whitespace-nowrap rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+					>Report course info</button>
 					<a
 						href="{base}/review?course={course.code}"
 						class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-[7px] px-[14px] py-2 text-[13px] font-medium transition-[background,border-color] duration-[120ms]"
@@ -683,78 +716,45 @@
 
 		{#if proposing}
 			<div class="mb-6 flex flex-wrap items-center gap-[8px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-4 py-3" style="animation: fadeUp 200ms cubic-bezier(.2,.6,.2,1) both;">
-				<span class="text-[13px] font-medium text-[var(--fg-2)] mr-1">Propose semester:</span>
-				<!-- season toggle -->
+				<span class="mr-1 text-[13px] font-medium text-[var(--fg-2)]">Propose semester:</span>
 				<div class="flex rounded-[6px] border border-[var(--border-strong)] p-[2px]" style="background: var(--bg-3);">
-					<button
-						type="button"
-						onclick={() => { proposeSeason = 'M'; }}
-						class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'M' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
-						style="font-family: var(--mono); {proposeSeason === 'M' ? 'background: var(--bg-4);' : ''}"
-					>Monsoon</button>
-					<button
-						type="button"
-						onclick={() => { proposeSeason = 'S'; }}
-						class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors duration-[100ms] {proposeSeason === 'S' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
-						style="font-family: var(--mono); {proposeSeason === 'S' ? 'background: var(--bg-4);' : ''}"
-					>Spring</button>
+					<button type="button" onclick={() => { proposeSeason = 'M'; }} class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors {proposeSeason === 'M' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}" style="font-family: var(--mono); {proposeSeason === 'M' ? 'background: var(--bg-4);' : ''}">Monsoon</button>
+					<button type="button" onclick={() => { proposeSeason = 'S'; }} class="rounded-[4px] px-[9px] py-[3px] text-[12px] font-medium transition-colors {proposeSeason === 'S' ? 'text-[var(--fg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}" style="font-family: var(--mono); {proposeSeason === 'S' ? 'background: var(--bg-4);' : ''}">Spring</button>
 				</div>
-				<!-- year input -->
 				<input
 					bind:value={proposeYear}
 					placeholder="2026"
 					oninput={() => { proposeYearError = false; }}
-					class="rounded-[5px] border bg-transparent px-[8px] py-[4px] text-[12px] outline-none transition-colors duration-[100ms] {proposeYearError ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-strong)] text-[var(--fg-2)] focus:border-[var(--accent-2)]'}"
+					class="rounded-[5px] border bg-transparent px-[8px] py-[4px] text-[12px] outline-none {proposeYearError ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-strong)] text-[var(--fg-2)] focus:border-[var(--accent-2)]'}"
 					style="font-family: var(--mono); width: 64px;"
 				/>
 
-				<!-- instructors list -->
-				{#each proposeFaculty as f (f.id)}
+				{#each proposeFaculty as faculty (faculty.id)}
 					<span class="flex items-center gap-[4px] rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[8px] py-[4px] text-[12px] text-[var(--fg-2)]">
-						{f.name}
-						<button
-							type="button"
-							onclick={() => removeProposeFaculty(f.id)}
-							aria-label="Remove {f.name}"
-							class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]"
-						>
-							<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-								<path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-							</svg>
+						{faculty.name}
+						<button type="button" onclick={() => removeProposeFaculty(faculty.id)} aria-label="Remove {faculty.name}" class="ml-[2px] flex h-[14px] w-[14px] items-center justify-center rounded-full text-[var(--fg-4)] transition-colors hover:text-[var(--fg)]">
+							<svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true"><path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
 						</button>
 					</span>
 				{/each}
 
 				{#if availableProposeFaculty.length > 0}
-					<select
-						onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) { addProposeFaculty(v); (e.target as HTMLSelectElement).value = ''; } }}
-						class="appearance-none rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none transition-colors hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]"
-						style="font-family: var(--mono); width: 110px;"
-					>
+					<select onchange={(event) => { const id = event.currentTarget.value; if (id) { addProposeFaculty(id); event.currentTarget.value = ''; } }} class="appearance-none rounded-[5px] border border-dashed border-[var(--border-strong)] bg-transparent px-[8px] py-[4px] text-[12px] text-[var(--fg-4)] outline-none hover:border-[var(--fg-4)] hover:text-[var(--fg-3)]" style="font-family: var(--mono); width: 110px;">
 						<option value="">+ instructor</option>
-						{#each availableProposeFaculty as f (f.id)}
-							<option value={f.id}>{f.name}</option>
+						{#each availableProposeFaculty as faculty (faculty.id)}
+							<option value={faculty.id}>{faculty.name}</option>
 						{/each}
 					</select>
 				{/if}
 
-				<button
-					type="button"
-					onclick={submitProposal}
-					class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium transition-colors duration-[120ms] ml-auto"
-					style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
-				>Propose</button>
-				<button
-					type="button"
-					onclick={() => { proposing = false; proposeYear = ''; proposeYearError = false; proposeFaculty = []; }}
-					class="text-[13px] text-[var(--fg-3)] hover:text-[var(--fg)] transition-colors px-2 py-1"
-				>Cancel</button>
+				<button type="button" onclick={submitProposal} class="ml-auto inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium" style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);">Propose</button>
+				<button type="button" onclick={() => { proposing = false; proposeYear = ''; proposeYearError = false; proposeFaculty = []; }} class="px-2 py-1 text-[13px] text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]">Cancel</button>
 			</div>
 		{/if}
 
 		<!-- taught-by banner -->
 		{#if selectedoffering}
-			<div class="mb-[18px] flex items-center gap-[14px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
+			<div class="mb-[18px] flex flex-wrap items-center gap-[14px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
 				<span class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">Taught by</span>
 				{#each selectedoffering.faculty as f, i (f.id)}
 					<a href="{base}/faculty/{f.slug ?? f.id}" class="text-[var(--fg)] transition-colors duration-[120ms] hover:text-[var(--accent-2)]">
@@ -801,6 +801,10 @@
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 	{/if}
 </div>
+
+{#if reportopen && course}
+	<CourseReportModal {course} faculty={allfaculty} initialofferingid={selectedoffering?.id} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) reportopen = false; }} onsubmit={submitCourseReport} />
+{/if}
 
 {#if confirmdel}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">

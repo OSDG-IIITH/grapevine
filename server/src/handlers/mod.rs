@@ -6,3 +6,4 @@ pub mod offerings;
 pub mod reviews;
 pub mod admin;
 pub mod search;
+pub mod reports;
