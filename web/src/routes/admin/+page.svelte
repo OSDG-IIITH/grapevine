@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 	import {
 		getFlags, dismissFlag, deleteFlaggedReview, exportSeedData,
-		getReports, dismissReport,
+		getReports, dismissReport, approveReport,
 		getProposedOfferings, approveProposedOffering, rejectProposedOffering,
 		getDeletedCourses, restoreCourse,
 		getDeletedFaculty, restoreFaculty,
@@ -89,6 +90,10 @@
 		if (await dismissReport(id)) reports = reports.filter((report) => report.id !== id);
 	}
 
+	async function approveInfoReport(id: string) {
+		if (await approveReport(id)) reports = reports.filter((report) => report.id !== id);
+	}
+
 	async function deleteReview(id: string) {
 		if (await deleteFlaggedReview(id)) items = items.filter((i) => i.id !== id);
 	}
@@ -149,7 +154,7 @@
 			CREATE_COURSE: 'created course', UPDATE_COURSE: 'updated course', DELETE_COURSE: 'deleted course',
 			CREATE_FACULTY: 'created faculty', UPDATE_FACULTY: 'updated faculty', DELETE_FACULTY: 'deleted faculty',
 			CREATE_LAB: 'created lab', UPDATE_LAB: 'updated lab', DELETE_LAB: 'deleted lab',
-			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty',
+			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty', APPROVE_REPORT: 'approved instructor change',
 			APPROVE_PROPOSED: 'approved proposed', REJECT_PROPOSED: 'rejected proposed',
 			DELETE_REVIEW: 'deleted review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
 			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
@@ -317,7 +322,11 @@
 					<div class="mb-3 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[22px]" style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
 						<div class="mb-3 flex flex-wrap items-center gap-3 text-[12px] text-[var(--fg-3)]">
 							<span class="rounded px-2 py-[2px] text-[11px] uppercase text-[var(--accent-2)] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)]" style="font-family: var(--mono);">{reporttypelabel(report.target_type)}</span>
-							<span class="text-[var(--fg)]">{report.target_label}</span>
+							{#if report.course_code}
+								<a href={`${base}/courses/${encodeURIComponent(report.course_code)}`} class="text-[var(--fg)] underline decoration-[var(--border-strong)] underline-offset-4 transition-colors hover:text-[var(--accent-2)]">{report.target_label}</a>
+							{:else}
+								<span class="text-[var(--fg)]">{report.target_label}</span>
+							{/if}
 							<span class="ml-auto text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">reported {reltime(report.created_at)}</span>
 						</div>
 						<div class="mb-3 text-[12px] text-[var(--fg-3)]">reported by <span class="text-[var(--fg-2)]">{report.reporter_name}</span></div>
@@ -334,7 +343,10 @@
 							</div>
 						{/if}
 						{#if report.reason}<p class="m-0 whitespace-pre-wrap text-[14px] leading-[1.65] text-[var(--fg)]">{report.reason}</p>{/if}
-						<div class="mt-4">
+						<div class="mt-4 flex flex-wrap gap-2">
+							{#if report.has_faculty_suggestion}
+								<button type="button" onclick={() => approveInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.3)] bg-[var(--accent-bg)] px-[14px] py-2 text-[13px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]">Approve change</button>
+							{/if}
 							<button type="button" onclick={() => dismissInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] text-[var(--fg)] transition-colors hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]">Dismiss report</button>
 						</div>
 					</div>

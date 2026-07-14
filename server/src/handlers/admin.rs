@@ -195,6 +195,16 @@ pub async fn dismiss_report(
     Ok(StatusCode::NO_CONTENT)
 }
 
+pub async fn approve_report(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    report::approve_faculty_suggestion(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn delete_review(
     State(s): State<AppState>,
     user: AuthUser,

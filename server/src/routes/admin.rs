@@ -10,6 +10,7 @@ pub fn router() -> Router<AppState> {
         .route("/admin/flags/:id/delete-review", post(admin::delete_review))
         .route("/admin/reports", get(admin::reports))
         .route("/admin/reports/:id/dismiss", post(admin::dismiss_report))
+        .route("/admin/reports/:id/approve", post(admin::approve_report))
         .route("/admin/reviews/course/:id/restore", post(admin::restore_review_course))
         .route("/admin/reviews/advisor/:id/restore", post(admin::restore_review_advisor))
         .route("/admin/offerings/:id/restore", post(admin::restore_offering_handler))

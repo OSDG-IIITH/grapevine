@@ -346,6 +346,10 @@ export async function dismissReport(id: string): Promise<boolean> {
 	return apivoid(`/admin/reports/${id}/dismiss`, { method: 'POST' });
 }
 
+export async function approveReport(id: string): Promise<boolean> {
+	return apivoid(`/admin/reports/${id}/approve`, { method: 'POST' });
+}
+
 export async function deleteFlaggedReview(id: string): Promise<boolean> {
 	const res = await apivoid(`/admin/flags/${id}/delete-review`, { method: 'POST' });
 	if (res) listCache.clear();

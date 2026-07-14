@@ -210,6 +210,7 @@ export interface ReportResponse {
 	id: string;
 	target_type: ReportTarget;
 	target_id: string;
+	course_code?: string;
 	target_label: string;
 	reason: string;
 	created_at: string;

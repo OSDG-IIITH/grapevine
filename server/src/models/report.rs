@@ -30,6 +30,7 @@ struct ReportRow {
     id: String,
     target_type: String,
     target_id: String,
+    course_code: Option<String>,
     target_label: String,
     reason: String,
     created_at: DateTime<Utc>,
@@ -57,6 +58,7 @@ pub struct ReportResponse {
     pub id: String,
     pub target_type: String,
     pub target_id: String,
+    pub course_code: Option<String>,
     pub target_label: String,
     pub reason: String,
     pub created_at: DateTime<Utc>,
@@ -235,9 +237,10 @@ pub async fn list(pool: &PgPool) -> Result<Vec<ReportResponse>, AppError> {
                     WHEN r.faculty_id IS NOT NULL THEN 'faculty'
                     WHEN r.lab_id IS NOT NULL THEN 'lab'
                     ELSE 'offering'
-                  END AS target_type,
-                  COALESCE(r.course_id, r.faculty_id, r.lab_id, r.offering_id) AS target_id,
-                  CASE
+                   END AS target_type,
+                   COALESCE(r.course_id, r.faculty_id, r.lab_id, r.offering_id) AS target_id,
+                   COALESCE(c.code, oc.code) AS course_code,
+                   CASE
                     WHEN r.course_id IS NOT NULL THEN c.code || ' · ' || c.name
                     WHEN r.faculty_id IS NOT NULL THEN f.name
                     WHEN r.lab_id IS NOT NULL THEN l.shortname || ' · ' || l.name
@@ -288,9 +291,10 @@ pub async fn dismiss(pool: &PgPool, id: &str, admin_id: &str) -> Result<(), AppE
                     WHEN r.faculty_id IS NOT NULL THEN 'faculty'
                     WHEN r.lab_id IS NOT NULL THEN 'lab'
                     ELSE 'offering'
-                  END AS target_type,
-                  COALESCE(r.course_id, r.faculty_id, r.lab_id, r.offering_id) AS target_id,
-                  CASE
+                   END AS target_type,
+                   COALESCE(r.course_id, r.faculty_id, r.lab_id, r.offering_id) AS target_id,
+                   COALESCE(c.code, oc.code) AS course_code,
+                   CASE
                     WHEN r.course_id IS NOT NULL THEN c.code || ' · ' || c.name
                     WHEN r.faculty_id IS NOT NULL THEN f.name
                     WHEN r.lab_id IS NOT NULL THEN l.shortname || ' · ' || l.name
@@ -363,6 +367,93 @@ pub async fn dismiss(pool: &PgPool, id: &str, admin_id: &str) -> Result<(), AppE
     Ok(())
 }
 
+pub async fn approve_faculty_suggestion(
+    pool: &PgPool,
+    id: &str,
+    admin_id: &str,
+) -> Result<(), AppError> {
+    let mut tx = pool.begin().await?;
+    let report = sqlx::query!(
+        r#"SELECT r.offering_id, r.has_faculty_suggestion
+           FROM reports r
+           JOIN offerings o ON o.id = r.offering_id
+           WHERE r.id = $1 AND o.deleted_at IS NULL
+           FOR UPDATE OF r, o"#,
+        id
+    )
+    .fetch_optional(&mut *tx)
+    .await?
+    .ok_or(AppError::NotFound)?;
+
+    let offering_id = report.offering_id.ok_or(AppError::NotFound)?;
+    if !report.has_faculty_suggestion {
+        return Err(AppError::BadRequest(
+            "report does not include an instructor change".into(),
+        ));
+    }
+
+    let suggested_faculty = sqlx::query_scalar!(
+        "SELECT faculty_id FROM report_faculty WHERE report_id = $1 AND suggested = true ORDER BY faculty_id",
+        id
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+
+    let active_faculty_count = sqlx::query_scalar!(
+        "SELECT COUNT(*) FROM faculty WHERE id = ANY($1) AND deleted_at IS NULL",
+        &suggested_faculty
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    if active_faculty_count != Some(suggested_faculty.len() as i64) {
+        return Err(AppError::BadRequest(
+            "all suggested faculty must be active".into(),
+        ));
+    }
+
+    let previous_faculty = sqlx::query_scalar!(
+        "SELECT f.slug FROM offering_faculty ofac JOIN faculty f ON f.id = ofac.faculty_id WHERE ofac.offering_id = $1 ORDER BY f.slug",
+        offering_id
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+
+    sqlx::query!("DELETE FROM offering_faculty WHERE offering_id = $1", offering_id)
+        .execute(&mut *tx)
+        .await?;
+    if !suggested_faculty.is_empty() {
+        sqlx::query!(
+            "INSERT INTO offering_faculty (offering_id, faculty_id) SELECT $1, unnest($2::text[])",
+            offering_id,
+            &suggested_faculty
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    sqlx::query!("DELETE FROM reports WHERE id = $1", id)
+        .execute(&mut *tx)
+        .await?;
+
+    let previous = json!({
+        "report_id": id,
+        "faculty": previous_faculty,
+        "suggested_faculty_ids": suggested_faculty,
+    });
+    sqlx::query(
+        "INSERT INTO audit_logs (id, admin_id, action, target_type, target_id, previous_state) VALUES ($1, $2, 'APPROVE_REPORT', 'offering', $3, $4)",
+    )
+    .bind(Ulid::new().to_string())
+    .bind(admin_id)
+    .bind(offering_id)
+    .bind(previous)
+    .execute(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+    Ok(())
+}
+
 fn attach_faculty(reports: Vec<ReportRow>, faculty: Vec<ReportFacultyRow>) -> Vec<ReportResponse> {
     let mut by_report: HashMap<String, (Vec<ReportFaculty>, Vec<ReportFaculty>)> = HashMap::new();
     for row in faculty {
@@ -387,6 +478,7 @@ fn attach_faculty(reports: Vec<ReportRow>, faculty: Vec<ReportFacultyRow>) -> Ve
                 id: report.id,
                 target_type: report.target_type,
                 target_id: report.target_id,
+                course_code: report.course_code,
                 target_label: report.target_label,
                 reason: report.reason,
                 created_at: report.created_at,
