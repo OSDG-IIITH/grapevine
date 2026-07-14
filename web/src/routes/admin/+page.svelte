@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { base } from '$app/paths';
 	import {
 		getFlags, dismissFlag, deleteFlaggedReview, exportSeedData,
@@ -16,7 +17,8 @@
 	import { currentUser } from '$lib/stores';
 	import type { FlagResponse, ReportResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
-	import Tabs from '$lib/components/Tabs.svelte';
+	import Pager from '$lib/components/Pager.svelte';
+	import { IconArrowBackUp } from '@tabler/icons-svelte';
 
 	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 
@@ -28,10 +30,22 @@
 	let deletedlabs = $state<{ shortname: string; name: string; deleted_at: string }[]>([]);
 	let deletedofferings = $state<DeletedOffering[]>([]);
 	let auditlogs = $state<AuditLog[]>([]);
+	let audittotal = $state(0);
+	let audithasmore = $state(false);
+	let auditoffset = $state(0);
+	let auditloading = $state(false);
+	let auditfilters = $state({ adminid: '', action: '', targettype: '' });
+	let mobilemenuopen = $state(false);
 	let moderators = $state<Moderator[]>([]);
 	let modtype = $state<'cas' | 'local'>('cas');
 	let modinput = $state({ casid: '', username: '' });
 	let modsubmitting = $state(false);
+
+	let dialog = $state<{ msg: string; label: string; danger: boolean; fn: () => void } | null>(null);
+
+	function withconfirm(msg: string, fn: () => void, label = 'Confirm', danger = false) {
+		dialog = { msg, fn, label, danger };
+	}
 
 	const restoreactionmap: Record<string, string> = {
 		DELETE_REVIEW: 'RESTORE_REVIEW',
@@ -45,11 +59,46 @@
 	let error = $state(false);
 	let activetab = $state<'reports' | 'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators'>('audit');
 
+	const AUDIT_LIMIT = 20;
+
+	const AUDIT_ACTIONS = [
+		'CREATE_COURSE', 'UPDATE_COURSE', 'DELETE_COURSE',
+		'CREATE_FACULTY', 'UPDATE_FACULTY', 'DELETE_FACULTY',
+		'CREATE_LAB', 'UPDATE_LAB', 'DELETE_LAB',
+		'CREATE_OFFERING', 'DELETE_OFFERING', 'UPDATE_OFFERING_FACULTY',
+		'APPROVE_REPORT', 'APPROVE_PROPOSED', 'REJECT_PROPOSED',
+		'DELETE_REVIEW', 'DISMISS_FLAG', 'DISMISS_REPORT',
+		'RESTORE_COURSE', 'RESTORE_FACULTY', 'RESTORE_LAB',
+		'RESTORE_REVIEW', 'RESTORE_OFFERING',
+		'ADD_MODERATOR', 'REMOVE_MODERATOR', 'EXPORT_SEED_DATA',
+	];
+	const AUDIT_TARGET_TYPES = ['course', 'faculty', 'lab', 'offering', 'course_review', 'advisor_review', 'user', 'flag', 'database'];
+
+	async function loadauditlogs() {
+		auditloading = true;
+		const page = await getAuditLogs(AUDIT_LIMIT, auditoffset, {
+			admin_id: auditfilters.adminid || undefined,
+			action: auditfilters.action || undefined,
+			target_type: auditfilters.targettype || undefined,
+		});
+		if (page) {
+			auditlogs = page.logs;
+			audittotal = page.total;
+			audithasmore = page.has_more;
+		}
+		auditloading = false;
+	}
+
+	function onauditfilter() {
+		auditoffset = 0;
+		loadauditlogs();
+	}
+
 	onMount(async () => {
 		const [flags, reportitems, props, del, delfac, dellabs, deloff, logs, mods] = await Promise.all([
 			getFlags(), getReports(), getProposedOfferings(),
 			getDeletedCourses(), getDeletedFaculty(), getDeletedLabs(), getDeletedOfferings(),
-			getAuditLogs(), getModerators()
+			getAuditLogs(AUDIT_LIMIT, 0), getModerators()
 		]);
 		if (flags === null || reportitems === null || props === null) error = true;
 		else {
@@ -60,7 +109,11 @@
 			deletedfaculty = delfac ?? [];
 			deletedlabs = dellabs ?? [];
 			deletedofferings = deloff ?? [];
-			auditlogs = logs ?? [];
+			if (logs) {
+				auditlogs = logs.logs;
+				audittotal = logs.total;
+				audithasmore = logs.has_more;
+			}
 			moderators = mods ?? [];
 		}
 		loading = false;
@@ -137,7 +190,9 @@
 				action: restoreaction,
 				target_type: log.target_type,
 				target_id: log.target_id,
-				previous_state: null,
+				target_name: log.target_name,
+				target_course_code: log.target_course_code,
+				previous_state: restoreaction === 'RESTORE_REVIEW' ? log.previous_state : null,
 				created_at: new Date().toISOString()
 			}, ...auditlogs];
 		}
@@ -156,11 +211,20 @@
 			CREATE_LAB: 'created lab', UPDATE_LAB: 'updated lab', DELETE_LAB: 'deleted lab',
 			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty', APPROVE_REPORT: 'approved instructor change',
 			APPROVE_PROPOSED: 'approved proposed', REJECT_PROPOSED: 'rejected proposed',
-			DELETE_REVIEW: 'deleted review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
+			DELETE_REVIEW: 'deleted a review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
 			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
-			RESTORE_REVIEW: 'restored review', RESTORE_OFFERING: 'restored offering',
+			RESTORE_REVIEW: 'restored a review', RESTORE_OFFERING: 'restored offering',
+			ADD_MODERATOR: 'added moderator', REMOVE_MODERATOR: 'removed moderator',
 		};
 		return labels[action] ?? action.toLowerCase().replace(/_/g, ' ');
+	}
+
+	function auditlink(log: AuditLog): string | null {
+		if (log.target_type === 'course') return `/courses/${log.target_id}`;
+		if (log.target_type === 'faculty') return `/faculty/${log.target_id}`;
+		if (log.target_type === 'lab') return `/labs/${log.target_id}`;
+		if (log.target_type === 'offering' && log.target_course_code) return `/courses/${log.target_course_code}`;
+		return null;
 	}
 
 	async function doAddMod() {
@@ -200,12 +264,19 @@
 	}
 
 	function reltime(iso: string): string {
-		const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-		if (d === 0) return 'today';
-		if (d === 1) return 'yesterday';
+		const date = new Date(iso);
+		const now = new Date();
+		const isToday = date.toDateString() === now.toDateString();
+		if (isToday) {
+			const hh = String(date.getHours()).padStart(2, '0');
+			const mm = String(date.getMinutes()).padStart(2, '0');
+			return `${hh}:${mm}`;
+		}
+		const d = Math.floor((now.getTime() - date.getTime()) / 86400000);
+		if (d <= 1) return 'yesterday';
 		if (d < 7) return `${d} days ago`;
 		if (d < 30) return `${Math.floor(d / 7)}w ago`;
-		return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+		return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 	}
 
 	function auditvalue(value: unknown): string {
@@ -221,14 +292,28 @@
 	}
 
 	let totaldeleted = $derived(deleted.length + deletedfaculty.length + deletedlabs.length + deletedofferings.length);
+
+	const tablabels: Record<string, string> = {
+		audit: 'audit log', reports: 'information reports', flagged: 'flagged reviews',
+		proposed: 'proposed offerings', deleted: 'deleted', moderators: 'moderators'
+	};
+
+	let tabs = $derived([
+		{ id: 'audit', label: 'Audit log', count: audittotal },
+		{ id: 'reports', label: 'Reports', count: reports.length },
+		{ id: 'flagged', label: 'Flagged', count: items.length },
+		{ id: 'proposed', label: 'Proposed', count: proposed.length },
+		{ id: 'deleted', label: 'Deleted', count: totaldeleted },
+		{ id: 'moderators', label: 'Moderators', count: moderators.length }
+	]);
 </script>
 
 <svelte:head>
 	<title>Admin · grapevine</title>
 </svelte:head>
 
-<div class="mx-auto w-full px-8 pb-[120px] pt-10" style="max-width: 920px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
-	<Crumbs items={[{ label: 'grapevine', href: '/' }, { label: 'admin' }, { label: 'flagged' }]} />
+<div class="mx-auto w-full px-8 pb-[120px] pt-10" style="max-width: 1120px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
+	<Crumbs items={[{ label: 'grapevine', href: '/' }, { label: 'admin' }, { label: tablabels[activetab] ?? activetab }]} />
 
 	{#if loading}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
@@ -262,39 +347,141 @@
 			</button>
 		</div>
 
-		<div class="mb-6">
-			<Tabs items={[
-				{ id: 'audit', label: 'Audit log', count: auditlogs.length },
-				{ id: 'reports', label: 'Information reports', count: reports.length },
-				{ id: 'flagged', label: 'Flagged reviews', count: items.length },
-				{ id: 'proposed', label: 'Proposed offerings', count: proposed.length },
-				{ id: 'deleted', label: 'Deleted', count: totaldeleted },
-				{ id: 'moderators', label: 'Moderators', count: moderators.length }
-			]} active={activetab} onchange={(id) => { activetab = id as typeof activetab; }} />
-		</div>
+		<div class="flex items-start gap-6">
+			<!-- Desktop sidebar -->
+			<nav class="hidden md:flex flex-col gap-[2px] w-[176px] shrink-0 pt-[2px]">
+				{#each tabs as tab}
+					<button
+						type="button"
+						onclick={() => { activetab = tab.id as typeof activetab; }}
+						class="flex items-center justify-between rounded-[7px] px-3 py-[7px] text-[13px] text-left transition-colors {activetab === tab.id ? 'bg-[var(--bg-3)] text-[var(--fg)] font-medium' : 'text-[var(--fg-3)] hover:bg-[var(--bg-2)] hover:text-[var(--fg-2)]'}"
+					>
+						<span>{tab.label}</span>
+						{#if tab.count > 0}
+							<span class="text-[11px] text-[var(--fg-4)] tabular-nums" style="font-family: var(--mono);">{tab.count}</span>
+						{/if}
+					</button>
+				{/each}
+			</nav>
+
+			<div class="flex-1 min-w-0">
+				<!-- Mobile accordion -->
+				<div class="md:hidden mb-4 rounded-[8px] border border-[var(--border)] bg-[var(--bg-2)] overflow-hidden">
+					<button
+						type="button"
+						onclick={() => mobilemenuopen = !mobilemenuopen}
+						aria-label="Select section"
+						class="flex w-full items-center justify-between px-4 py-[10px] text-[13px] text-[var(--fg)]"
+					>
+						<span class="font-medium">{tabs.find(t => t.id === activetab)?.label ?? activetab}</span>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-[var(--fg-3)] transition-transform duration-200 {mobilemenuopen ? 'rotate-180' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
+					</button>
+					{#if mobilemenuopen}
+						<div transition:slide={{ duration: 180 }}>
+							{#each tabs.filter(t => t.id !== activetab) as tab}
+								<button
+									type="button"
+									onclick={() => { activetab = tab.id as typeof activetab; mobilemenuopen = false; }}
+									class="flex w-full items-center justify-between border-t border-[var(--border)] px-4 py-[9px] text-[13px] text-left transition-colors text-[var(--fg-3)] hover:bg-[var(--bg-3)] hover:text-[var(--fg-2)]"
+								>
+									<span>{tab.label}</span>
+									{#if tab.count > 0}
+										<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{tab.count}</span>
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 
 		{#if activetab === 'audit'}
-			{#if auditlogs.length === 0}
+			<div class="mb-3 flex flex-wrap gap-2">
+				<select
+					bind:value={auditfilters.adminid}
+					onchange={onauditfilter}
+					class="rounded-[7px] border border-[var(--border)] bg-[var(--bg-2)] px-3 py-[6px] text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--border-strong)] cursor-pointer"
+				>
+					<option value="">All moderators</option>
+					{#each moderators as mod}
+						<option value={mod.id}>{mod.display_name}</option>
+					{/each}
+				</select>
+				<select
+					bind:value={auditfilters.action}
+					onchange={onauditfilter}
+					class="rounded-[7px] border border-[var(--border)] bg-[var(--bg-2)] px-3 py-[6px] text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--border-strong)] cursor-pointer"
+				>
+					<option value="">All actions</option>
+					{#each AUDIT_ACTIONS as a}
+						<option value={a}>{actionlabel(a)}</option>
+					{/each}
+				</select>
+				<select
+					bind:value={auditfilters.targettype}
+					onchange={onauditfilter}
+					class="rounded-[7px] border border-[var(--border)] bg-[var(--bg-2)] px-3 py-[6px] text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--border-strong)] cursor-pointer"
+				>
+					<option value="">All target types</option>
+					{#each AUDIT_TARGET_TYPES as t}
+						<option value={t}>{t.replace('_', ' ')}</option>
+					{/each}
+				</select>
+			</div>
+			{#if auditlogs.length === 0 && !auditloading}
 				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]"
 					style="background-image: linear-gradient(180deg, rgba(107,143,111,0.035), transparent 42%);">
 					No audit log entries yet.
 				</div>
 			{:else}
 				{#each auditlogs as log (log.id)}
-					<div class="mb-2 flex items-start gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px]">
+					<div class="mb-2 flex items-start gap-4 rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] transition-[border-color] duration-[120ms] hover:border-[var(--border-strong)]">
 						<div class="flex-1 min-w-0">
 							<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
 								<span class="font-medium text-[var(--fg)]">{log.admin_name}</span>
 								<span class="text-[var(--fg-3)]">{actionlabel(log.action)}</span>
-								<span
-									class="rounded-[4px] border border-[var(--border-strong)] px-[6px] py-[1px] text-[11px] text-[var(--fg-2)]"
-									style="font-family: var(--mono);"
-								>{log.target_id}</span>
+								{#if log.previous_state?.['course_code']}
+									<span class="text-[var(--fg-3)]">on</span>
+									<a href={`${base}/courses/${log.previous_state['course_code']}`} class="text-[var(--fg)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--accent-2)]">{log.previous_state['course_name'] as string}</a>
+								{:else if log.previous_state?.['faculty_slug']}
+									<span class="text-[var(--fg-3)]">on</span>
+									<a href={`${base}/faculty/${log.previous_state['faculty_slug']}`} class="text-[var(--fg)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--accent-2)]">{log.previous_state['faculty_name'] as string}</a>
+								{:else if log.target_name}
+									{#if auditlink(log)}
+										<a href={`${base}${auditlink(log)}`} class="text-[var(--fg)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--accent-2)]">{log.target_name}</a>
+									{:else}
+										<span class="text-[var(--fg)]">{log.target_name}</span>
+									{/if}
+									<span class="rounded-[4px] border border-[var(--border-strong)] px-[6px] py-[1px] text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{log.target_id}</span>
+								{:else}
+									<span class="rounded-[4px] border border-[var(--border-strong)] px-[6px] py-[1px] text-[11px] text-[var(--fg-2)]" style="font-family: var(--mono);">{log.target_id}</span>
+								{/if}
 							</div>
 							{#if log.previous_state}
-								<div class="mt-1 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">
-									{Object.entries(log.previous_state).map(([k, v]) => `${k}: ${auditvalue(v)}`).join(' · ')}
-								</div>
+								{@const hasdiff = 'before' in log.previous_state && 'after' in log.previous_state}
+								{@const isreview = log.target_type === 'course_review' || log.target_type === 'advisor_review'}
+								{#if hasdiff}
+									{@const before = log.previous_state['before'] as Record<string, unknown>}
+									{@const after = log.previous_state['after'] as Record<string, unknown>}
+									<div class="mt-1 flex flex-wrap gap-x-3 gap-y-[2px] text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">
+										{#each Object.keys(before) as key}
+											{#if String(before[key]) !== String(after[key])}
+												<span>{key}: <s class="text-[var(--fg-4)] opacity-60">{auditvalue(before[key])}</s> → <span class="text-[var(--fg-3)]">{auditvalue(after[key])}</span></span>
+											{/if}
+										{/each}
+									</div>
+								{:else if isreview && log.previous_state['body']}
+									<blockquote class="mt-2 border-l-2 border-[var(--border-strong)] pl-3 text-[12px] leading-[1.6] text-[var(--fg-3)]">
+										{log.previous_state['body'] as string}
+									</blockquote>
+								{:else}
+									{@const skip = new Set(['course_code', 'course_name', 'faculty_slug', 'faculty_name'])}
+									{@const entries = Object.entries(log.previous_state).filter(([k]) => !skip.has(k))}
+									{#if entries.length > 0}
+										<div class="mt-1 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">
+											{entries.map(([k, v]) => `${k}: ${auditvalue(v)}`).join(' · ')}
+										</div>
+									{/if}
+								{/if}
 							{/if}
 						</div>
 						<div class="flex items-center gap-2 shrink-0">
@@ -303,12 +490,20 @@
 								<button
 									type="button"
 									onclick={() => doRestoreAudit(log)}
-									class="inline-flex items-center rounded-[6px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[10px] py-[4px] text-[11px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
-								>Restore</button>
+									class="inline-flex items-center rounded-[6px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] p-[4px] text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.93]"
+								><IconArrowBackUp size={14} /></button>
 							{/if}
 						</div>
 					</div>
 				{/each}
+				{#if audittotal > AUDIT_LIMIT}
+					<Pager
+						page={Math.floor(auditoffset / AUDIT_LIMIT) + 1}
+						totalpages={Math.ceil(audittotal / AUDIT_LIMIT)}
+						totalitems={audittotal}
+						onchange={(p) => { auditoffset = (p - 1) * AUDIT_LIMIT; loadauditlogs(); }}
+					/>
+				{/if}
 			{/if}
 
 		{:else if activetab === 'reports'}
@@ -345,9 +540,9 @@
 						{#if report.reason}<p class="m-0 whitespace-pre-wrap text-[14px] leading-[1.65] text-[var(--fg)]">{report.reason}</p>{/if}
 						<div class="mt-4 flex flex-wrap gap-2">
 							{#if report.has_faculty_suggestion}
-								<button type="button" onclick={() => approveInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.3)] bg-[var(--accent-bg)] px-[14px] py-2 text-[13px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]">Approve change</button>
+								<button type="button" onclick={() => approveInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.3)] bg-[var(--accent-bg)] px-[14px] py-2 text-[13px] font-medium text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.98]">Approve change</button>
 							{/if}
-							<button type="button" onclick={() => dismissInfoReport(report.id)} class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] text-[var(--fg)] transition-colors hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]">Dismiss report</button>
+							<button type="button" onclick={() => withconfirm('Dismiss this information report?', () => dismissInfoReport(report.id), 'Dismiss')} class="inline-flex items-center rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] text-[var(--fg)] transition-[background-color,border-color,transform] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)] active:scale-[0.98]">Dismiss report</button>
 						</div>
 					</div>
 				{/each}
@@ -393,13 +588,13 @@
 						<div class="mt-4 flex gap-2">
 							<button
 								type="button"
-								class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background,border-color] duration-[120ms] border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)] text-[var(--danger)] hover:bg-[rgba(217,138,138,0.14)] hover:border-[rgba(217,138,138,0.32)]"
-								onclick={() => deleteReview(it.id)}
+								class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background-color,border-color,transform] duration-[120ms] border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)] text-[var(--danger)] hover:bg-[rgba(217,138,138,0.14)] hover:border-[rgba(217,138,138,0.32)] active:scale-[0.98]"
+								onclick={() => withconfirm('Delete this review? This action can be undone from the audit log.', () => deleteReview(it.id), 'Delete review', true)}
 							>Delete review</button>
 							<button
 								type="button"
-								class="inline-flex items-center gap-2 rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg)] transition-[background,border-color] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]"
-								onclick={() => dismiss(it.id)}
+								class="inline-flex items-center gap-2 rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg)] transition-[background-color,border-color,transform] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)] active:scale-[0.98]"
+								onclick={() => withconfirm('Dismiss this flag?', () => dismiss(it.id), 'Dismiss flag')}
 							>Dismiss flag</button>
 						</div>
 					</div>
@@ -458,13 +653,13 @@
 						<div class="mt-4 flex gap-2">
 							<button
 								type="button"
-								class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background,border-color] duration-[120ms] border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] text-[var(--accent-2)] hover:bg-[rgba(107,143,111,0.14)] hover:border-[rgba(107,143,111,0.32)]"
+								class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background-color,border-color,transform] duration-[120ms] border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] text-[var(--accent-2)] hover:bg-[rgba(107,143,111,0.14)] hover:border-[rgba(107,143,111,0.32)] active:scale-[0.98]"
 								onclick={() => approveProp(p.id)}
 							>Approve</button>
 							<button
 								type="button"
-								class="inline-flex items-center gap-2 rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg)] transition-[background,border-color] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)]"
-								onclick={() => rejectProp(p.id)}
+								class="inline-flex items-center gap-2 rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg)] transition-[background-color,border-color,transform] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)] active:scale-[0.98]"
+								onclick={() => withconfirm(`Reject this proposed offering for ${p.course_code}?`, () => rejectProp(p.id), 'Reject', true)}
 							>Reject</button>
 						</div>
 					</div>
@@ -487,7 +682,7 @@
 							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.name}</span>
 							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
 							<button type="button" onclick={() => doRestore(d.code)}
-								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.98]"
 							>Restore</button>
 						</div>
 					{/each}
@@ -501,7 +696,7 @@
 							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.name}</span>
 							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
 							<button type="button" onclick={() => doRestoreFaculty(d.slug)}
-								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.98]"
 							>Restore</button>
 						</div>
 					{/each}
@@ -515,7 +710,7 @@
 							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.name}</span>
 							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
 							<button type="button" onclick={() => doRestoreLab(d.shortname)}
-								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.98]"
 							>Restore</button>
 						</div>
 					{/each}
@@ -529,7 +724,7 @@
 							<span class="flex-1 text-[14px] text-[var(--fg)]">{d.course_name}</span>
 							<span class="text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{reltime(d.deleted_at)}</span>
 							<button type="button" onclick={() => doRestoreOffering(d.id)}
-								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+								class="inline-flex items-center rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[12px] py-[6px] text-[12px] font-medium text-[var(--accent-2)] transition-[background-color,transform] duration-[120ms] hover:bg-[rgba(107,143,111,0.14)] active:scale-[0.98]"
 							>Restore</button>
 						</div>
 					{/each}
@@ -591,7 +786,7 @@
 						{#if mod.id !== $currentUser?.id}
 							<button
 								type="button"
-								onclick={() => doDemote(mod.id)}
+								onclick={() => withconfirm(`Demote ${mod.display_name} from moderator?`, () => doDemote(mod.id), 'Demote', true)}
 								aria-label="Demote {mod.display_name}"
 								class="shrink-0 inline-flex items-center rounded-[6px] border border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)] px-[10px] py-[4px] text-[11px] font-medium text-[var(--danger)] transition-colors hover:bg-[rgba(217,138,138,0.14)]"
 							>Demote</button>
@@ -601,5 +796,36 @@
 			{/if}
 
 		{/if}
+			</div><!-- flex-1 content -->
+		</div><!-- sidebar+content flex -->
 	{/if}
 </div>
+
+{#if dialog}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onclick={() => dialog = null}
+	>
+		<div
+			class="mx-4 w-full max-w-[360px] rounded-[12px] border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-2xl"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+		>
+			<p class="mb-5 text-[14px] leading-[1.6] text-[var(--fg)]">{dialog.msg}</p>
+			<div class="flex justify-end gap-2">
+				<button
+					type="button"
+					onclick={() => dialog = null}
+					class="rounded-[7px] border border-[var(--border)] bg-transparent px-4 py-[7px] text-[13px] text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-3)]"
+				>Cancel</button>
+				<button
+					type="button"
+					onclick={() => { dialog!.fn(); dialog = null; }}
+					class="rounded-[7px] border px-4 py-[7px] text-[13px] font-medium transition-colors {dialog.danger ? 'border-[rgba(217,138,138,0.3)] bg-[var(--danger-bg)] text-[var(--danger)] hover:bg-[rgba(217,138,138,0.14)]' : 'border-[var(--border-strong)] bg-[var(--bg-3)] text-[var(--fg)] hover:bg-[var(--bg-4,var(--bg-3))]'}"
+				>{dialog.label}</button>
+			</div>
+		</div>
+	</div>
+{/if}

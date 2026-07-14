@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
@@ -72,6 +72,7 @@ pub async fn export(
     )
     .fetch_all(&s.pool).await?;
 
+    audit::logaction(&s.pool, &user.id, "EXPORT_SEED_DATA", "database", "all", None).await?;
     Ok(Json(SeedExport {
         labs: labs.into_iter().map(|r| SeedLab { name: r.name, shortname: r.shortname, description: r.description }).collect(),
         faculty: faculty.into_iter().map(|r| SeedFaculty { name: r.name, slug: r.slug, bio: r.bio, labs: r.labs }).collect(),
@@ -221,7 +222,11 @@ pub async fn delete_review(
 
     if let Some(f) = course_flag {
         let review = sqlx::query!(
-            "SELECT body FROM course_reviews WHERE id = $1 AND deleted_at IS NULL",
+            r#"SELECT cr.body, c.code as course_code, c.name as course_name
+               FROM course_reviews cr
+               JOIN offerings o ON o.id = cr.offering_id
+               JOIN courses c ON c.id = o.course_id
+               WHERE cr.id = $1 AND cr.deleted_at IS NULL"#,
             f.review_id
         )
         .fetch_optional(&s.pool)
@@ -234,7 +239,7 @@ pub async fn delete_review(
         .execute(&s.pool)
         .await?;
 
-        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        let prev = review.map(|r| serde_json::json!({ "body": r.body, "course_code": r.course_code, "course_name": r.course_name }));
         audit::logaction(&s.pool, &user.id, "DELETE_REVIEW", "course_review", &f.review_id, prev).await?;
         return Ok(StatusCode::NO_CONTENT);
     }
@@ -248,7 +253,10 @@ pub async fn delete_review(
 
     if let Some(f) = advisor_flag {
         let review = sqlx::query!(
-            "SELECT body FROM advisor_reviews WHERE id = $1 AND deleted_at IS NULL",
+            r#"SELECT ar.body, f.slug as faculty_slug, f.name as faculty_name
+               FROM advisor_reviews ar
+               JOIN faculty f ON f.id = ar.faculty_id
+               WHERE ar.id = $1 AND ar.deleted_at IS NULL"#,
             f.review_id
         )
         .fetch_optional(&s.pool)
@@ -261,7 +269,7 @@ pub async fn delete_review(
         .execute(&s.pool)
         .await?;
 
-        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        let prev = review.map(|r| serde_json::json!({ "body": r.body, "faculty_slug": r.faculty_slug, "faculty_name": r.faculty_name }));
         audit::logaction(&s.pool, &user.id, "DELETE_REVIEW", "advisor_review", &f.review_id, prev).await?;
         return Ok(StatusCode::NO_CONTENT);
     }
@@ -285,7 +293,19 @@ pub async fn restore_review_course(
     .rows_affected();
 
     if n == 0 { return Err(AppError::NotFound); }
-    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "course_review", &id, None).await?;
+
+    let ctx = sqlx::query!(
+        r#"SELECT c.code as course_code, c.name as course_name
+           FROM course_reviews cr
+           JOIN offerings o ON o.id = cr.offering_id
+           JOIN courses c ON c.id = o.course_id
+           WHERE cr.id = $1"#,
+        id
+    )
+    .fetch_optional(&s.pool)
+    .await?;
+    let prev = ctx.map(|r| serde_json::json!({ "course_code": r.course_code, "course_name": r.course_name }));
+    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "course_review", &id, prev).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -305,7 +325,18 @@ pub async fn restore_review_advisor(
     .rows_affected();
 
     if n == 0 { return Err(AppError::NotFound); }
-    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "advisor_review", &id, None).await?;
+
+    let ctx = sqlx::query!(
+        r#"SELECT f.slug as faculty_slug, f.name as faculty_name
+           FROM advisor_reviews ar
+           JOIN faculty f ON f.id = ar.faculty_id
+           WHERE ar.id = $1"#,
+        id
+    )
+    .fetch_optional(&s.pool)
+    .await?;
+    let prev = ctx.map(|r| serde_json::json!({ "faculty_slug": r.faculty_slug, "faculty_name": r.faculty_name }));
+    audit::logaction(&s.pool, &user.id, "RESTORE_REVIEW", "advisor_review", &id, prev).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -517,12 +548,24 @@ pub async fn restore_course(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[derive(Deserialize)]
+pub struct AuditQuery {
+    limit: Option<i64>,
+    offset: Option<i64>,
+    admin_id: Option<String>,
+    action: Option<String>,
+    target_type: Option<String>,
+}
+
 pub async fn audit_logs(
     State(s): State<AppState>,
     user: AuthUser,
-) -> Result<Json<Vec<audit::AuditLog>>, AppError> {
+    Query(q): Query<AuditQuery>,
+) -> Result<Json<audit::AuditPage>, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
-    Ok(Json(audit::list(&s.pool).await?))
+    let limit = q.limit.unwrap_or(50).clamp(1, 200);
+    let offset = q.offset.unwrap_or(0).max(0);
+    Ok(Json(audit::list(&s.pool, limit, offset, q.admin_id.as_deref(), q.action.as_deref(), q.target_type.as_deref()).await?))
 }
 
 #[derive(Serialize)]

@@ -47,8 +47,11 @@ pub async fn update(
     let result = lab::update_lab(&s.pool, &shortname, &body).await?;
 
     if let Some(p) = prev_row {
-        let prev = serde_json::json!({ "name": p.name, "short": p.shortname, "description": p.description });
-        audit::logaction(&s.pool, &user.id, "UPDATE_LAB", "lab", &p.id, Some(prev)).await?;
+        let prev = serde_json::json!({
+            "before": { "name": p.name, "short": p.shortname, "description": p.description },
+            "after": { "name": body.name, "short": body.short, "description": body.description }
+        });
+        audit::logaction(&s.pool, &user.id, "UPDATE_LAB", "lab", &p.shortname, Some(prev)).await?;
     }
 
     Ok(Json(result))

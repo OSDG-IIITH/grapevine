@@ -10,7 +10,7 @@ import type {
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
 	ProposedOfferingResponse, ProposedOfferingLean,
-	AuditLog, LegacyCourseReview, LegacyAdvisorReview
+	AuditLog, AuditLogPage, LegacyCourseReview, LegacyAdvisorReview
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -522,8 +522,16 @@ export async function rejectProposedOffering(id: string): Promise<boolean> {
 	return res;
 }
 
-export async function getAuditLogs(): Promise<AuditLog[] | null> {
-	return apifetch<AuditLog[]>('/admin/audit-logs');
+export async function getAuditLogs(
+	limit = 50,
+	offset = 0,
+	filters: { admin_id?: string; action?: string; target_type?: string } = {}
+): Promise<AuditLogPage | null> {
+	const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+	if (filters.admin_id) params.set('admin_id', filters.admin_id);
+	if (filters.action) params.set('action', filters.action);
+	if (filters.target_type) params.set('target_type', filters.target_type);
+	return apifetch<AuditLogPage>(`/admin/audit-logs?${params}`);
 }
 
 export async function getDeletedOfferings(): Promise<{ id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string }[] | null> {

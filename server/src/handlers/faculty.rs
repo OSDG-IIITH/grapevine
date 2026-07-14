@@ -55,8 +55,11 @@ pub async fn update(
     let result = faculty::update_faculty(&s.pool, &slug, &body).await?;
 
     if let Some(p) = prev_row {
-        let prev = serde_json::json!({ "name": p.name, "slug": p.slug, "bio": p.bio });
-        audit::logaction(&s.pool, &user.id, "UPDATE_FACULTY", "faculty", &p.id, Some(prev)).await?;
+        let prev = serde_json::json!({
+            "before": { "name": p.name, "slug": p.slug, "bio": p.bio },
+            "after": { "name": body.name, "slug": body.slug, "bio": body.bio }
+        });
+        audit::logaction(&s.pool, &user.id, "UPDATE_FACULTY", "faculty", &p.slug, Some(prev)).await?;
     }
 
     Ok(Json(result))

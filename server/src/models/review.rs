@@ -284,7 +284,11 @@ pub async fn edit_course_review(pool: &PgPool, review_id: &str, user_id: &str, r
 pub async fn delete_course_review(pool: &PgPool, review_id: &str, user_id: &str, is_admin: bool) -> Result<(), AppError> {
     let rows = if is_admin {
         let review = sqlx::query!(
-            "SELECT body FROM course_reviews WHERE id = $1 AND deleted_at IS NULL",
+            r#"SELECT cr.body, c.code as course_code, c.name as course_name
+               FROM course_reviews cr
+               JOIN offerings o ON o.id = cr.offering_id
+               JOIN courses c ON c.id = o.course_id
+               WHERE cr.id = $1 AND cr.deleted_at IS NULL"#,
             review_id
         )
         .fetch_optional(pool)
@@ -300,7 +304,7 @@ pub async fn delete_course_review(pool: &PgPool, review_id: &str, user_id: &str,
         .await?
         .rows_affected();
 
-        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        let prev = review.map(|r| serde_json::json!({ "body": r.body, "course_code": r.course_code, "course_name": r.course_name }));
         crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "course_review", review_id, prev).await?;
         count
     } else {
@@ -430,7 +434,10 @@ pub async fn edit_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, 
 pub async fn delete_advisor_review(pool: &PgPool, review_id: &str, user_id: &str, is_admin: bool) -> Result<(), AppError> {
     let rows = if is_admin {
         let review = sqlx::query!(
-            "SELECT body FROM advisor_reviews WHERE id = $1 AND deleted_at IS NULL",
+            r#"SELECT ar.body, f.slug as faculty_slug, f.name as faculty_name
+               FROM advisor_reviews ar
+               JOIN faculty f ON f.id = ar.faculty_id
+               WHERE ar.id = $1 AND ar.deleted_at IS NULL"#,
             review_id
         )
         .fetch_optional(pool)
@@ -446,7 +453,7 @@ pub async fn delete_advisor_review(pool: &PgPool, review_id: &str, user_id: &str
         .await?
         .rows_affected();
 
-        let prev = review.map(|r| serde_json::json!({ "body": r.body }));
+        let prev = review.map(|r| serde_json::json!({ "body": r.body, "faculty_slug": r.faculty_slug, "faculty_name": r.faculty_name }));
         crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "advisor_review", review_id, prev).await?;
         count
     } else {

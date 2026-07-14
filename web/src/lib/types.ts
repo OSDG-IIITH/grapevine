@@ -343,6 +343,14 @@ export interface AuditLog {
 	action: string;
 	target_type: string;
 	target_id: string;
+	target_name?: string | null;
+	target_course_code?: string | null;
 	previous_state: Record<string, unknown> | null;
 	created_at: string;
+}
+
+export interface AuditLogPage {
+	logs: AuditLog[];
+	total: number;
+	has_more: boolean;
 }
