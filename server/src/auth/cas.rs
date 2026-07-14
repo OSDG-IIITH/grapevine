@@ -71,8 +71,6 @@ pub async fn callback(
         return Ok(Redirect::to(&format!("{}/login?error=domain", s.cfg.frontend_url)));
     }
 
-    // Read-only check: if this email already backs an anonymous (local) account,
-    // reject the CAS login. CAS never writes to verified_emails.
     let hash = email_hmac(&cas_id, &s.cfg.verify_email_secret);
     let already_used = sqlx::query_scalar!(
         "SELECT 1 AS one FROM verified_emails WHERE email_hash = $1",
@@ -335,6 +333,13 @@ pub async fn link_callback(
     if email_used && !user.verified {
         return Ok(Redirect::to(&format!("{}/login?error=email_has_local", s.cfg.frontend_url)));
     }
+
+    sqlx::query!(
+        "DELETE FROM verified_emails WHERE email_hash = $1",
+        hash
+    )
+    .execute(&mut *tx)
+    .await?;
 
     sqlx::query!(
         "UPDATE users SET cas_id = $1, username = NULL, password_hash = NULL, verified = true WHERE id = $2",
