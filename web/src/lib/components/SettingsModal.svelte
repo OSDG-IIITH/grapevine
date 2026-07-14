@@ -427,7 +427,7 @@
 									<label class="block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);" for="unlink-pw">Choose password</label>
 									<div class="relative mt-1.5">
 										<input id="unlink-pw" type={showunlinkpw ? 'text' : 'password'} autocomplete="new-password" bind:value={unlinkpw} placeholder="••••••••" class="w-full rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[9px] pl-[13px] pr-[38px] text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]" />
-										<button type="button" aria-label={showunlinkpw ? 'Hide' : 'Show'} onclick={() => showunlinkpw = !showunlinkpw} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
+										<button type="button" tabindex="-1" aria-label={showunlinkpw ? 'Hide' : 'Show'} onclick={() => showunlinkpw = !showunlinkpw} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
 											{#if showunlinkpw}<IconEyeOff size={15} stroke={1.6} />{:else}<IconEye size={15} stroke={1.6} />{/if}
 										</button>
 									</div>
@@ -436,14 +436,11 @@
 									<label class="block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);" for="unlink-confirm">Confirm password</label>
 									<div class="relative mt-1.5">
 										<input id="unlink-confirm" type={showunlinkconfirm ? 'text' : 'password'} autocomplete="new-password" bind:value={unlinkconfirm} placeholder="••••••••" class="w-full rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] py-[9px] pl-[13px] pr-[38px] text-[14px] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]" />
-										<button type="button" aria-label={showunlinkconfirm ? 'Hide' : 'Show'} onclick={() => showunlinkconfirm = !showunlinkconfirm} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
+										<button type="button" tabindex="-1" aria-label={showunlinkconfirm ? 'Hide' : 'Show'} onclick={() => showunlinkconfirm = !showunlinkconfirm} class="absolute right-[10px] top-1/2 -translate-y-1/2 text-[var(--fg-4)] transition-colors duration-[100ms] hover:text-[var(--fg-3)]">
 											{#if showunlinkconfirm}<IconEyeOff size={15} stroke={1.6} />{:else}<IconEye size={15} stroke={1.6} />{/if}
 										</button>
 									</div>
 								</div>
-							</div>
-							<div class="rounded-[8px] border border-[var(--border-2)] px-[13px] py-[10px] text-[13px] leading-[1.5] text-[var(--fg-3)]" style="background: var(--bg-inset);">
-								Your CAS email will be <span class="text-[var(--fg-2)]">permanently marked as used</span> and cannot be linked to any account in the future.
 							</div>
 							{#if unlinkerror}
 								<p class="rounded-[7px] border px-[12px] py-[8px] text-[13px]" style="border-color: rgba(201,122,122,0.32); background: var(--danger-bg); color: var(--danger);">{unlinkerror}</p>
