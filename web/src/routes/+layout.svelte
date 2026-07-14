@@ -15,7 +15,7 @@
 	let { children } = $props();
 
 	// Routes that render regardless of auth state (no redirect loop).
-	const PUBLIC_ROUTES = ['/login', '/verify'];
+	const PUBLIC_ROUTES = ['/login', '/verify', '/changelog'];
 
 	let authChecked = $state(false);
 
