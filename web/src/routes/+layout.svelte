@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
-	import { IconBrandGithub } from '@tabler/icons-svelte';
+	import IconBrandGithub from '@tabler/icons-svelte/icons/brand-github';
 	import { page } from '$app/state';
 	import { goto, afterNavigate } from '$app/navigation';
 	import { base } from '$app/paths';

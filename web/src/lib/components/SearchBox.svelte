@@ -3,7 +3,9 @@
 	import { base } from '$app/paths';
 	import { search } from '$lib/api';
 	import type { SearchResult } from '$lib/types';
-	import { IconBook, IconUser, IconFlask } from '@tabler/icons-svelte';
+	import IconBook from '@tabler/icons-svelte/icons/book';
+	import IconUser from '@tabler/icons-svelte/icons/user';
+	import IconFlask from '@tabler/icons-svelte/icons/flask';
 
 	interface Props {
 		placeholder?: string;

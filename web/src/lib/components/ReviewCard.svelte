@@ -12,7 +12,9 @@
 		editCourseReview, editAdvisorReview
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
-	import { IconFlag, IconTrash, IconPencil } from '@tabler/icons-svelte';
+	import IconFlag from '@tabler/icons-svelte/icons/flag';
+	import IconTrash from '@tabler/icons-svelte/icons/trash';
+	import IconPencil from '@tabler/icons-svelte/icons/pencil';
 	import ReviewModal from './ReviewModal.svelte';
 	import LegacyReviewModal from './LegacyReviewModal.svelte';
 	import FlagModal from './FlagModal.svelte';

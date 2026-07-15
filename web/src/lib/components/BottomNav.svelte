@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
-	import { IconBook, IconUser, IconFlask, IconPencil } from '@tabler/icons-svelte';
+	import IconBook from '@tabler/icons-svelte/icons/book';
+	import IconUser from '@tabler/icons-svelte/icons/user';
+	import IconFlask from '@tabler/icons-svelte/icons/flask';
+	import IconPencil from '@tabler/icons-svelte/icons/pencil';
 
 	const nav = [
 		{ id: 'courses', label: 'Courses', href: '/courses', icon: IconBook },

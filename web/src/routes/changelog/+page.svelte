@@ -5,7 +5,7 @@
 	import { currentUser } from '$lib/stores';
 	import { getMe } from '$lib/api';
 	import { PUBLIC_API_URL } from '$env/static/public';
-	import { IconBrandGithub } from '@tabler/icons-svelte';
+	import IconBrandGithub from '@tabler/icons-svelte/icons/brand-github';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 
 	let { data } = $props();

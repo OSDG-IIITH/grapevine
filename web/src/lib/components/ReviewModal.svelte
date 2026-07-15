@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { CourseReview, AdvisorReview } from '$lib/types';
-	import { IconFlag, IconTrash, IconPencil, IconCheck } from '@tabler/icons-svelte';
+	import IconFlag from '@tabler/icons-svelte/icons/flag';
+	import IconTrash from '@tabler/icons-svelte/icons/trash';
+	import IconPencil from '@tabler/icons-svelte/icons/pencil';
+	import IconCheck from '@tabler/icons-svelte/icons/check';
 	import SegBar from './SegBar.svelte';
 	import OverallBar from './OverallBar.svelte';
 

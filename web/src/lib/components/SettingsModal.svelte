@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { IconLock, IconHelpCircle, IconKey, IconEye, IconEyeOff, IconLink } from '@tabler/icons-svelte';
+	import IconLock from '@tabler/icons-svelte/icons/lock';
+	import IconHelpCircle from '@tabler/icons-svelte/icons/help-circle';
+	import IconKey from '@tabler/icons-svelte/icons/key';
+	import IconEye from '@tabler/icons-svelte/icons/eye';
+	import IconEyeOff from '@tabler/icons-svelte/icons/eye-off';
+	import IconLink from '@tabler/icons-svelte/icons/link';
 	import { currentUser } from '$lib/stores';
 	import { changePassword, newRecoveryCode, updateSecurityQuestion, casLinkUrl, unlinkCas, getMe } from '$lib/api';
 	import type { AuthUser } from '$lib/types';

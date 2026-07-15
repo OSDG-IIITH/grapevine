@@ -18,7 +18,7 @@
 	import type { FlagResponse, ReportResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Pager from '$lib/components/Pager.svelte';
-	import { IconArrowBackUp } from '@tabler/icons-svelte';
+	import IconArrowBackUp from '@tabler/icons-svelte/icons/arrow-back-up';
 
 	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 

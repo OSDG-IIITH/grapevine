@@ -4,7 +4,7 @@
 	import { base } from '$app/paths';
 	import { currentUser, searchOpen } from '$lib/stores';
 	import { PUBLIC_API_URL } from '$env/static/public';
-	import { IconSearch } from '@tabler/icons-svelte';
+	import IconSearch from '@tabler/icons-svelte/icons/search';
 	import SettingsModal from './SettingsModal.svelte';
 
 	let settingsopen = $state(false);

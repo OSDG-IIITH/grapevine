@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { LegacyCourseReview, LegacyAdvisorReview } from '$lib/types';
-	import { IconTrash } from '@tabler/icons-svelte';
+	import IconTrash from '@tabler/icons-svelte/icons/trash';
 
 	interface Props {
 		review: LegacyCourseReview | LegacyAdvisorReview;
