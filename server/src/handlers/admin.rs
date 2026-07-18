@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     auth::{session::AuthUser, validate::normalize_username},
     error::AppError,
-    models::{audit, course, faculty, lab, offering::Season, report},
+    models::{audit, course, faculty, lab, offering::Season, report, review},
     state::AppState,
 };
 
@@ -767,4 +767,20 @@ pub async fn deleted_offerings(
         year: r.year,
         deleted_at: r.deleted_at,
     }).collect()))
+}
+
+pub async fn list_external_course_reviews(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<review::AdminExternalCourseReview>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(review::all_external_course_reviews(&s.pool).await?))
+}
+
+pub async fn list_external_advisor_reviews(
+    State(s): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<Vec<review::AdminExternalAdvisorReview>>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(review::all_external_advisor_reviews(&s.pool).await?))
 }

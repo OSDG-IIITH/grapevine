@@ -10,7 +10,9 @@ import type {
 	CreateAdvisorReview, EditAdvisorReview,
 	PatchCourse, PatchFaculty, PatchLab,
 	ProposedOfferingResponse, ProposedOfferingLean,
-	AuditLog, AuditLogPage, LegacyCourseReview, LegacyAdvisorReview
+	AuditLog, AuditLogPage, LegacyCourseReview, LegacyAdvisorReview,
+	ExternalCourseReview, ExternalAdvisorReview,
+	AdminExternalCourseReview, AdminExternalAdvisorReview
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -107,6 +109,10 @@ export async function getLegacyCourseReviews(code: string): Promise<LegacyCourse
 	return apifetch<LegacyCourseReview[]>(`/courses/${encodeURIComponent(code)}/legacy-reviews`);
 }
 
+export async function getExternalCourseReviews(code: string): Promise<ExternalCourseReview[] | null> {
+	return apifetch<ExternalCourseReview[]>(`/courses/${encodeURIComponent(code)}/external-reviews`);
+}
+
 export async function getFaculty(params?: { q?: string; sort?: string }): Promise<FacultyLean[] | null> {
 	const p = new URLSearchParams();
 	if (params?.q?.trim()) p.set('q', params.q.trim());
@@ -137,6 +143,10 @@ export async function getAdvisorReviews(slug: string): Promise<AdvisorReview[] |
 
 export async function getLegacyAdvisorReviews(slug: string): Promise<LegacyAdvisorReview[] | null> {
 	return apifetch<LegacyAdvisorReview[]>(`/faculty/${slug}/legacy-reviews`);
+}
+
+export async function getExternalAdvisorReviews(slug: string): Promise<ExternalAdvisorReview[] | null> {
+	return apifetch<ExternalAdvisorReview[]>(`/faculty/${slug}/external-reviews`);
 }
 
 export async function getLabs(q?: string): Promise<LabLean[] | null> {
@@ -566,4 +576,52 @@ export async function addLocalModerator(username: string, displayName?: string, 
 
 export async function demoteModerator(id: string): Promise<boolean> {
 	return apivoid(`/admin/moderators/${id}/demote`, { method: 'POST' });
+}
+
+export async function createExternalCourseReview(body: { course_id: string; offering_id?: string; body: string; source_note?: string }): Promise<ExternalCourseReview | null> {
+	return apifetch<ExternalCourseReview>('/reviews/external/course', json(body));
+}
+
+export async function editExternalCourseReview(id: string, body: { body: string; source_note?: string }): Promise<ExternalCourseReview | null> {
+	return apifetch<ExternalCourseReview>(`/reviews/external/course/${id}`, json(body, 'PATCH'));
+}
+
+export async function deleteExternalCourseReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/external/course/${id}`, { method: 'DELETE' });
+}
+
+export async function voteExternalCourseReview(id: string, value: 1 | -1): Promise<boolean> {
+	return apivoid(`/reviews/external/course/${id}/vote`, json({ value }));
+}
+
+export async function unvoteExternalCourseReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/external/course/${id}/vote`, { method: 'DELETE' });
+}
+
+export async function createExternalAdvisorReview(body: { faculty_id: string; body: string; source_note?: string }): Promise<ExternalAdvisorReview | null> {
+	return apifetch<ExternalAdvisorReview>('/reviews/external/advisor', json(body));
+}
+
+export async function editExternalAdvisorReview(id: string, body: { body: string; source_note?: string }): Promise<ExternalAdvisorReview | null> {
+	return apifetch<ExternalAdvisorReview>(`/reviews/external/advisor/${id}`, json(body, 'PATCH'));
+}
+
+export async function deleteExternalAdvisorReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/external/advisor/${id}`, { method: 'DELETE' });
+}
+
+export async function getAdminExternalCourseReviews(): Promise<AdminExternalCourseReview[] | null> {
+	return apifetch<AdminExternalCourseReview[]>('/admin/external/course');
+}
+
+export async function getAdminExternalAdvisorReviews(): Promise<AdminExternalAdvisorReview[] | null> {
+	return apifetch<AdminExternalAdvisorReview[]>('/admin/external/advisor');
+}
+
+export async function voteExternalAdvisorReview(id: string, value: 1 | -1): Promise<boolean> {
+	return apivoid(`/reviews/external/advisor/${id}/vote`, json({ value }));
+}
+
+export async function unvoteExternalAdvisorReview(id: string): Promise<boolean> {
+	return apivoid(`/reviews/external/advisor/${id}/vote`, { method: 'DELETE' });
 }

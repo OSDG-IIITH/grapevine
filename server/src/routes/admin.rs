@@ -1,4 +1,5 @@
 use axum::{routing::{get, post}, Router};
+
 use crate::{handlers::admin, state::AppState};
 
 pub fn router() -> Router<AppState> {
@@ -28,4 +29,6 @@ pub fn router() -> Router<AppState> {
         .route("/admin/moderators/cas", post(admin::add_cas_moderator))
         .route("/admin/moderators/local", post(admin::add_local_moderator))
         .route("/admin/moderators/:id/demote", post(admin::demote_moderator))
+        .route("/admin/external/course", get(admin::list_external_course_reviews))
+        .route("/admin/external/advisor", get(admin::list_external_advisor_reviews))
 }

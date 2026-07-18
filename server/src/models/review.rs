@@ -701,6 +701,311 @@ pub async fn delete_legacy_course_review(pool: &PgPool, id: &str, user_id: &str)
     Ok(())
 }
 
+#[derive(Debug, Serialize)]
+pub struct ExternalCourseReview {
+    pub id: String,
+    pub course_id: String,
+    pub offering_id: Option<String>,
+    pub body: String,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub user_vote: Option<i16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_note: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_by: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_by_display_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExternalAdvisorReview {
+    pub id: String,
+    pub faculty_id: String,
+    pub body: String,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub user_vote: Option<i16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_note: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_by: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_by_display_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateExternalCourseReview {
+    pub course_id: String,
+    pub offering_id: Option<String>,
+    pub body: String,
+    pub source_note: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateExternalAdvisorReview {
+    pub faculty_id: String,
+    pub body: String,
+    pub source_note: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EditExternalReview {
+    pub body: String,
+    pub source_note: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AdminExternalCourseReview {
+    pub id: String,
+    pub course_id: String,
+    pub course_code: String,
+    pub course_name: String,
+    pub offering_id: Option<String>,
+    pub body: String,
+    pub source_note: Option<String>,
+    pub added_by: String,
+    pub added_by_display_name: String,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AdminExternalAdvisorReview {
+    pub id: String,
+    pub faculty_id: String,
+    pub faculty_slug: String,
+    pub faculty_name: String,
+    pub body: String,
+    pub source_note: Option<String>,
+    pub added_by: String,
+    pub added_by_display_name: String,
+    pub score: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
+    pub created_at: DateTime<Utc>,
+}
+
+pub async fn external_course_reviews_by_course(pool: &PgPool, course_id: &str, user_id: &str, is_mod: bool) -> Result<Vec<ExternalCourseReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT ecr.id, ecr.course_id, ecr.offering_id, ecr.body, ecr.source_note,
+                  ecr.added_by, u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?",
+                  ecr.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM external_course_reviews ecr
+           JOIN users u ON u.id = ecr.added_by
+           LEFT JOIN external_course_review_votes v ON v.review_id = ecr.id
+           LEFT JOIN external_course_review_votes uv ON uv.review_id = ecr.id AND uv.user_id = $2
+           WHERE ecr.course_id = $1
+           GROUP BY ecr.id, ecr.course_id, ecr.offering_id, ecr.body, ecr.source_note,
+                    ecr.added_by, u.display_name, ecr.created_at, uv.vote
+           ORDER BY "score!" DESC, ecr.created_at DESC"#,
+        course_id, user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| ExternalCourseReview {
+        id: r.id, course_id: r.course_id, offering_id: r.offering_id,
+        body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes, user_vote: r.user_vote,
+        source_note: if is_mod { r.source_note } else { None },
+        added_by: if is_mod { Some(r.added_by) } else { None },
+        added_by_display_name: if is_mod { Some(r.display_name) } else { None },
+        created_at: r.created_at,
+    }).collect())
+}
+
+pub async fn external_advisor_reviews_by_faculty(pool: &PgPool, faculty_id: &str, user_id: &str, is_mod: bool) -> Result<Vec<ExternalAdvisorReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT ear.id, ear.faculty_id, ear.body, ear.source_note,
+                  ear.added_by, u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  uv.vote as "user_vote?",
+                  ear.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM external_advisor_reviews ear
+           JOIN users u ON u.id = ear.added_by
+           LEFT JOIN external_advisor_review_votes v ON v.review_id = ear.id
+           LEFT JOIN external_advisor_review_votes uv ON uv.review_id = ear.id AND uv.user_id = $2
+           WHERE ear.faculty_id = $1
+           GROUP BY ear.id, ear.faculty_id, ear.body, ear.source_note,
+                    ear.added_by, u.display_name, ear.created_at, uv.vote
+           ORDER BY "score!" DESC, ear.created_at DESC"#,
+        faculty_id, user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| ExternalAdvisorReview {
+        id: r.id, faculty_id: r.faculty_id,
+        body: r.body, score: r.score, upvotes: r.upvotes, downvotes: r.downvotes, user_vote: r.user_vote,
+        source_note: if is_mod { r.source_note } else { None },
+        added_by: if is_mod { Some(r.added_by) } else { None },
+        added_by_display_name: if is_mod { Some(r.display_name) } else { None },
+        created_at: r.created_at,
+    }).collect())
+}
+
+pub async fn create_external_course_review(pool: &PgPool, added_by: &str, req: CreateExternalCourseReview) -> Result<ExternalCourseReview, AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        "INSERT INTO external_course_reviews (id, course_id, offering_id, body, source_note, added_by)
+         VALUES ($1, $2, $3, $4, $5, $6)",
+        id, req.course_id, req.offering_id, req.body, req.source_note, added_by
+    )
+    .execute(pool)
+    .await?;
+
+    let course = sqlx::query!("SELECT code, name FROM courses WHERE id = $1", req.course_id)
+        .fetch_one(pool).await?;
+    crate::models::audit::logaction(pool, added_by, "CREATE_EXTERNAL_REVIEW", "external_course_review", &id,
+        Some(serde_json::json!({ "body": req.body, "course_code": course.code, "course_name": course.name }))).await?;
+
+    let rows = external_course_reviews_by_course(pool, &req.course_id, added_by, true).await?;
+    rows.into_iter().find(|r| r.id == id).ok_or(AppError::Internal)
+}
+
+pub async fn create_external_advisor_review(pool: &PgPool, added_by: &str, req: CreateExternalAdvisorReview) -> Result<ExternalAdvisorReview, AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        "INSERT INTO external_advisor_reviews (id, faculty_id, body, source_note, added_by)
+         VALUES ($1, $2, $3, $4, $5)",
+        id, req.faculty_id, req.body, req.source_note, added_by
+    )
+    .execute(pool)
+    .await?;
+
+    let fac = sqlx::query!("SELECT slug, name FROM faculty WHERE id = $1", req.faculty_id)
+        .fetch_one(pool).await?;
+    crate::models::audit::logaction(pool, added_by, "CREATE_EXTERNAL_REVIEW", "external_advisor_review", &id,
+        Some(serde_json::json!({ "body": req.body, "faculty_slug": fac.slug, "faculty_name": fac.name }))).await?;
+
+    let rows = external_advisor_reviews_by_faculty(pool, &req.faculty_id, added_by, true).await?;
+    rows.into_iter().find(|r| r.id == id).ok_or(AppError::Internal)
+}
+
+pub async fn delete_external_course_review(pool: &PgPool, id: &str, user_id: &str) -> Result<(), AppError> {
+    let review = sqlx::query!(
+        r#"SELECT ecr.body, c.code as course_code, c.name as course_name
+           FROM external_course_reviews ecr
+           JOIN courses c ON c.id = ecr.course_id
+           WHERE ecr.id = $1"#,
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if review.is_none() { return Err(AppError::NotFound); }
+
+    sqlx::query!("DELETE FROM external_course_reviews WHERE id = $1", id)
+        .execute(pool)
+        .await?;
+
+    let prev = review.map(|r| serde_json::json!({ "body": r.body, "course_code": r.course_code, "course_name": r.course_name }));
+    crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "external_course_review", id, prev).await?;
+    Ok(())
+}
+
+pub async fn delete_external_advisor_review(pool: &PgPool, id: &str, user_id: &str) -> Result<(), AppError> {
+    let review = sqlx::query!(
+        r#"SELECT ear.body, f.slug as faculty_slug, f.name as faculty_name
+           FROM external_advisor_reviews ear
+           JOIN faculty f ON f.id = ear.faculty_id
+           WHERE ear.id = $1"#,
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if review.is_none() { return Err(AppError::NotFound); }
+
+    sqlx::query!("DELETE FROM external_advisor_reviews WHERE id = $1", id)
+        .execute(pool)
+        .await?;
+
+    let prev = review.map(|r| serde_json::json!({ "body": r.body, "faculty_slug": r.faculty_slug, "faculty_name": r.faculty_name }));
+    crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "external_advisor_review", id, prev).await?;
+    Ok(())
+}
+
+pub async fn edit_external_course_review(pool: &PgPool, id: &str, user_id: &str, req: EditExternalReview) -> Result<ExternalCourseReview, AppError> {
+    let row = sqlx::query!(
+        "UPDATE external_course_reviews SET body = $1, source_note = $2 WHERE id = $3 RETURNING id, course_id",
+        req.body, req.source_note, id
+    ).fetch_optional(pool).await?.ok_or(AppError::NotFound)?;
+    let rows = external_course_reviews_by_course(pool, &row.course_id, user_id, true).await?;
+    rows.into_iter().find(|r| r.id == id).ok_or(AppError::Internal)
+}
+
+pub async fn edit_external_advisor_review(pool: &PgPool, id: &str, user_id: &str, req: EditExternalReview) -> Result<ExternalAdvisorReview, AppError> {
+    let row = sqlx::query!(
+        "UPDATE external_advisor_reviews SET body = $1, source_note = $2 WHERE id = $3 RETURNING id, faculty_id",
+        req.body, req.source_note, id
+    ).fetch_optional(pool).await?.ok_or(AppError::NotFound)?;
+    let rows = external_advisor_reviews_by_faculty(pool, &row.faculty_id, user_id, true).await?;
+    rows.into_iter().find(|r| r.id == id).ok_or(AppError::Internal)
+}
+
+pub async fn all_external_course_reviews(pool: &PgPool) -> Result<Vec<AdminExternalCourseReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT ecr.id, ecr.course_id, c.code as course_code, c.name as course_name,
+                  ecr.offering_id, ecr.body, ecr.source_note,
+                  ecr.added_by, u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  ecr.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM external_course_reviews ecr
+           JOIN courses c ON c.id = ecr.course_id
+           JOIN users u ON u.id = ecr.added_by
+           LEFT JOIN external_course_review_votes v ON v.review_id = ecr.id
+           GROUP BY ecr.id, ecr.course_id, c.code, c.name, ecr.offering_id, ecr.body, ecr.source_note,
+                    ecr.added_by, u.display_name, ecr.created_at
+           ORDER BY ecr.created_at DESC"#
+    ).fetch_all(pool).await?;
+    Ok(rows.into_iter().map(|r| AdminExternalCourseReview {
+        id: r.id, course_id: r.course_id, course_code: r.course_code, course_name: r.course_name,
+        offering_id: r.offering_id, body: r.body, source_note: r.source_note,
+        added_by: r.added_by, added_by_display_name: r.display_name,
+        score: r.score, upvotes: r.upvotes, downvotes: r.downvotes, created_at: r.created_at,
+    }).collect())
+}
+
+pub async fn all_external_advisor_reviews(pool: &PgPool) -> Result<Vec<AdminExternalAdvisorReview>, AppError> {
+    let rows = sqlx::query!(
+        r#"SELECT ear.id, ear.faculty_id, f.slug as faculty_slug, f.name as faculty_name,
+                  ear.body, ear.source_note,
+                  ear.added_by, u.display_name,
+                  COALESCE(SUM(v.vote), 0)::bigint as "score!",
+                  COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0)::bigint as "upvotes!",
+                  COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0)::bigint as "downvotes!",
+                  ear.created_at as "created_at!: chrono::DateTime<chrono::Utc>"
+           FROM external_advisor_reviews ear
+           JOIN faculty f ON f.id = ear.faculty_id
+           JOIN users u ON u.id = ear.added_by
+           LEFT JOIN external_advisor_review_votes v ON v.review_id = ear.id
+           GROUP BY ear.id, ear.faculty_id, f.slug, f.name, ear.body, ear.source_note,
+                    ear.added_by, u.display_name, ear.created_at
+           ORDER BY ear.created_at DESC"#
+    ).fetch_all(pool).await?;
+    Ok(rows.into_iter().map(|r| AdminExternalAdvisorReview {
+        id: r.id, faculty_id: r.faculty_id, faculty_slug: r.faculty_slug, faculty_name: r.faculty_name,
+        body: r.body, source_note: r.source_note,
+        added_by: r.added_by, added_by_display_name: r.display_name,
+        score: r.score, upvotes: r.upvotes, downvotes: r.downvotes, created_at: r.created_at,
+    }).collect())
+}
+
 pub async fn delete_legacy_advisor_review(pool: &PgPool, id: &str, user_id: &str) -> Result<(), AppError> {
     let review = sqlx::query!(
         "SELECT body FROM legacy_advisor_reviews WHERE id = $1",
@@ -723,5 +1028,51 @@ pub async fn delete_legacy_advisor_review(pool: &PgPool, id: &str, user_id: &str
 
     let prev = review.map(|r| serde_json::json!({ "body": r.body }));
     crate::models::audit::logaction(pool, user_id, "DELETE_REVIEW", "legacy_advisor_review", id, prev).await?;
+    Ok(())
+}
+
+pub async fn upsert_external_course_vote(pool: &PgPool, review_id: &str, user_id: &str, value: i16) -> Result<(), AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        r#"INSERT INTO external_course_review_votes (id, user_id, review_id, vote)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, review_id) DO UPDATE SET vote = EXCLUDED.vote"#,
+        id, user_id, review_id, value
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete_external_course_vote(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        "DELETE FROM external_course_review_votes WHERE user_id = $1 AND review_id = $2",
+        user_id, review_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn upsert_external_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str, value: i16) -> Result<(), AppError> {
+    let id = Ulid::new().to_string();
+    sqlx::query!(
+        r#"INSERT INTO external_advisor_review_votes (id, user_id, review_id, vote)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, review_id) DO UPDATE SET vote = EXCLUDED.vote"#,
+        id, user_id, review_id, value
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete_external_advisor_vote(pool: &PgPool, review_id: &str, user_id: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        "DELETE FROM external_advisor_review_votes WHERE user_id = $1 AND review_id = $2",
+        user_id, review_id
+    )
+    .execute(pool)
+    .await?;
     Ok(())
 }

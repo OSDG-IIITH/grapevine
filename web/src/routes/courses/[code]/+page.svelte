@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews } from '$lib/api';
-	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission, LegacyCourseReview } from '$lib/types';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews, getExternalCourseReviews, deleteExternalCourseReview, editExternalCourseReview, voteExternalCourseReview, unvoteExternalCourseReview } from '$lib/api';
+	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission, LegacyCourseReview, ExternalCourseReview } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
@@ -15,6 +15,9 @@
 	import Combobox from '$lib/components/Combobox.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import CourseReportModal from '$lib/components/CourseReportModal.svelte';
+	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import IconPencil from '@tabler/icons-svelte/icons/pencil';
+	import IconTrash from '@tabler/icons-svelte/icons/trash';
 
 	const code = $derived($page.params.code);
 
@@ -22,6 +25,8 @@
 	let reviews = $state<CourseReview[]>([]);
 	let proposedReviews = $state<CourseReview[]>([]);
 	let legacyreviews = $state<LegacyCourseReview[]>([]);
+	let externalreviews = $state<ExternalCourseReview[]>([]);
+	let externalmodalopen = $state(false);
 	let tab = $state('all');
 	let error = $state('');
 	let reportopen = $state(false);
@@ -69,6 +74,19 @@
 
 	let confirmdel = $state(false);
 	let deleting = $state(false);
+	let confirmdelext = $state(false);
+	let delextid = $state('');
+	let editingext = $state<Record<string, { body: string; source_note: string }>>({});
+
+	async function saveeditcourse(id: string) {
+		const data = editingext[id];
+		if (!data) return;
+		const updated = await editExternalCourseReview(id, { body: data.body, source_note: data.source_note || undefined });
+		if (updated) {
+			externalreviews = externalreviews.map(e => e.id === id ? updated : e);
+			delete editingext[id];
+		}
+	}
 
 	async function doDelete() {
 		if (!course) return;
@@ -129,19 +147,21 @@
 		reviews = [];
 		proposedReviews = [];
 		legacyreviews = [];
+		externalreviews = [];
 		reportopen = false;
 		proposing = false;
 		tab = 'all';
 		editing = false;
 
 		const decoded = decodeURIComponent(c);
-		Promise.all([getCourse(decoded), getCourseReviews(decoded), getProposedReviews(decoded), getLegacyCourseReviews(decoded)])
-			.then(([d, r, pr, lr]) => {
+		Promise.all([getCourse(decoded), getCourseReviews(decoded), getProposedReviews(decoded), getLegacyCourseReviews(decoded), getExternalCourseReviews(decoded)])
+			.then(([d, r, pr, lr, er]) => {
 				if (!d) { error = 'Course not found.'; return; }
 				course = d;
 				reviews = r ?? [];
 				proposedReviews = pr ?? [];
 				legacyreviews = lr ?? [];
+				externalreviews = er ?? [];
 			});
 
 		if (!facultyloaded) {
@@ -285,9 +305,23 @@
 		]) : {}
 	);
 
+	async function handlevotecourse(id: string, newvote: 0 | 1 | -1) {
+		if (!$currentUser) return;
+		const r = externalreviews.find(e => e.id === id);
+		if (!r) return;
+		const prev = (r.user_vote ?? 0) as 0 | 1 | -1;
+		const ok = newvote === 0 ? await unvoteExternalCourseReview(id) : await voteExternalCourseReview(id, newvote as 1 | -1);
+		if (ok) externalreviews = externalreviews.map(e => e.id === id ? {
+			...e, user_vote: newvote || null,
+			upvotes: e.upvotes + (newvote === 1 ? 1 : 0) - (prev === 1 ? 1 : 0),
+			downvotes: e.downvotes + (newvote === -1 ? 1 : 0) - (prev === -1 ? 1 : 0),
+			score: e.score + newvote - prev
+		} : e);
+	}
+
 	const tabs = $derived(
 		course ? [
-			{ id: 'all', label: 'All', count: reviews.length + proposedReviews.length + legacyreviews.length },
+			{ id: 'all', label: 'All', count: reviews.length + proposedReviews.length + legacyreviews.length + externalreviews.length },
 			...course.offerings.map((o) => ({
 				id: o.id,
 				label: o.code,
@@ -295,6 +329,9 @@
 			})),
 			...(course.proposed_offerings.length > 0 || proposedReviews.length > 0 || legacyreviews.length > 0 ? [
 				{ id: 'other', label: 'Other', count: proposedReviews.length + legacyreviews.length }
+			] : []),
+			...($currentUser?.is_admin || externalreviews.length > 0 ? [
+				{ id: 'external', label: 'External', count: externalreviews.length }
 			] : [])
 		] : []
 	);
@@ -302,6 +339,7 @@
 	const shown = $derived(
 		tab === 'all' ? [...reviews, ...proposedReviews, ...legacyreviews].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) :
 		tab === 'other' ? [...proposedReviews, ...legacyreviews] :
+		tab === 'external' ? [] :
 		reviews.filter((r) => r.offering_id === tab)
 	);
 	const selectedoffering = $derived(course && tab !== 'all' && tab !== 'other' ? course.offerings.find((o) => o.id === tab) : null);
@@ -767,8 +805,107 @@
 			</div>
 		{/if}
 
+		{#snippet extcard(r: import('$lib/types').ExternalCourseReview)}
+			{@const fmtdate = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+			{@const editing = !!editingext[r.id]}
+			<div class="group relative flex flex-col gap-[10px] overflow-hidden rounded-[10px] border border-[var(--border)] p-[14px_16px] transition-[background,border-color] duration-[160ms]"
+				style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107,143,111,0.03), transparent 42%);">
+				<div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[180ms] group-hover:opacity-100"
+					style="background: radial-gradient(ellipse 220px 110px at 100% 0%, rgba(107,143,111,0.05), transparent 70%);"></div>
+				<div class="flex min-w-0 items-center gap-2">
+					<div class="flex min-w-0 flex-wrap items-center gap-[5px] text-[12px] text-[var(--fg-3)]">
+						<span class="text-[13px] font-medium text-[var(--fg-2)]">External Review</span>
+						<span class="text-[var(--fg-4)]">·</span>
+						<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{fmtdate}</span>
+					</div>
+				</div>
+				{#if editing}
+					<textarea
+						bind:value={editingext[r.id].body}
+						rows={4}
+						class="w-full resize-none rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[13px] leading-[1.55] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+					></textarea>
+					<input
+						bind:value={editingext[r.id].source_note}
+						placeholder="source note (optional)"
+						class="w-full rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+						style="font-family: var(--mono);"
+					/>
+					<div class="flex items-center gap-2">
+						<button type="button" onclick={() => saveeditcourse(r.id)}
+							class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium"
+							style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
+						>Save</button>
+						<button type="button" onclick={() => { delete editingext[r.id]; }}
+							class="px-2 py-1 text-[12px] text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+						>Cancel</button>
+					</div>
+				{:else}
+					<div class="flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]" style="white-space: pre-wrap; text-wrap: pretty;">{r.body}</div>
+					<div class="mt-auto flex items-center gap-[2px]">
+						<button type="button" aria-label="Upvote"
+							onclick={() => handlevotecourse(r.id, r.user_vote === 1 ? 0 : 1)}
+							class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {r.user_vote === 1 ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+							style="font-family: var(--mono);"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+							<span class="min-w-[14px] text-left">{r.upvotes}</span>
+						</button>
+						<button type="button" aria-label="Downvote"
+							onclick={() => handlevotecourse(r.id, r.user_vote === -1 ? 0 : -1)}
+							class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {r.user_vote === -1 ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+							style="font-family: var(--mono);"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+							<span class="min-w-[14px] text-left">{r.downvotes}</span>
+						</button>
+						{#if r.added_by_display_name}
+							<button type="button" aria-label="Edit external review"
+								onclick={() => { editingext[r.id] = { body: r.body, source_note: r.source_note ?? '' }; }}
+								class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--fg)]"
+							>
+								<IconPencil size={13} stroke={1.7} />
+							</button>
+							<button type="button" aria-label="Delete external review"
+								onclick={() => { delextid = r.id; confirmdelext = true; }}
+								class="relative z-[2] inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--danger)]"
+							>
+								<IconTrash size={13} stroke={1.7} />
+							</button>
+						{/if}
+					</div>
+					{#if r.added_by_display_name}
+						<div class="flex flex-wrap items-center gap-[6px]">
+							{#if r.source_note}<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.source_note}</span>{/if}
+							<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]">by {r.added_by_display_name}</span>
+						</div>
+					{/if}
+				{/if}
+			</div>
+		{/snippet}
+
 		<!-- reviews -->
-		{#if shown.length === 0}
+		{#if tab === 'external'}
+			{#if $currentUser?.is_admin}
+				<div class="mb-3 flex justify-end">
+					<button
+						type="button"
+						onclick={() => externalmodalopen = true}
+						class="inline-flex items-center gap-[6px] rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[14px] py-[7px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+					>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+						Add review
+					</button>
+				</div>
+			{/if}
+			{#if externalreviews.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">No external reviews yet.</div>
+			{:else}
+				<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
+					{#each externalreviews as r (r.id)}{@render extcard(r)}{/each}
+				</div>
+			{/if}
+		{:else if shown.length === 0 && (tab !== 'all' || externalreviews.length === 0)}
 			<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
 				{#if tab === 'other'}
 					No reviews yet.
@@ -795,10 +932,15 @@
 						}}
 					/>
 				{/each}
+				{#if tab === 'all'}
+					{#each externalreviews as r (r.id)}{@render extcard(r)}{/each}
+				{/if}
 			</div>
 		{/if}
 
-		<Pager page={reviewpage} totalpages={reviewpages} totalitems={shown.length} onchange={(p) => (reviewpage = p)} />
+		{#if tab !== 'external'}
+			<Pager page={reviewpage} totalpages={reviewpages} totalitems={shown.length} onchange={(p) => (reviewpage = p)} />
+		{/if}
 
 	{:else}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
@@ -807,6 +949,14 @@
 
 {#if reportopen && course}
 	<CourseReportModal {course} faculty={allfaculty} initialofferingid={selectedoffering?.id} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) reportopen = false; }} onsubmit={submitCourseReport} />
+{/if}
+
+{#if externalmodalopen && course}
+	<ExternalReviewModal
+		coursecode={course.code}
+		oncreate={(r) => { externalreviews = [r as ExternalCourseReview, ...externalreviews]; externalmodalopen = false; }}
+		onclose={() => { externalmodalopen = false; }}
+	/>
 {/if}
 
 {#if confirmdel}
@@ -827,6 +977,22 @@
 					class="rounded-[7px] px-[14px] py-2 text-[13px] font-medium text-white transition-colors disabled:opacity-60"
 					style="background: var(--danger);"
 				>{deleting ? 'Deleting…' : 'Delete'}</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if confirmdelext}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
+		<div class="w-full max-w-[340px] rounded-[12px] border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-xl">
+			<p class="mb-1 text-[15px] font-medium text-[var(--fg)]">Delete external review?</p>
+			<p class="mb-5 text-[13px] text-[var(--fg-3)]">This action cannot be undone.</p>
+			<div class="flex justify-end gap-2">
+				<button type="button" onclick={() => { confirmdelext = false; delextid = ''; }} class="rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-4)]">Cancel</button>
+				<button type="button" onclick={async () => {
+					if (await deleteExternalCourseReview(delextid)) externalreviews = externalreviews.filter(e => e.id !== delextid);
+					confirmdelext = false; delextid = '';
+				}} class="rounded-[7px] px-[14px] py-2 text-[13px] font-medium text-white" style="background: var(--danger);">Delete</button>
 			</div>
 		</div>
 	</div>

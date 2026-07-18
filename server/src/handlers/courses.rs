@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::Deserialize;
 use crate::{
-    auth::session::{AuthUser, MaybeAuth},
+    auth::session::{AuthUser, MaybeAuth, MaybeAuthUser},
     error::AppError,
     models::{audit, course, review, offering::Season},
     state::AppState,
@@ -117,6 +117,16 @@ pub async fn legacy_reviews(
 ) -> Result<Json<Vec<review::LegacyCourseReview>>, AppError> {
     let id = course::id_by_code(&s.pool, &code).await?;
     Ok(Json(review::legacy_course_reviews_by_course(&s.pool, &id, &user_id).await?))
+}
+
+pub async fn external_reviews(
+    State(s): State<AppState>,
+    MaybeAuthUser(user): MaybeAuthUser,
+    Path(code): Path<String>,
+) -> Result<Json<Vec<review::ExternalCourseReview>>, AppError> {
+    let id = course::id_by_code(&s.pool, &code).await?;
+    let (user_id, is_mod) = user.as_ref().map_or(("", false), |u| (u.id.as_str(), u.is_admin));
+    Ok(Json(review::external_course_reviews_by_course(&s.pool, &id, user_id, is_mod).await?))
 }
 
 #[derive(Deserialize)]

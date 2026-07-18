@@ -12,13 +12,17 @@
 		getDeletedOfferings, restoreOffering,
 		getAuditLogs, restoreReview,
 		getModerators, addCasModerator, addLocalModerator, demoteModerator,
+		getAdminExternalCourseReviews, getAdminExternalAdvisorReviews,
+		deleteExternalCourseReview, deleteExternalAdvisorReview,
+		editExternalCourseReview, editExternalAdvisorReview,
 		type Moderator
 	} from '$lib/api';
 	import { currentUser } from '$lib/stores';
-	import type { FlagResponse, ReportResponse, ProposedOfferingResponse, AuditLog } from '$lib/types';
+	import type { FlagResponse, ReportResponse, ProposedOfferingResponse, AuditLog, AdminExternalCourseReview, AdminExternalAdvisorReview } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 	import IconArrowBackUp from '@tabler/icons-svelte/icons/arrow-back-up';
+	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
 
 	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 
@@ -57,7 +61,48 @@
 	};
 	let loading = $state(true);
 	let error = $state(false);
-	let activetab = $state<'reports' | 'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators'>('audit');
+	let activetab = $state<'reports' | 'flagged' | 'proposed' | 'deleted' | 'audit' | 'moderators' | 'external'>('audit');
+	let externalmodalopen = $state(false);
+	let extcoursereviews = $state<AdminExternalCourseReview[]>([]);
+	let extadvisorreviews = $state<AdminExternalAdvisorReview[]>([]);
+	let extsearch = $state('');
+	let exteditingid = $state<string | null>(null);
+	let exteditbody = $state('');
+	let exteditsourcenote = $state('');
+
+	type ExtItem = ({ kind: 'course' } & AdminExternalCourseReview) | ({ kind: 'advisor' } & AdminExternalAdvisorReview);
+
+	const extall = $derived<ExtItem[]>([
+		...extcoursereviews.map(r => ({ kind: 'course' as const, ...r })),
+		...extadvisorreviews.map(r => ({ kind: 'advisor' as const, ...r })),
+	].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+
+	const extfiltered = $derived(extsearch.trim()
+		? extall.filter(r => {
+			const q = extsearch.toLowerCase();
+			const context = r.kind === 'course' ? `${r.course_code} ${r.course_name}` : `${r.faculty_name}`;
+			return r.body.toLowerCase().includes(q) || (r.source_note ?? '').toLowerCase().includes(q) || context.toLowerCase().includes(q) || r.added_by_display_name.toLowerCase().includes(q);
+		})
+		: extall);
+
+	async function deleteextreview(kind: 'course' | 'advisor', id: string) {
+		const ok = kind === 'course' ? await deleteExternalCourseReview(id) : await deleteExternalAdvisorReview(id);
+		if (ok) {
+			if (kind === 'course') extcoursereviews = extcoursereviews.filter(r => r.id !== id);
+			else extadvisorreviews = extadvisorreviews.filter(r => r.id !== id);
+		}
+	}
+
+	async function saveextedit(kind: 'course' | 'advisor', id: string) {
+		const updated = kind === 'course'
+			? await editExternalCourseReview(id, { body: exteditbody, source_note: exteditsourcenote || undefined })
+			: await editExternalAdvisorReview(id, { body: exteditbody, source_note: exteditsourcenote || undefined });
+		if (updated) {
+			if (kind === 'course') extcoursereviews = extcoursereviews.map(r => r.id === id ? { ...r, body: updated.body, source_note: updated.source_note } : r);
+			else extadvisorreviews = extadvisorreviews.map(r => r.id === id ? { ...r, body: updated.body, source_note: updated.source_note } : r);
+			exteditingid = null;
+		}
+	}
 
 	const AUDIT_LIMIT = 20;
 
@@ -67,12 +112,12 @@
 		'CREATE_LAB', 'UPDATE_LAB', 'DELETE_LAB',
 		'CREATE_OFFERING', 'DELETE_OFFERING', 'UPDATE_OFFERING_FACULTY',
 		'APPROVE_REPORT', 'APPROVE_PROPOSED', 'REJECT_PROPOSED',
-		'DELETE_REVIEW', 'DISMISS_FLAG', 'DISMISS_REPORT',
+		'DELETE_REVIEW', 'CREATE_EXTERNAL_REVIEW', 'DISMISS_FLAG', 'DISMISS_REPORT',
 		'RESTORE_COURSE', 'RESTORE_FACULTY', 'RESTORE_LAB',
 		'RESTORE_REVIEW', 'RESTORE_OFFERING',
 		'ADD_MODERATOR', 'REMOVE_MODERATOR', 'EXPORT_SEED_DATA',
 	];
-	const AUDIT_TARGET_TYPES = ['course', 'faculty', 'lab', 'offering', 'course_review', 'advisor_review', 'user', 'flag', 'database'];
+	const AUDIT_TARGET_TYPES = ['course', 'faculty', 'lab', 'offering', 'course_review', 'advisor_review', 'external_course_review', 'external_advisor_review', 'user', 'flag', 'database'];
 
 	async function loadauditlogs() {
 		auditloading = true;
@@ -95,10 +140,11 @@
 	}
 
 	onMount(async () => {
-		const [flags, reportitems, props, del, delfac, dellabs, deloff, logs, mods] = await Promise.all([
+		const [flags, reportitems, props, del, delfac, dellabs, deloff, logs, mods, ecr, ear] = await Promise.all([
 			getFlags(), getReports(), getProposedOfferings(),
 			getDeletedCourses(), getDeletedFaculty(), getDeletedLabs(), getDeletedOfferings(),
-			getAuditLogs(AUDIT_LIMIT, 0), getModerators()
+			getAuditLogs(AUDIT_LIMIT, 0), getModerators(),
+			getAdminExternalCourseReviews(), getAdminExternalAdvisorReviews()
 		]);
 		if (flags === null || reportitems === null || props === null) error = true;
 		else {
@@ -115,6 +161,8 @@
 				audithasmore = logs.has_more;
 			}
 			moderators = mods ?? [];
+			extcoursereviews = ecr ?? [];
+			extadvisorreviews = ear ?? [];
 		}
 		loading = false;
 	});
@@ -211,7 +259,7 @@
 			CREATE_LAB: 'created lab', UPDATE_LAB: 'updated lab', DELETE_LAB: 'deleted lab',
 			CREATE_OFFERING: 'created offering', DELETE_OFFERING: 'deleted offering', UPDATE_OFFERING_FACULTY: 'updated offering faculty', APPROVE_REPORT: 'approved instructor change',
 			APPROVE_PROPOSED: 'approved proposed', REJECT_PROPOSED: 'rejected proposed',
-			DELETE_REVIEW: 'deleted a review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
+			DELETE_REVIEW: 'deleted a review', CREATE_EXTERNAL_REVIEW: 'added external review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
 			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
 			RESTORE_REVIEW: 'restored a review', RESTORE_OFFERING: 'restored offering',
 			ADD_MODERATOR: 'added moderator', REMOVE_MODERATOR: 'removed moderator',
@@ -295,7 +343,8 @@
 
 	const tablabels: Record<string, string> = {
 		audit: 'audit log', reports: 'information reports', flagged: 'flagged reviews',
-		proposed: 'proposed offerings', deleted: 'deleted', moderators: 'moderators'
+		proposed: 'proposed offerings', deleted: 'deleted', moderators: 'moderators',
+		external: 'add external review'
 	};
 
 	let tabs = $derived([
@@ -304,7 +353,8 @@
 		{ id: 'flagged', label: 'Flagged', count: items.length },
 		{ id: 'proposed', label: 'Proposed', count: proposed.length },
 		{ id: 'deleted', label: 'Deleted', count: totaldeleted },
-		{ id: 'moderators', label: 'Moderators', count: moderators.length }
+		{ id: 'moderators', label: 'Moderators', count: moderators.length },
+		{ id: 'external', label: 'External', count: 0 }
 	]);
 </script>
 
@@ -458,7 +508,7 @@
 							</div>
 							{#if log.previous_state}
 								{@const hasdiff = 'before' in log.previous_state && 'after' in log.previous_state}
-								{@const isreview = log.target_type === 'course_review' || log.target_type === 'advisor_review'}
+								{@const isreview = log.target_type === 'course_review' || log.target_type === 'advisor_review' || log.target_type === 'external_course_review' || log.target_type === 'external_advisor_review'}
 								{#if hasdiff}
 									{@const before = log.previous_state['before'] as Record<string, unknown>}
 									{@const after = log.previous_state['after'] as Record<string, unknown>}
@@ -795,6 +845,89 @@
 				{/each}
 			{/if}
 
+		{:else if activetab === 'external'}
+			<div class="mb-4 flex items-center gap-3">
+				<input
+					bind:value={extsearch}
+					placeholder="search body, source, course, faculty…"
+					class="flex-1 rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[13px] text-[var(--fg-2)] outline-none placeholder:text-[var(--fg-4)] focus:border-[var(--accent-2)]"
+				/>
+				<button
+					type="button"
+					onclick={() => externalmodalopen = true}
+					class="inline-flex shrink-0 items-center gap-[6px] rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[14px] py-2 text-[13px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+				>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+					Add
+				</button>
+			</div>
+			{#if extfiltered.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">{extsearch ? 'No results.' : 'No external reviews yet.'}</div>
+			{:else}
+				<div class="flex flex-col gap-[8px]">
+					{#each extfiltered as r (r.id)}
+						{@const fmtdate = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+						{@const isediting = exteditingid === r.id}
+						<div class="overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] p-[14px_16px]">
+							<div class="mb-[8px] flex flex-wrap items-center gap-[8px]">
+								{#if r.kind === 'course'}
+									<a href="{base}/courses/{r.course_code}" class="rounded-[5px] border border-[var(--border-strong)] px-[7px] py-[2px] text-[11px] text-[var(--fg-2)] transition-colors hover:text-[var(--accent-2)]" style="font-family: var(--mono);">{r.course_code}</a>
+									<span class="text-[12px] text-[var(--fg-3)]">{r.course_name}</span>
+								{:else}
+									<a href="{base}/faculty/{r.faculty_slug}" class="text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:text-[var(--accent-2)]">{r.faculty_name}</a>
+									<span class="rounded-[4px] border border-[var(--border-strong)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]">advisor</span>
+								{/if}
+								<span class="ml-auto text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">{fmtdate}</span>
+							</div>
+							{#if isediting}
+								<textarea
+									bind:value={exteditbody}
+									rows={4}
+									class="mb-2 w-full resize-none rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[13px] leading-[1.55] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+								></textarea>
+								<input
+									bind:value={exteditsourcenote}
+									placeholder="source note (optional)"
+									class="mb-3 w-full rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+									style="font-family: var(--mono);"
+								/>
+								<div class="flex items-center gap-2">
+									<button type="button" onclick={() => saveextedit(r.kind, r.id)}
+										class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium"
+										style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
+									>Save</button>
+									<button type="button" onclick={() => exteditingid = null}
+										class="px-2 py-1 text-[12px] text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+									>Cancel</button>
+								</div>
+							{:else}
+								<p class="mb-[10px] text-[13px] leading-[1.55] text-[var(--fg-2)]" style="white-space: pre-wrap; text-wrap: pretty;">{r.body}</p>
+								<div class="flex flex-wrap items-center gap-[8px]">
+									<div class="flex flex-wrap items-center gap-[6px]">
+										{#if r.source_note}<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.source_note}</span>{/if}
+										<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]">by {r.added_by_display_name}</span>
+									</div>
+									<div class="ml-auto flex items-center gap-[4px]">
+										<button type="button" aria-label="Edit"
+											onclick={() => { exteditingid = r.id; exteditbody = r.body; exteditsourcenote = r.source_note ?? ''; }}
+											class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+										>
+											<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+										</button>
+										<button type="button" aria-label="Delete"
+											onclick={() => withconfirm('Delete this external review?', () => deleteextreview(r.kind, r.id), 'Delete', true)}
+											class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] text-[var(--fg-3)] transition-colors hover:text-[var(--danger)]"
+										>
+											<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+										</button>
+									</div>
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+
 		{/if}
 			</div><!-- flex-1 content -->
 		</div><!-- sidebar+content flex -->
@@ -828,4 +961,16 @@
 			</div>
 		</div>
 	</div>
+{/if}
+
+{#if externalmodalopen}
+	<ExternalReviewModal
+		oncreate={async () => {
+			externalmodalopen = false;
+			const [ecr, ear] = await Promise.all([getAdminExternalCourseReviews(), getAdminExternalAdvisorReviews()]);
+			extcoursereviews = ecr ?? extcoursereviews;
+			extadvisorreviews = ear ?? extadvisorreviews;
+		}}
+		onclose={() => { externalmodalopen = false; }}
+	/>
 {/if}

@@ -178,6 +178,66 @@ pub async fn flag_advisor_review(
     Ok(StatusCode::NO_CONTENT)
 }
 
+pub async fn create_external_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<CreateExternalCourseReview>,
+) -> Result<(StatusCode, Json<ExternalCourseReview>), AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    let r = review::create_external_course_review(&s.pool, &user.id, body).await?;
+    Ok((StatusCode::CREATED, Json(r)))
+}
+
+pub async fn edit_external_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<review::EditExternalReview>,
+) -> Result<Json<ExternalCourseReview>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(review::edit_external_course_review(&s.pool, &id, &user.id, body).await?))
+}
+
+pub async fn delete_external_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    review::delete_external_course_review(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn create_external_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(body): Json<CreateExternalAdvisorReview>,
+) -> Result<(StatusCode, Json<ExternalAdvisorReview>), AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    let r = review::create_external_advisor_review(&s.pool, &user.id, body).await?;
+    Ok((StatusCode::CREATED, Json(r)))
+}
+
+pub async fn edit_external_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<review::EditExternalReview>,
+) -> Result<Json<ExternalAdvisorReview>, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    Ok(Json(review::edit_external_advisor_review(&s.pool, &id, &user.id, body).await?))
+}
+
+pub async fn delete_external_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    review::delete_external_advisor_review(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn delete_legacy_course_review(
     State(s): State<AppState>,
     user: AuthUser,
@@ -195,5 +255,49 @@ pub async fn delete_legacy_advisor_review(
 ) -> Result<StatusCode, AppError> {
     if !user.is_admin { return Err(AppError::Forbidden); }
     review::delete_legacy_advisor_review(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn vote_external_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<VoteBody>,
+) -> Result<StatusCode, AppError> {
+    if body.value != 1 && body.value != -1 {
+        return Err(AppError::BadRequest("value must be 1 or -1".into()));
+    }
+    review::upsert_external_course_vote(&s.pool, &id, &user.id, body.value).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn unvote_external_course_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    review::delete_external_course_vote(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn vote_external_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Json(body): Json<VoteBody>,
+) -> Result<StatusCode, AppError> {
+    if body.value != 1 && body.value != -1 {
+        return Err(AppError::BadRequest("value must be 1 or -1".into()));
+    }
+    review::upsert_external_advisor_vote(&s.pool, &id, &user.id, body.value).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn unvote_external_advisor_review(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    review::delete_external_advisor_vote(&s.pool, &id, &user.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }

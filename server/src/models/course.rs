@@ -119,7 +119,7 @@ pub async fn list(pool: &PgPool, q: Option<&str>, instructor: Option<&str>, sort
                   COALESCE(AVG(r.teaching::float8), 0.0)::float8 as "teaching!: f64",
                   COALESCE(AVG(r.grading::float8), 0.0)::float8 as "grading!: f64",
                   COALESCE(AVG(r.content::float8), 0.0)::float8 as "content!: f64",
-                  (COUNT(r.id) + COALESCE((SELECT COUNT(*) FROM legacy_course_reviews lr WHERE lr.course_id = c.id), 0))::int8 as "reviews_count!: i64"
+                  (COUNT(r.id) + COALESCE((SELECT COUNT(*) FROM legacy_course_reviews lr WHERE lr.course_id = c.id), 0) + COALESCE((SELECT COUNT(*) FROM external_course_reviews er WHERE er.course_id = c.id), 0))::int8 as "reviews_count!: i64"
            FROM courses c
            LEFT JOIN offerings o ON o.course_id = c.id AND o.approved = true AND o.deleted_at IS NULL
            LEFT JOIN course_reviews r ON r.offering_id = o.id AND r.deleted_at IS NULL

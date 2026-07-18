@@ -4,7 +4,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use crate::{auth::session::{AuthUser, MaybeAuth}, error::AppError, models::{audit, faculty, review}, state::AppState};
+use crate::{auth::session::{AuthUser, MaybeAuth, MaybeAuthUser}, error::AppError, models::{audit, faculty, review}, state::AppState};
 
 pub async fn create(
     State(s): State<AppState>,
@@ -104,4 +104,14 @@ pub async fn legacy_reviews(
 ) -> Result<Json<Vec<review::LegacyAdvisorReview>>, AppError> {
     let fac_id = faculty::id_by_slug(&s.pool, &slug).await?;
     Ok(Json(review::legacy_advisor_reviews_by_faculty(&s.pool, &fac_id, &user_id).await?))
+}
+
+pub async fn external_reviews(
+    State(s): State<AppState>,
+    MaybeAuthUser(user): MaybeAuthUser,
+    Path(slug): Path<String>,
+) -> Result<Json<Vec<review::ExternalAdvisorReview>>, AppError> {
+    let fac_id = faculty::id_by_slug(&s.pool, &slug).await?;
+    let (user_id, is_mod) = user.as_ref().map_or(("", false), |u| (u.id.as_str(), u.is_admin));
+    Ok(Json(review::external_advisor_reviews_by_faculty(&s.pool, &fac_id, user_id, is_mod).await?))
 }

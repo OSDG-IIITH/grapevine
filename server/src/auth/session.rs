@@ -24,6 +24,9 @@ pub struct VerifiedUser {
 /// extractor for public endpoints that want user_vote when a session exists
 pub struct MaybeAuth(pub String);
 
+/// extractor for public endpoints that need to know admin status when a session exists
+pub struct MaybeAuthUser(pub Option<AuthUser>);
+
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for AuthUser {
     type Rejection = AppError;
@@ -76,5 +79,22 @@ impl<S: Send + Sync> FromRequestParts<S> for MaybeAuth {
         .await
         .unwrap_or_default();
         Ok(MaybeAuth(id))
+    }
+}
+
+#[async_trait]
+impl<S: Send + Sync> FromRequestParts<S> for MaybeAuthUser {
+    type Rejection = Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Infallible> {
+        let user = async {
+            let session = Session::from_request_parts(parts, state).await.ok()?;
+            let id: String = session.get(USER_ID_KEY).await.ok()??;
+            let is_admin: bool = session.get(IS_ADMIN_KEY).await.unwrap_or(None).unwrap_or(false);
+            let verified: bool = session.get(VERIFIED_KEY).await.unwrap_or(None).unwrap_or(false);
+            Some(AuthUser { id, is_admin, verified })
+        }
+        .await;
+        Ok(MaybeAuthUser(user))
     }
 }

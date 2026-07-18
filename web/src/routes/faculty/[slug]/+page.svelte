@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews } from '$lib/api';
+	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews, getExternalAdvisorReviews, deleteExternalAdvisorReview, editExternalAdvisorReview, voteExternalAdvisorReview, unvoteExternalAdvisorReview } from '$lib/api';
 	import { toast } from 'svelte-sonner';
-	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean, LegacyAdvisorReview } from '$lib/types';
+	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean, LegacyAdvisorReview, ExternalAdvisorReview } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS, COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
 	import Crumbs from '$lib/components/Crumbs.svelte';
@@ -14,12 +14,17 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import ReportModal from '$lib/components/ReportModal.svelte';
+	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import IconPencil from '@tabler/icons-svelte/icons/pencil';
+	import IconTrash from '@tabler/icons-svelte/icons/trash';
 
 	const slug = $derived($page.params.slug);
 
 	let faculty = $state<FacultyDetail | null>(null);
 	let advisorreviews = $state<AdvisorReview[]>([]);
 	let legacyadvisorreviews = $state<LegacyAdvisorReview[]>([]);
+	let externaladvisorreviews = $state<ExternalAdvisorReview[]>([]);
+	let externalmodalopen = $state(false);
 	let instructorreviews = $state<(CourseReview & { offeringcode: string; coursecode: string })[]>([]);
 	let tab = $state('advisor');
 	let error = $state('');
@@ -53,6 +58,7 @@
 		faculty = null;
 		advisorreviews = [];
 		legacyadvisorreviews = [];
+		externaladvisorreviews = [];
 		instructorreviews = [];
 		reportopen = false;
 		tab = 'advisor';
@@ -75,6 +81,7 @@
 
 		getAdvisorReviews(s).then((r) => { if (r) advisorreviews = r; });
 		getLegacyAdvisorReviews(s).then((r) => { if (r) legacyadvisorreviews = r; });
+		getExternalAdvisorReviews(s).then((r) => { if (r) externaladvisorreviews = r; });
 	});
 
 	async function startEdit() {
@@ -144,12 +151,13 @@
 
 	const tabs = $derived([
 		{ id: 'advisor', label: 'As Advisor', count: advisorreviews.length + legacyadvisorreviews.length },
-		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length }
+		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length },
+		...($currentUser?.is_admin || externaladvisorreviews.length > 0 ? [{ id: 'external', label: 'External', count: externaladvisorreviews.length }] : [])
 	]);
 
 	const PER_PAGE = 10;
 	let reviewpage = $state(1);
-	const showncount = $derived(tab === 'advisor' ? advisorreviews.length + legacyadvisorreviews.length : instructorreviews.length);
+	const showncount = $derived(tab === 'advisor' ? advisorreviews.length + legacyadvisorreviews.length : tab === 'external' ? externaladvisorreviews.length : instructorreviews.length);
 	const reviewpages = $derived(Math.max(1, Math.ceil(showncount / PER_PAGE)));
 
 	const taughtcourses = $derived((() => {
@@ -165,6 +173,33 @@
 
 	let confirmdel = $state(false);
 	let deleting = $state(false);
+	let confirmdelext = $state(false);
+	let delextid = $state('');
+	let editingextadv = $state<Record<string, { body: string; source_note: string }>>({});
+
+	async function saveeditadvisor(id: string) {
+		const data = editingextadv[id];
+		if (!data) return;
+		const updated = await editExternalAdvisorReview(id, { body: data.body, source_note: data.source_note || undefined });
+		if (updated) {
+			externaladvisorreviews = externaladvisorreviews.map(e => e.id === id ? updated : e);
+			delete editingextadv[id];
+		}
+	}
+
+	async function handlevoteadvisor(id: string, newvote: 0 | 1 | -1) {
+		if (!$currentUser) return;
+		const r = externaladvisorreviews.find(e => e.id === id);
+		if (!r) return;
+		const prev = (r.user_vote ?? 0) as 0 | 1 | -1;
+		const ok = newvote === 0 ? await unvoteExternalAdvisorReview(id) : await voteExternalAdvisorReview(id, newvote as 1 | -1);
+		if (ok) externaladvisorreviews = externaladvisorreviews.map(e => e.id === id ? {
+			...e, user_vote: newvote || null,
+			upvotes: e.upvotes + (newvote === 1 ? 1 : 0) - (prev === 1 ? 1 : 0),
+			downvotes: e.downvotes + (newvote === -1 ? 1 : 0) - (prev === -1 ? 1 : 0),
+			score: e.score + newvote - prev
+		} : e);
+	}
 
 	async function doDelete() {
 		if (!faculty) return;
@@ -365,6 +400,103 @@
 					{/each}
 				</div>
 			{/if}
+		{:else if tab === 'external'}
+			{#if $currentUser?.is_admin}
+				<div class="mb-3 flex justify-end">
+					<button
+						type="button"
+						onclick={() => externalmodalopen = true}
+						class="inline-flex items-center gap-[6px] rounded-[7px] border border-[rgba(107,143,111,0.2)] bg-[var(--accent-bg)] px-[14px] py-[7px] text-[12px] font-medium text-[var(--accent-2)] transition-colors hover:bg-[rgba(107,143,111,0.14)]"
+					>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+						Add review
+					</button>
+				</div>
+			{/if}
+			{#if externaladvisorreviews.length === 0}
+				<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">No external reviews yet.</div>
+			{:else}
+				<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
+					{#each externaladvisorreviews as r (r.id)}
+						{@const fmtdate = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+						{@const editing = !!editingextadv[r.id]}
+						<div class="group relative flex flex-col gap-[10px] overflow-hidden rounded-[10px] border border-[var(--border)] p-[14px_16px] transition-[background,border-color] duration-[160ms]"
+							style="background: var(--bg-2); background-image: linear-gradient(180deg, rgba(107,143,111,0.03), transparent 42%);">
+							<div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[180ms] group-hover:opacity-100"
+								style="background: radial-gradient(ellipse 220px 110px at 100% 0%, rgba(107,143,111,0.05), transparent 70%);"></div>
+							<div class="flex min-w-0 items-center gap-2">
+								<div class="flex min-w-0 flex-wrap items-center gap-[5px] text-[12px] text-[var(--fg-3)]">
+									<span class="text-[13px] font-medium text-[var(--fg-2)]">External Review</span>
+									<span class="text-[var(--fg-4)]">·</span>
+									<span class="text-[11px] tracking-[0.04em]" style="font-family: var(--mono);">{fmtdate}</span>
+								</div>
+							</div>
+							{#if editing}
+								<textarea
+									bind:value={editingextadv[r.id].body}
+									rows={4}
+									class="w-full resize-none rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[13px] leading-[1.55] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+								></textarea>
+								<input
+									bind:value={editingextadv[r.id].source_note}
+									placeholder="source note (optional)"
+									class="w-full rounded-[7px] border border-[var(--border-strong)] bg-transparent px-3 py-2 text-[12px] text-[var(--fg-2)] outline-none focus:border-[var(--accent-2)]"
+									style="font-family: var(--mono);"
+								/>
+								<div class="flex items-center gap-2">
+									<button type="button" onclick={() => saveeditadvisor(r.id)}
+										class="inline-flex items-center rounded-[6px] px-[12px] py-[5px] text-[12px] font-medium"
+										style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);"
+									>Save</button>
+									<button type="button" onclick={() => { delete editingextadv[r.id]; }}
+										class="px-2 py-1 text-[12px] text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+									>Cancel</button>
+								</div>
+							{:else}
+								<div class="flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]" style="white-space: pre-wrap; text-wrap: pretty;">{r.body}</div>
+								<div class="mt-auto flex items-center gap-[2px]">
+									<button type="button" aria-label="Upvote"
+										onclick={() => handlevoteadvisor(r.id, r.user_vote === 1 ? 0 : 1)}
+										class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {r.user_vote === 1 ? 'text-[var(--accent-2)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+										style="font-family: var(--mono);"
+									>
+										<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+										<span class="min-w-[14px] text-left">{r.upvotes}</span>
+									</button>
+									<button type="button" aria-label="Downvote"
+										onclick={() => handlevoteadvisor(r.id, r.user_vote === -1 ? 0 : -1)}
+										class="relative z-[2] inline-flex items-center gap-[5px] rounded-[5px] px-2 py-1 text-[12px] font-semibold transition-colors duration-[120ms] {r.user_vote === -1 ? 'text-[var(--danger)]' : 'text-[var(--fg-3)] hover:text-[var(--fg)]'}"
+										style="font-family: var(--mono);"
+									>
+										<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+										<span class="min-w-[14px] text-left">{r.downvotes}</span>
+									</button>
+									{#if r.added_by_display_name}
+										<button type="button" aria-label="Edit external review"
+											onclick={() => { editingextadv[r.id] = { body: r.body, source_note: r.source_note ?? '' }; }}
+											class="relative z-[2] ml-auto inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--fg)]"
+										>
+											<IconPencil size={13} stroke={1.7} />
+										</button>
+										<button type="button" aria-label="Delete external review"
+											onclick={() => { delextid = r.id; confirmdelext = true; }}
+											class="relative z-[2] inline-flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors duration-[120ms] text-[var(--fg-3)] hover:text-[var(--danger)]"
+										>
+											<IconTrash size={13} stroke={1.7} />
+										</button>
+									{/if}
+								</div>
+								{#if r.added_by_display_name}
+									<div class="flex flex-wrap items-center gap-[6px]">
+										{#if r.source_note}<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.source_note}</span>{/if}
+										<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]">by {r.added_by_display_name}</span>
+									</div>
+								{/if}
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
 		{:else}
 			{#if taughtcourses.length}
 				<div class="mb-[18px] flex flex-wrap items-center gap-[14px_18px] rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-[18px] py-[14px] text-[13px]">
@@ -415,6 +547,14 @@
 	<ReportModal target={faculty.name} submitting={reportsubmitting} onclose={() => { if (!reportsubmitting) reportopen = false; }} onsubmit={sendReport} />
 {/if}
 
+{#if externalmodalopen && faculty}
+	<ExternalReviewModal
+		facultyslug={faculty.slug}
+		oncreate={(r) => { externaladvisorreviews = [r as ExternalAdvisorReview, ...externaladvisorreviews]; externalmodalopen = false; }}
+		onclose={() => { externalmodalopen = false; }}
+	/>
+{/if}
+
 {#if confirmdel}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
 		<div class="w-full max-w-[340px] rounded-[12px] border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-xl">
@@ -433,6 +573,22 @@
 					class="rounded-[7px] px-[14px] py-2 text-[13px] font-medium text-white transition-colors disabled:opacity-60"
 					style="background: var(--danger);"
 				>{deleting ? 'Deleting…' : 'Delete'}</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if confirmdelext}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
+		<div class="w-full max-w-[340px] rounded-[12px] border border-[var(--border)] bg-[var(--bg-2)] p-6 shadow-xl">
+			<p class="mb-1 text-[15px] font-medium text-[var(--fg)]">Delete external review?</p>
+			<p class="mb-5 text-[13px] text-[var(--fg-3)]">This action cannot be undone.</p>
+			<div class="flex justify-end gap-2">
+				<button type="button" onclick={() => { confirmdelext = false; delextid = ''; }} class="rounded-[7px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[14px] py-2 text-[13px] font-medium text-[var(--fg-2)] transition-colors hover:bg-[var(--bg-4)]">Cancel</button>
+				<button type="button" onclick={async () => {
+					if (await deleteExternalAdvisorReview(delextid)) externaladvisorreviews = externaladvisorreviews.filter(e => e.id !== delextid);
+					confirmdelext = false; delextid = '';
+				}} class="rounded-[7px] px-[14px] py-2 text-[13px] font-medium text-white" style="background: var(--danger);">Delete</button>
 			</div>
 		</div>
 	</div>

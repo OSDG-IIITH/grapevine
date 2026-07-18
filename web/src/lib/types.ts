@@ -177,6 +177,66 @@ export interface LegacyAdvisorReview {
 	created_at: string;
 }
 
+export interface ExternalCourseReview {
+	id: string;
+	course_id: string;
+	offering_id?: string;
+	body: string;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	user_vote?: 1 | -1 | null;
+	source_note?: string;
+	added_by?: string;
+	added_by_display_name?: string;
+	created_at: string;
+}
+
+export interface ExternalAdvisorReview {
+	id: string;
+	faculty_id: string;
+	body: string;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	user_vote?: 1 | -1 | null;
+	source_note?: string;
+	added_by?: string;
+	added_by_display_name?: string;
+	created_at: string;
+}
+
+export interface AdminExternalCourseReview {
+	id: string;
+	course_id: string;
+	course_code: string;
+	course_name: string;
+	offering_id?: string;
+	body: string;
+	source_note?: string;
+	added_by: string;
+	added_by_display_name: string;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	created_at: string;
+}
+
+export interface AdminExternalAdvisorReview {
+	id: string;
+	faculty_id: string;
+	faculty_slug: string;
+	faculty_name: string;
+	body: string;
+	source_note?: string;
+	added_by: string;
+	added_by_display_name: string;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	created_at: string;
+}
+
 export const COURSE_AXIS_ORDER = ['difficulty', 'workload', 'teaching', 'grading', 'content'] as const;
 
 export const COURSE_AXIS_LABELS: Record<string, string> = {
