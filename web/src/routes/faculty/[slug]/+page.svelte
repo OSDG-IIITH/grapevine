@@ -15,6 +15,7 @@
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import ReportModal from '$lib/components/ReportModal.svelte';
 	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import { rendermarkdown } from '$lib/markdown';
 	import IconPencil from '@tabler/icons-svelte/icons/pencil';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
 
@@ -453,7 +454,7 @@
 									>Cancel</button>
 								</div>
 							{:else}
-								<div class="flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]" style="white-space: pre-wrap; text-wrap: pretty;">{r.body}</div>
+								<div class="flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]" style="text-wrap: pretty;"><div class="review-prose">{@html rendermarkdown(r.body)}</div></div>
 								<div class="mt-auto flex items-center gap-[2px]">
 									<button type="button" aria-label="Upvote"
 										onclick={() => handlevoteadvisor(r.id, r.user_vote === 1 ? 0 : 1)}

@@ -18,6 +18,7 @@
 	import ReviewModal from './ReviewModal.svelte';
 	import LegacyReviewModal from './LegacyReviewModal.svelte';
 	import FlagModal from './FlagModal.svelte';
+	import { rendermarkdown } from '$lib/markdown';
 
 	type AnyReview = CourseReview | AdvisorReview | LegacyCourseReview | LegacyAdvisorReview;
 	type RegularReview = CourseReview | AdvisorReview;
@@ -249,7 +250,7 @@
 	<!-- excerpt -->
 	<div class="line-clamp-3 flex-1 text-[13px] leading-[1.55] text-[var(--fg-2)]">
 		{#if review.body}
-			{review.body}
+			<div class="review-prose">{@html rendermarkdown(review.body)}</div>
 		{:else}
 			<span class="italic text-[var(--fg-4)]">No written review.</span>
 		{/if}

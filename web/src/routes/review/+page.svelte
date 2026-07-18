@@ -17,6 +17,7 @@
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Combobox from '$lib/components/Combobox.svelte';
 	import Loader from "@lucide/svelte/icons/loader";
+	import { rendermarkdown } from '$lib/markdown';
 
 	const precourse = page.url.searchParams.get('course');
 	const prefaculty = page.url.searchParams.get('faculty');
@@ -37,6 +38,7 @@
 	let submitting = $state(false);
 	let manualoverall = $state<number | null>(null);
 	let hoveredoverall = $state<number | null>(null);
+	let previewmode = $state(false);
 
 	let proposeSeason = $state('M');
 	let proposeYear = $state('');
@@ -414,17 +416,33 @@
 					Your review
 				</div>
 				<div class="min-w-0">
-					<textarea
-						class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[16px] py-[14px] text-[14px] leading-[1.65] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
-						style="min-height: 180px;"
-						placeholder="Share your experience."
-						bind:value={body}
-					></textarea>
-					<div
-						class="mt-2 text-right text-[11px] {body.trim().length > 20 ? 'text-[var(--accent)]' : 'text-[var(--fg-4)]'}"
-						style="font-family: var(--mono);"
-					>
-						{body.trim().length} characters {body.trim().length > 20 ? '✓' : '(min 20)'}
+					<div class="flex items-center justify-end mb-2">
+						<button
+							type="button"
+							onclick={() => (previewmode = !previewmode)}
+							class="px-3 py-1.5 rounded-[5px] text-[11px] transition-[color,background] duration-[120ms] {previewmode ? 'text-[var(--accent-2)] bg-[var(--accent-bg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+							style="font-family: var(--mono);"
+						>{previewmode ? 'hide preview' : 'preview'}</button>
+					</div>
+					{#if previewmode}
+						{#if body.trim()}
+							<div class="review-prose min-h-[180px] rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[16px] py-[14px] text-[14px] leading-[1.65] text-[var(--fg)]">{@html rendermarkdown(body)}</div>
+						{:else}
+							<div class="min-h-[180px] rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[16px] py-[14px] text-[14px] leading-[1.65]"><span class="italic text-[var(--fg-4)]">Nothing to preview.</span></div>
+						{/if}
+					{:else}
+						<textarea
+							class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[16px] py-[14px] text-[14px] leading-[1.65] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
+							style="min-height: 180px;"
+							placeholder="Share your experience."
+							bind:value={body}
+						></textarea>
+					{/if}
+					<div class="mt-2 flex items-center justify-between text-[11px]" style="font-family: var(--mono);">
+						<span class="text-[var(--fg-4)]">Markdown Supported</span>
+						<span class="{body.trim().length > 20 ? 'text-[var(--accent)]' : 'text-[var(--fg-4)]'}">
+							{body.trim().length} characters {body.trim().length > 20 ? '✓' : '(min 20)'}
+						</span>
 					</div>
 				</div>
 			</div>

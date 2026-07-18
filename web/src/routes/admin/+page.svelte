@@ -23,6 +23,7 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import IconArrowBackUp from '@tabler/icons-svelte/icons/arrow-back-up';
 	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import { rendermarkdown } from '$lib/markdown';
 
 	type DeletedOffering = { id: string; course_code: string; course_name: string; season: string; year: number; deleted_at: string };
 
@@ -696,7 +697,7 @@
 										<div>cont: {r.content}/5</div>
 										<div>work: {r.workload}/5</div>
 									</div>
-									<div class="text-[13px] leading-[1.6] text-[var(--fg-2)]">{r.body}</div>
+									<div class="text-[13px] leading-[1.6] text-[var(--fg-2)]"><div class="review-prose">{@html rendermarkdown(r.body)}</div></div>
 								</div>
 							{/each}
 						{/if}
@@ -901,7 +902,7 @@
 									>Cancel</button>
 								</div>
 							{:else}
-								<p class="mb-[10px] text-[13px] leading-[1.55] text-[var(--fg-2)]" style="white-space: pre-wrap; text-wrap: pretty;">{r.body}</p>
+								<div class="mb-[10px] text-[13px] leading-[1.55] text-[var(--fg-2)]" style="text-wrap: pretty;"><div class="review-prose">{@html rendermarkdown(r.body)}</div></div>
 								<div class="flex flex-wrap items-center gap-[8px]">
 									<div class="flex flex-wrap items-center gap-[6px]">
 										{#if r.source_note}<span class="rounded-[4px] border border-[var(--border)] px-[6px] py-[1px] text-[11px] text-[var(--fg-3)]" style="font-family: var(--mono);">{r.source_note}</span>{/if}

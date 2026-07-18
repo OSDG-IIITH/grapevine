@@ -6,6 +6,7 @@
 	import IconCheck from '@tabler/icons-svelte/icons/check';
 	import SegBar from './SegBar.svelte';
 	import OverallBar from './OverallBar.svelte';
+	import { rendermarkdown } from '$lib/markdown';
 
 	interface Props {
 		review: CourseReview | AdvisorReview;
@@ -45,6 +46,7 @@
 	const editshownoverall = $derived(editoverall !== null ? editoverall : editcalcavg);
 
 	let hoveredoverall = $state<number | null>(null);
+	let previewmode = $state(false);
 
 	const stars = $derived(Math.round(review.overall ?? 0));
 	const initialvote = $derived((review.user_vote ?? 0) as 0 | 1 | -1);
@@ -63,6 +65,10 @@
 	$effect(() => {
 		document.body.style.overflow = 'hidden';
 		return () => { document.body.style.overflow = ''; };
+	});
+
+	$effect(() => {
+		if (editing) previewmode = false;
 	});
 
 	function fmtdate(iso: string): string {
@@ -181,20 +187,38 @@
 		</div>
 
 		<!-- body -->
-		<div
-			class="flex-1 overflow-y-auto p-[18px_22px] text-[14px] leading-[1.7] text-[var(--fg)]"
-			style="white-space: pre-wrap; text-wrap: pretty;"
-		>
+		<div class="flex-1 overflow-y-auto p-[18px_22px] text-[14px] leading-[1.7] text-[var(--fg)]" style="text-wrap: pretty;">
 			{#if editing}
-				<textarea
-					class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[12px] text-[14px] leading-[1.6] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
-					style="min-height: 140px;"
-					placeholder="Share your experience."
-					value={editbody}
-					oninput={(e) => oneditbody((e.target as HTMLTextAreaElement).value)}
-				></textarea>
+				<div class="flex items-center justify-end mb-2">
+					<button
+						type="button"
+						onclick={() => (previewmode = !previewmode)}
+						class="px-3 py-1.5 rounded-[5px] text-[11px] transition-[color,background] duration-[120ms] {previewmode ? 'text-[var(--accent-2)] bg-[var(--accent-bg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+						style="font-family: var(--mono);"
+					>{previewmode ? 'hide preview' : 'preview'}</button>
+				</div>
+				{#if previewmode}
+					{#if editbody.trim()}
+						<div class="review-prose">{@html rendermarkdown(editbody)}</div>
+					{:else}
+						<span class="italic text-[var(--fg-4)]">Nothing to preview.</span>
+					{/if}
+				{:else}
+					<textarea
+						class="w-full resize-y rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[12px] text-[14px] leading-[1.6] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
+						style="min-height: 140px;"
+						placeholder="Share your experience."
+						value={editbody}
+						oninput={(e) => oneditbody((e.target as HTMLTextAreaElement).value)}
+					></textarea>
+					<p class="mt-1.5 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">Supports Markdown.</p>
+				{/if}
 			{:else}
-				{review.body}
+				{#if review.body}
+					<div class="review-prose">{@html rendermarkdown(review.body)}</div>
+				{:else}
+					<span class="italic text-[var(--fg-4)]">No written review.</span>
+				{/if}
 			{/if}
 		</div>
 

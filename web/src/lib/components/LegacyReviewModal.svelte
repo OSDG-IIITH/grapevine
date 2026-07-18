@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { LegacyCourseReview, LegacyAdvisorReview } from '$lib/types';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
+	import { rendermarkdown } from '$lib/markdown';
 
 	interface Props {
 		review: LegacyCourseReview | LegacyAdvisorReview;
@@ -80,10 +81,10 @@
 		<!-- body -->
 		<div
 			class="flex-1 overflow-y-auto p-[18px_22px] text-[14px] leading-[1.7] text-[var(--fg)]"
-			style="white-space: pre-wrap; text-wrap: pretty;"
+			style="text-wrap: pretty;"
 		>
 			{#if review.body}
-				{review.body}
+				<div class="review-prose">{@html rendermarkdown(review.body)}</div>
 			{:else}
 				<span class="italic text-[var(--fg-4)]">No written review.</span>
 			{/if}

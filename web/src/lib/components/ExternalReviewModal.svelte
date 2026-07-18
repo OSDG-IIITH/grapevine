@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { getCourse, getFacultyMember, createExternalCourseReview, createExternalAdvisorReview } from '$lib/api';
 	import type { ExternalCourseReview, ExternalAdvisorReview } from '$lib/types';
+	import { rendermarkdown } from '$lib/markdown';
 
 	interface Props {
 		/** pre-fill for course page — hides type/target selector */
@@ -21,6 +22,7 @@
 	let sourcenote = $state('');
 	let submitting = $state(false);
 	let error = $state('');
+	let previewmode = $state(false);
 
 	function portal(node: HTMLElement) {
 		document.body.appendChild(node);
@@ -125,13 +127,30 @@
 
 			<div>
 				<label for="ext-body" class="mb-1 block text-[11px] uppercase tracking-[0.08em] text-[var(--fg-4)]" style="font-family: var(--mono);">Review</label>
-				<textarea
-					id="ext-body"
-					rows={6}
-					placeholder="Paste the review text…"
-					bind:value={body}
-					class="w-full resize-none rounded-[7px] border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[13px] leading-[1.65] text-[var(--fg)] placeholder-[var(--fg-4)] outline-none focus:border-[var(--border-strong)]"
-				></textarea>
+				<div class="flex items-center justify-end mb-2">
+					<button
+						type="button"
+						onclick={() => (previewmode = !previewmode)}
+						class="px-3 py-1.5 rounded-[5px] text-[11px] transition-[color,background] duration-[120ms] {previewmode ? 'text-[var(--accent-2)] bg-[var(--accent-bg)]' : 'text-[var(--fg-4)] hover:text-[var(--fg-3)]'}"
+						style="font-family: var(--mono);"
+					>{previewmode ? 'hide preview' : 'preview'}</button>
+				</div>
+				{#if previewmode}
+					{#if body.trim()}
+						<div class="review-prose">{@html rendermarkdown(body)}</div>
+					{:else}
+						<span class="italic text-[var(--fg-4)]">Nothing to preview.</span>
+					{/if}
+				{:else}
+					<textarea
+						id="ext-body"
+						rows={6}
+						placeholder="Paste the review text…"
+						bind:value={body}
+						class="w-full resize-none rounded-[7px] border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[13px] leading-[1.65] text-[var(--fg)] placeholder-[var(--fg-4)] outline-none focus:border-[var(--border-strong)]"
+					></textarea>
+					<p class="mt-1.5 text-[11px] text-[var(--fg-4)]" style="font-family: var(--mono);">Supports **bold**, _italic_, links, and lists.</p>
+				{/if}
 			</div>
 
 			{#if error}
