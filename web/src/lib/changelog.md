@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-18
+
+### External Reviews
+Moderators can now copy over reviews from Whatsapp and display them on the course/advisor page.
+
+### Markdown Support
+Basic markdown is now supported in reviews.
+
 ## 2026-07-14
 
 ### Link/Unlink CAS
