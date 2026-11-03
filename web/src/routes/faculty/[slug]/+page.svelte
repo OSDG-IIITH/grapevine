@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
+	import { untrack } from 'svelte';
 	import { base } from '$app/paths';
 	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews, getExternalAdvisorReviews, deleteExternalAdvisorReview, editExternalAdvisorReview, voteExternalAdvisorReview, unvoteExternalAdvisorReview } from '$lib/api';
 	import { toast } from 'svelte-sonner';
@@ -15,6 +16,8 @@
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import ReportModal from '$lib/components/ReportModal.svelte';
 	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import QA from '$lib/components/QA.svelte';
+	import Pills from '$lib/components/Pills.svelte';
 	import { rendermarkdown } from '$lib/markdown';
 	import IconPencil from '@tabler/icons-svelte/icons/pencil';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
@@ -28,6 +31,8 @@
 	let externalmodalopen = $state(false);
 	let instructorreviews = $state<(CourseReview & { offeringcode: string; coursecode: string })[]>([]);
 	let tab = $state('advisor');
+	let view = $state('reviews');
+	let qcount = $state<number | undefined>(undefined);
 	let error = $state('');
 	let reportopen = $state(false);
 	let reportsubmitting = $state(false);
@@ -63,6 +68,8 @@
 		instructorreviews = [];
 		reportopen = false;
 		tab = 'advisor';
+		view = untrack(() => $page.url.searchParams.get('view')) === 'questions' ? 'questions' : 'reviews';
+		qcount = undefined;
 		error = '';
 		editing = false;
 
@@ -155,6 +162,14 @@
 		{ id: 'instructor', label: 'As Instructor', count: instructorreviews.length },
 		...($currentUser?.is_admin || externaladvisorreviews.length > 0 ? [{ id: 'external', label: 'External', count: externaladvisorreviews.length }] : [])
 	]);
+
+	function setview(id: string) {
+		view = id;
+		const url = new URL($page.url);
+		if (id === 'questions') url.searchParams.set('view', 'questions');
+		else url.searchParams.delete('view');
+		replaceState(url, {});
+	}
 
 	const PER_PAGE = 10;
 	let reviewpage = $state(1);
@@ -380,7 +395,19 @@
 			bar="continuous"
 		/>
 
-		<Tabs items={tabs} active={tab} mono={false} onchange={(id) => { tab = id; reviewpage = 1; }} />
+		<Tabs
+			mono={false}
+			items={[{ id: 'reviews', label: 'Reviews', count: tabs.reduce((n, t) => n + t.count, 0) }, { id: 'questions', label: 'Questions', count: qcount }]}
+			active={view}
+			onchange={setview}
+		/>
+
+		<div class:hidden={view !== 'questions'}>
+			<QA target={{ faculty: faculty.slug }} oncount={(n) => (qcount = n)} />
+		</div>
+
+		{#if view === 'reviews'}
+		<Pills items={tabs} active={tab} onchange={(id) => { tab = id; reviewpage = 1; }} />
 
 		{#if tab === 'advisor'}
 			{#if advisorreviews.length === 0 && legacyadvisorreviews.length === 0}
@@ -538,6 +565,7 @@
 		{/if}
 
 		<Pager page={reviewpage} totalpages={reviewpages} totalitems={showncount} onchange={(p) => (reviewpage = p)} />
+		{/if}
 
 	{:else}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>

@@ -14,6 +14,8 @@ pub fn router() -> Router<AppState> {
         .route("/admin/reports/:id/approve", post(admin::approve_report))
         .route("/admin/reviews/course/:id/restore", post(admin::restore_review_course))
         .route("/admin/reviews/advisor/:id/restore", post(admin::restore_review_advisor))
+        .route("/admin/questions/:id/restore", post(admin::restore_question))
+        .route("/admin/answers/:id/restore", post(admin::restore_answer))
         .route("/admin/offerings/:id/restore", post(admin::restore_offering_handler))
         .route("/admin/proposed", get(admin::list_proposed))
         .route("/admin/proposed/:id/approve", post(admin::approve_proposed))

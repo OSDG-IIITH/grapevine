@@ -12,7 +12,8 @@ import type {
 	ProposedOfferingResponse, ProposedOfferingLean,
 	AuditLog, AuditLogPage, LegacyCourseReview, LegacyAdvisorReview,
 	ExternalCourseReview, ExternalAdvisorReview,
-	AdminExternalCourseReview, AdminExternalAdvisorReview
+	AdminExternalCourseReview, AdminExternalAdvisorReview,
+	Question, QaTarget, QaSort
 } from './types';
 
 const BASE = PUBLIC_API_URL || '/grapevine/api';
@@ -624,4 +625,62 @@ export async function voteExternalAdvisorReview(id: string, value: 1 | -1): Prom
 
 export async function unvoteExternalAdvisorReview(id: string): Promise<boolean> {
 	return apivoid(`/reviews/external/advisor/${id}/vote`, { method: 'DELETE' });
+}
+
+export async function getQuestions(target: QaTarget, q = '', sort: QaSort = 'top'): Promise<Question[] | null> {
+	const p = new URLSearchParams({ ...target, sort });
+	if (q.trim()) p.set('q', q.trim());
+	return apifetch<Question[]>(`/questions?${p}`, undefined, true);
+}
+
+export async function createQuestion(target: QaTarget, body: string, anonymous: boolean): Promise<{ id: string } | null> {
+	return apifetch('/questions', json({ ...target, body, anonymous }));
+}
+
+export async function editQuestion(id: string, body: string): Promise<boolean> {
+	return apivoid(`/questions/${id}`, json({ body }, 'PATCH'));
+}
+
+export async function deleteQuestion(id: string): Promise<boolean> {
+	return apivoid(`/questions/${id}`, { method: 'DELETE' });
+}
+
+export async function voteQuestion(id: string): Promise<boolean> {
+	return apivoid(`/questions/${id}/vote`, { method: 'POST' });
+}
+
+export async function unvoteQuestion(id: string): Promise<boolean> {
+	return apivoid(`/questions/${id}/vote`, { method: 'DELETE' });
+}
+
+export async function flagQuestion(id: string, reason: string): Promise<boolean> {
+	return apivoid(`/questions/${id}/flag`, json({ reason }));
+}
+
+export async function createAnswer(questionid: string, body: string, anonymous: boolean, offering_id: string | null): Promise<{ id: string } | null> {
+	return apifetch(`/questions/${questionid}/answers`, json({ body, anonymous, offering_id }));
+}
+
+export async function editAnswer(id: string, body: string, offering_id: string | null): Promise<boolean> {
+	return apivoid(`/answers/${id}`, json({ body, offering_id }, 'PATCH'));
+}
+
+export async function deleteAnswer(id: string): Promise<boolean> {
+	return apivoid(`/answers/${id}`, { method: 'DELETE' });
+}
+
+export async function voteAnswer(id: string, value: 1 | -1): Promise<boolean> {
+	return apivoid(`/answers/${id}/vote`, json({ value }));
+}
+
+export async function unvoteAnswer(id: string): Promise<boolean> {
+	return apivoid(`/answers/${id}/vote`, { method: 'DELETE' });
+}
+
+export async function flagAnswer(id: string, reason: string): Promise<boolean> {
+	return apivoid(`/answers/${id}/flag`, json({ reason }));
+}
+
+export async function restoreQa(type: 'question' | 'answer', id: string): Promise<boolean> {
+	return apivoid(`/admin/${type}s/${id}/restore`, { method: 'POST' });
 }

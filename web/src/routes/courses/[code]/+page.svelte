@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
-	import { goto } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
+	import { untrack } from 'svelte';
 	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews, getExternalCourseReviews, deleteExternalCourseReview, editExternalCourseReview, voteExternalCourseReview, unvoteExternalCourseReview } from '$lib/api';
 	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission, LegacyCourseReview, ExternalCourseReview } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
@@ -16,6 +17,8 @@
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import CourseReportModal from '$lib/components/CourseReportModal.svelte';
 	import ExternalReviewModal from '$lib/components/ExternalReviewModal.svelte';
+	import QA from '$lib/components/QA.svelte';
+	import Pills from '$lib/components/Pills.svelte';
 	import { rendermarkdown } from '$lib/markdown';
 	import IconPencil from '@tabler/icons-svelte/icons/pencil';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
@@ -29,6 +32,8 @@
 	let externalreviews = $state<ExternalCourseReview[]>([]);
 	let externalmodalopen = $state(false);
 	let tab = $state('all');
+	let view = $state('reviews');
+	let qcount = $state<number | undefined>(undefined);
 	let error = $state('');
 	let reportopen = $state(false);
 	let reportsubmitting = $state(false);
@@ -152,6 +157,8 @@
 		reportopen = false;
 		proposing = false;
 		tab = 'all';
+		view = untrack(() => $page.url.searchParams.get('view')) === 'questions' ? 'questions' : 'reviews';
+		qcount = undefined;
 		editing = false;
 
 		const decoded = decodeURIComponent(c);
@@ -336,6 +343,14 @@
 			] : [])
 		] : []
 	);
+
+	function setview(id: string) {
+		view = id;
+		const url = new URL($page.url);
+		if (id === 'questions') url.searchParams.set('view', 'questions');
+		else url.searchParams.delete('view');
+		replaceState(url, {});
+	}
 
 	const shown = $derived(
 		tab === 'all' ? [...reviews, ...proposedReviews, ...legacyreviews].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) :
@@ -749,6 +764,18 @@
 		/>
 
 		<Tabs
+			mono={false}
+			items={[{ id: 'reviews', label: 'Reviews', count: tabs[0]?.count }, { id: 'questions', label: 'Questions', count: qcount }]}
+			active={view}
+			onchange={setview}
+		/>
+
+		<div class:hidden={view !== 'questions'}>
+			<QA target={{ course: course.code }} offerings={course.offerings.map((o) => ({ id: o.id, code: o.code }))} oncount={(n) => (qcount = n)} />
+		</div>
+
+		{#if view === 'reviews'}
+		<Pills
 			items={tabs}
 			active={tab}
 			onchange={(id) => { tab = id; reviewpage = 1; }}
@@ -941,6 +968,7 @@
 
 		{#if tab !== 'external'}
 			<Pager page={reviewpage} totalpages={reviewpages} totalitems={shown.length} onchange={(p) => (reviewpage = p)} />
+		{/if}
 		{/if}
 
 	{:else}

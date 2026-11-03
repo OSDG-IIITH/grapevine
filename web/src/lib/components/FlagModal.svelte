@@ -3,9 +3,10 @@
 		onclose: () => void;
 		onsubmit: (reason: string) => void;
 		submitting?: boolean;
+		what?: string;
 	}
 
-	let { onclose, onsubmit, submitting = false }: Props = $props();
+	let { onclose, onsubmit, submitting = false, what = 'review' }: Props = $props();
 
 	let reason = $state('');
 	const cansubmit = $derived(!submitting && reason.trim().length > 2);
@@ -45,7 +46,7 @@
 	>
 		<div class="flex items-center justify-between gap-3 border-b border-[var(--border)] p-[18px_20px]">
 			<div>
-				<div class="text-[24px] text-[var(--fg)]" style="font-family: var(--serif);">Flag review</div>
+				<div class="text-[24px] text-[var(--fg)]" style="font-family: var(--serif);">Flag {what}</div>
 			</div>
 			<button
 				type="button"
@@ -64,7 +65,7 @@
 			<textarea
 				class="mt-2 w-full resize-none rounded-[8px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-[12px] text-[14px] leading-[1.6] text-[var(--fg)] outline-none transition-[border-color] duration-[120ms] placeholder:text-[var(--fg-4)] hover:border-[var(--border-strong)] focus:border-[var(--accent)]"
 				rows="4"
-				placeholder="Why are you flagging this review? "
+				placeholder="Why are you flagging this {what}? "
 				bind:value={reason}
 				autofocus
 			></textarea>

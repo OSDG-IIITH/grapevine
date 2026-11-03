@@ -61,3 +61,29 @@ course_review_flags
 advisor_review_flags
   id, user_id, review_id (→ advisor_reviews), reason, created_at
   unique (user_id, review_id)
+
+questions
+  id, user_id, course_id (nullable), faculty_id (nullable)
+  anonymous (bool)
+  body (text, 10–500 chars), search (generated tsvector)
+  edited_at, created_at, deleted_at, deleted_by
+  -- exactly one of course_id, faculty_id is set
+
+answers
+  id, user_id, question_id, offering_id (nullable, course questions only)
+  anonymous (bool)
+  body (text, 2–5000 chars), search (generated tsvector)
+  edited_at, created_at, deleted_at, deleted_by
+  unique (user_id, question_id) where deleted_at is null
+
+question_votes
+  user_id, question_id ("me too", no value)
+  primary key (user_id, question_id)
+
+answer_votes
+  id, user_id, answer_id, vote (+1/-1)
+  unique (user_id, answer_id)
+
+qa_flags
+  id, user_id, question_id (nullable), answer_id (nullable), reason, created_at
+  -- exactly one of question_id, answer_id is set; one flag per user per target
