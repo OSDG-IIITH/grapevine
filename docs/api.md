@@ -47,13 +47,33 @@ Advisor Reviews
   POST   /reviews/advisor/:id/flag       flag review
   review fields include: score (net), upvotes, downvotes, user_vote
 
+Questions & Answers
+  GET    /questions                      query: course=<code> | faculty=<slug> (exactly one), q (search), sort (top | new | unanswered)
+                                           returns questions with answers inlined; q matches question and answer text (stemmed, typo tolerant)
+  POST   /questions                      body: { course | faculty, body (10–500 chars), anonymous }
+  PATCH  /questions/:id                  author edits body
+  DELETE /questions/:id                  author (only while unanswered) or moderator (soft delete)
+  POST   /questions/:id/vote             "me too"
+  DELETE /questions/:id/vote             remove "me too"
+  POST   /questions/:id/flag             flag question
+  POST   /questions/:id/answers          body: { body (2–5000 chars), anonymous, offering_id? }; one live answer per user per question
+  PATCH  /answers/:id                    author edits body and offering_id
+  DELETE /answers/:id                    author, or moderator (soft delete)
+  POST   /answers/:id/vote               body: { value: 1 or -1 }
+  DELETE /answers/:id/vote               remove current user's vote
+  POST   /answers/:id/flag               flag answer
+  question fields include: votes, voted, mine, answers
+  answer fields include: score, upvotes, downvotes, user_vote, mine, reviewer (author reviewed this course/advisor)
+
 Labs
   GET  /labs                             list + search
   GET  /labs/:id                         detail + faculty in lab + aggregated advisor reviews
 
 Admin
-  GET    /admin/flags                    list all flagged reviews
+  GET    /admin/flags                    list all flagged reviews, questions and answers (review_type: course | advisor | question | answer)
   POST   /admin/flags/:id/dismiss        dismiss flag without deleting review
   POST   /admin/flags/:id/delete-review  delete flagged review and cascade its flags
+  POST   /admin/questions/:id/restore    restore a moderator-deleted question
+  POST   /admin/answers/:id/restore      restore a moderator-deleted answer
   GET    /admin/export                   export database tables to JSON seeding format
 

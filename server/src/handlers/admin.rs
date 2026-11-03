@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     auth::{session::AuthUser, validate::normalize_username},
     error::AppError,
-    models::{audit, course, faculty, lab, offering::Season, report, review},
+    models::{audit, course, faculty, lab, offering::Season, qa, report, review},
     state::AppState,
 };
 
@@ -96,6 +96,10 @@ pub struct FlagResponse {
     pub review_id: String,
     pub review_body: String,
     pub reporter: ReporterRef,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub course_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub faculty_name: Option<String>,
 }
 
 pub async fn flags(
@@ -140,6 +144,8 @@ pub async fn flags(
         review_id: r.review_id,
         review_body: r.review_body.unwrap_or_default(),
         reporter: ReporterRef { id: r.reporter_id, display_name: r.reporter_name },
+        course_code: None,
+        faculty_name: None,
     }).collect();
 
     result.extend(advisor_flags.into_iter().map(|r| FlagResponse {
@@ -150,6 +156,39 @@ pub async fn flags(
         review_id: r.review_id,
         review_body: r.review_body.unwrap_or_default(),
         reporter: ReporterRef { id: r.reporter_id, display_name: r.reporter_name },
+        course_code: None,
+        faculty_name: None,
+    }));
+
+    let qa_flags = sqlx::query!(
+        r#"SELECT f.id, f.reason,
+                  f.created_at as "created_at: chrono::DateTime<chrono::Utc>",
+                  COALESCE(f.question_id, f.answer_id) as "review_id!",
+                  f.question_id IS NOT NULL as "isquestion!",
+                  LEFT(COALESCE(a.body, q.body), 200) as "review_body?",
+                  c.code as "course_code?", fa.name as "faculty_name?",
+                  u.id as reporter_id, u.display_name as reporter_name
+           FROM qa_flags f
+           LEFT JOIN answers a ON a.id = f.answer_id
+           JOIN questions q ON q.id = COALESCE(f.question_id, a.question_id)
+           LEFT JOIN courses c ON c.id = q.course_id
+           LEFT JOIN faculty fa ON fa.id = q.faculty_id
+           JOIN users u ON u.id = f.user_id
+           WHERE q.deleted_at IS NULL AND (a.id IS NULL OR a.deleted_at IS NULL)"#
+    )
+    .fetch_all(&s.pool)
+    .await?;
+
+    result.extend(qa_flags.into_iter().map(|r| FlagResponse {
+        id: r.id,
+        reason: r.reason,
+        created_at: r.created_at,
+        review_type: if r.isquestion { "question" } else { "answer" },
+        review_id: r.review_id,
+        review_body: r.review_body.unwrap_or_default(),
+        reporter: ReporterRef { id: r.reporter_id, display_name: r.reporter_name },
+        course_code: r.course_code,
+        faculty_name: r.faculty_name,
     }));
 
     result.sort_by(|a, b| b.created_at.cmp(&a.created_at));
@@ -170,6 +209,9 @@ pub async fn dismiss_flag(
 
     if rows == 0 {
         sqlx::query!("DELETE FROM advisor_review_flags WHERE id = $1", id)
+            .execute(&s.pool)
+            .await?;
+        sqlx::query!("DELETE FROM qa_flags WHERE id = $1", id)
             .execute(&s.pool)
             .await?;
     }
@@ -274,7 +316,36 @@ pub async fn delete_review(
         return Ok(StatusCode::NO_CONTENT);
     }
 
-    Err(AppError::NotFound)
+    let qa_flag = sqlx::query!("SELECT question_id, answer_id FROM qa_flags WHERE id = $1", id)
+        .fetch_optional(&s.pool)
+        .await?;
+
+    match qa_flag {
+        Some(f) if f.question_id.is_some() => qa::moddelete_question(&s.pool, &f.question_id.unwrap_or_default(), &user.id).await?,
+        Some(f) => qa::moddelete_answer(&s.pool, &f.answer_id.unwrap_or_default(), &user.id).await?,
+        None => return Err(AppError::NotFound),
+    }
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn restore_question(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    qa::restore_question(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn restore_answer(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    if !user.is_admin { return Err(AppError::Forbidden); }
+    qa::restore_answer(&s.pool, &id, &user.id).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn restore_review_course(

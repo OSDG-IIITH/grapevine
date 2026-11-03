@@ -177,6 +177,39 @@ export interface LegacyAdvisorReview {
 	created_at: string;
 }
 
+export interface Answer {
+	id: string;
+	question_id: string;
+	offering_id: string | null;
+	author: { id: string; display_name: string } | null;
+	anonymous: boolean;
+	body: string;
+	score: number;
+	upvotes: number;
+	downvotes: number;
+	user_vote: 1 | -1 | null;
+	mine: boolean;
+	reviewer: boolean;
+	edited_at: string | null;
+	created_at: string;
+}
+
+export interface Question {
+	id: string;
+	author: { id: string; display_name: string } | null;
+	anonymous: boolean;
+	body: string;
+	votes: number;
+	voted: boolean;
+	mine: boolean;
+	answers: Answer[];
+	edited_at: string | null;
+	created_at: string;
+}
+
+export type QaTarget = { course: string } | { faculty: string };
+export type QaSort = 'top' | 'new' | 'unanswered';
+
 export interface ExternalCourseReview {
 	id: string;
 	course_id: string;
@@ -277,7 +310,7 @@ export interface FlagResponse {
 	id: string;
 	reason: string;
 	created_at: string;
-	review_type: 'course' | 'advisor';
+	review_type: 'course' | 'advisor' | 'question' | 'answer';
 	review_id: string;
 	review_body: string;
 	reporter: { id: string; display_name: string };

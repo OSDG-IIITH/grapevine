@@ -5,6 +5,7 @@ pub mod labs;
 pub mod reviews;
 pub mod admin;
 pub mod reports;
+pub mod qa;
 
 use axum::{extract::{FromRequestParts, Request}, middleware::{self, Next}, response::Response, routing::{get, patch, post}, Router};
 use axum::http::{HeaderValue, HeaderName, Method};
@@ -59,6 +60,7 @@ pub fn app(state: AppState) -> Router {
         .merge(labs::router())
         .merge(reviews::router())
         .merge(reports::router())
+        .merge(qa::router())
         .merge(admin::router())
         .layer(middleware::from_fn(require_verified));
 

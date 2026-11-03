@@ -6,3 +6,4 @@ pub mod lab;
 pub mod review;
 pub mod audit;
 pub mod report;
+pub mod qa;

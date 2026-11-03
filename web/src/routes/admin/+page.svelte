@@ -10,7 +10,7 @@
 		getDeletedFaculty, restoreFaculty,
 		getDeletedLabs, restoreLab,
 		getDeletedOfferings, restoreOffering,
-		getAuditLogs, restoreReview,
+		getAuditLogs, restoreReview, restoreQa,
 		getModerators, addCasModerator, addLocalModerator, demoteModerator,
 		getAdminExternalCourseReviews, getAdminExternalAdvisorReviews,
 		deleteExternalCourseReview, deleteExternalAdvisorReview,
@@ -54,6 +54,8 @@
 
 	const restoreactionmap: Record<string, string> = {
 		DELETE_REVIEW: 'RESTORE_REVIEW',
+		DELETE_QUESTION: 'RESTORE_QUESTION',
+		DELETE_ANSWER: 'RESTORE_ANSWER',
 		DELETE_OFFERING: 'RESTORE_OFFERING',
 		REJECT_PROPOSED: 'RESTORE_OFFERING',
 		DELETE_COURSE: 'RESTORE_COURSE',
@@ -118,7 +120,7 @@
 		'RESTORE_REVIEW', 'RESTORE_OFFERING',
 		'ADD_MODERATOR', 'REMOVE_MODERATOR', 'EXPORT_SEED_DATA',
 	];
-	const AUDIT_TARGET_TYPES = ['course', 'faculty', 'lab', 'offering', 'course_review', 'advisor_review', 'external_course_review', 'external_advisor_review', 'user', 'flag', 'database'];
+	const AUDIT_TARGET_TYPES = ['course', 'faculty', 'lab', 'offering', 'course_review', 'advisor_review', 'external_course_review', 'external_advisor_review', 'question', 'answer', 'user', 'flag', 'database'];
 
 	async function loadauditlogs() {
 		auditloading = true;
@@ -214,6 +216,10 @@
 		if (log.action === 'DELETE_REVIEW') {
 			ok = await restoreReview(log.target_type === 'course_review' ? 'course' : 'advisor', log.target_id);
 			restoreaction = 'RESTORE_REVIEW';
+		} else if (log.action === 'DELETE_QUESTION' || log.action === 'DELETE_ANSWER') {
+			const kind = log.action === 'DELETE_QUESTION' ? 'question' : 'answer';
+			ok = await restoreQa(kind, log.target_id);
+			restoreaction = kind === 'question' ? 'RESTORE_QUESTION' : 'RESTORE_ANSWER';
 		} else if (log.action === 'DELETE_OFFERING' || log.action === 'REJECT_PROPOSED') {
 			ok = await restoreOffering(log.target_id);
 			if (ok) deletedofferings = deletedofferings.filter((d) => d.id !== log.target_id);
@@ -241,10 +247,14 @@
 				target_id: log.target_id,
 				target_name: log.target_name,
 				target_course_code: log.target_course_code,
-				previous_state: restoreaction === 'RESTORE_REVIEW' ? log.previous_state : null,
+				previous_state: ['RESTORE_REVIEW', 'RESTORE_QUESTION', 'RESTORE_ANSWER'].includes(restoreaction) ? log.previous_state : null,
 				created_at: new Date().toISOString()
 			}, ...auditlogs];
 		}
+	}
+
+	function kindlabel(type: string): string {
+		return type === 'question' || type === 'answer' ? type : 'review';
 	}
 
 	function isrestorable(log: AuditLog): boolean {
@@ -263,6 +273,8 @@
 			DELETE_REVIEW: 'deleted a review', CREATE_EXTERNAL_REVIEW: 'added external review', DISMISS_FLAG: 'dismissed flag', DISMISS_REPORT: 'dismissed information report',
 			RESTORE_COURSE: 'restored course', RESTORE_FACULTY: 'restored faculty', RESTORE_LAB: 'restored lab',
 			RESTORE_REVIEW: 'restored a review', RESTORE_OFFERING: 'restored offering',
+			DELETE_QUESTION: 'deleted a question', DELETE_ANSWER: 'deleted an answer',
+			RESTORE_QUESTION: 'restored a question', RESTORE_ANSWER: 'restored an answer',
 			ADD_MODERATOR: 'added moderator', REMOVE_MODERATOR: 'removed moderator',
 		};
 		return labels[action] ?? action.toLowerCase().replace(/_/g, ' ');
@@ -628,6 +640,9 @@
 							{#if it.review_type === 'advisor' && it.faculty_name}
 								<span>advisor review · <span class="text-[var(--fg-2)]">{it.faculty_name}</span></span>
 							{/if}
+							{#if it.review_type === 'question' || it.review_type === 'answer'}
+								<span>{it.review_type} · <span class="text-[var(--fg-2)]" style={it.course_code ? 'font-family: var(--mono);' : ''}>{it.course_code ?? it.faculty_name}</span></span>
+							{/if}
 							<span class="ml-auto text-[var(--fg-4)]" style="font-family: var(--mono); font-size: 11px;">
 								flagged {reltime(it.created_at)}
 							</span>
@@ -640,8 +655,8 @@
 							<button
 								type="button"
 								class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background-color,border-color,transform] duration-[120ms] border-[rgba(217,138,138,0.2)] bg-[var(--danger-bg)] text-[var(--danger)] hover:bg-[rgba(217,138,138,0.14)] hover:border-[rgba(217,138,138,0.32)] active:scale-[0.98]"
-								onclick={() => withconfirm('Delete this review? This action can be undone from the audit log.', () => deleteReview(it.id), 'Delete review', true)}
-							>Delete review</button>
+								onclick={() => withconfirm(`Delete this ${kindlabel(it.review_type)}? This action can be undone from the audit log.`, () => deleteReview(it.id), `Delete ${kindlabel(it.review_type)}`, true)}
+							>Delete {kindlabel(it.review_type)}</button>
 							<button
 								type="button"
 								class="inline-flex items-center gap-2 rounded-[7px] border border-[var(--border-2)] bg-[var(--bg-2)] px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg)] transition-[background-color,border-color,transform] duration-[120ms] hover:bg-[var(--bg-3)] hover:border-[var(--border-strong)] active:scale-[0.98]"
