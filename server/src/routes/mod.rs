@@ -7,7 +7,7 @@ pub mod admin;
 pub mod reports;
 pub mod qa;
 
-use axum::{extract::{FromRequestParts, Request}, middleware::{self, Next}, response::Response, routing::{get, patch, post}, Router};
+use axum::{extract::{FromRequestParts, Request}, middleware::{self, Next}, response::Response, routing::{get, patch, post, put}, Router};
 use axum::http::{HeaderValue, HeaderName, Method};
 use tower_http::cors::CorsLayer;
 use crate::{auth::{cas, session::VerifiedUser}, error::AppError, handlers, state::AppState};
@@ -53,6 +53,8 @@ pub fn app(state: AppState) -> Router {
     // Protected routes: all app content, gated behind require_verified.
     let protected = Router::new()
         .route("/me/reviews", get(handlers::auth::my_reviews))
+        .route("/me/drafts", get(handlers::drafts::list).post(handlers::drafts::create))
+        .route("/me/drafts/:id", put(handlers::drafts::update).delete(handlers::drafts::delete))
         .route("/search", get(handlers::search::search))
         .merge(courses::router())
         .merge(offerings::router())

@@ -7,3 +7,4 @@ pub mod review;
 pub mod audit;
 pub mod report;
 pub mod qa;
+pub mod draft;

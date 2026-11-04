@@ -3,7 +3,7 @@
 	import { goto, replaceState } from '$app/navigation';
 	import { untrack } from 'svelte';
 	import { base } from '$app/paths';
-	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews, getExternalAdvisorReviews, deleteExternalAdvisorReview, editExternalAdvisorReview, voteExternalAdvisorReview, unvoteExternalAdvisorReview } from '$lib/api';
+	import { getFacultyMember, getAdvisorReviews, getOfferingReviews, getLabs, updateFaculty, deleteFaculty, submitReport, getLegacyAdvisorReviews, getExternalAdvisorReviews, deleteExternalAdvisorReview, editExternalAdvisorReview, voteExternalAdvisorReview, unvoteExternalAdvisorReview, getDrafts } from '$lib/api';
 	import { toast } from 'svelte-sonner';
 	import type { FacultyDetail, AdvisorReview, CourseReview, LabLean, LegacyAdvisorReview, ExternalAdvisorReview } from '$lib/types';
 	import { ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS, COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
@@ -25,6 +25,7 @@
 	const slug = $derived($page.params.slug);
 
 	let faculty = $state<FacultyDetail | null>(null);
+	let hasdraft = $state(false);
 	let advisorreviews = $state<AdvisorReview[]>([]);
 	let legacyadvisorreviews = $state<LegacyAdvisorReview[]>([]);
 	let externaladvisorreviews = $state<ExternalAdvisorReview[]>([]);
@@ -227,6 +228,11 @@
 			goto(`${base}/faculty`);
 		}
 	}
+
+	$effect(() => {
+		const id = faculty?.id;
+		if (id) getDrafts().then((ds) => (hasdraft = !!ds?.some((d) => d.faculty_id === id)));
+	});
 </script>
 
 <svelte:head>
@@ -365,9 +371,9 @@
 						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 					>
 						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<path d="M5 12h14M12 5v14" />
+							<path d={hasdraft ? 'M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z' : 'M5 12h14M12 5v14'} />
 						</svg>
-						Write a review
+						{hasdraft ? 'Continue draft' : 'Write a review'}
 					</a>
 				{/if}
 			</div>

@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 	import { goto, replaceState } from '$app/navigation';
 	import { untrack } from 'svelte';
-	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews, getExternalCourseReviews, deleteExternalCourseReview, editExternalCourseReview, voteExternalCourseReview, unvoteExternalCourseReview } from '$lib/api';
+	import { getCourse, getCourseReviews, getCourses, updateCourse, getFaculty, createOffering, deleteOffering, updateOfferingFaculty, getProposedReviews, proposeOffering, deleteCourse, submitReport, getLegacyCourseReviews, getExternalCourseReviews, deleteExternalCourseReview, editExternalCourseReview, voteExternalCourseReview, unvoteExternalCourseReview, getDrafts } from '$lib/api';
 	import type { CourseDetail, CourseReview, Offering, FacultyLean, CourseLean, CourseRef, CourseReportSubmission, LegacyCourseReview, ExternalCourseReview } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS } from '$lib/types';
 	import { currentUser } from '$lib/stores';
@@ -26,6 +26,7 @@
 	const code = $derived($page.params.code);
 
 	let course = $state<CourseDetail | null>(null);
+	let hasdraft = $state(false);
 	let reviews = $state<CourseReview[]>([]);
 	let proposedReviews = $state<CourseReview[]>([]);
 	let legacyreviews = $state<LegacyCourseReview[]>([]);
@@ -364,6 +365,11 @@
 	let reviewpage = $state(1);
 	const reviewpages = $derived(Math.max(1, Math.ceil(shown.length / PER_PAGE)));
 	const visiblereviews = $derived(shown.slice((reviewpage - 1) * PER_PAGE, reviewpage * PER_PAGE));
+
+	$effect(() => {
+		const id = course?.id;
+		if (id) getDrafts().then((ds) => (hasdraft = !!ds?.some((d) => d.course_id === id)));
+	});
 </script>
 
 <svelte:head>
@@ -462,9 +468,9 @@
 						style="background: linear-gradient(180deg,#7ea583 0%,#6b8f6f 100%); border: 1px solid #4d6e51; color: #0f1612; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 0 rgba(0,0,0,0.25);"
 					>
 						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<path d="M5 12h14M12 5v14" />
+							<path d={hasdraft ? 'M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z' : 'M5 12h14M12 5v14'} />
 						</svg>
-						Write a review
+						{hasdraft ? 'Continue draft' : 'Write a review'}
 					</a>
 				{/if}
 			</div>
