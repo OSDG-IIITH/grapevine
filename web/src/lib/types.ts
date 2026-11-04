@@ -407,6 +407,33 @@ export interface MyReviews {
 	advisor: AdvisorReview[];
 }
 
+export interface DraftData {
+	offering_id?: string;
+	axes?: Record<string, number>;
+	overall?: number | null;
+	body?: string;
+	anonymous?: boolean;
+	propose?: { season: string; year: string; faculty_ids: string[] };
+}
+
+export interface Draft {
+	id: string;
+	course_id: string | null;
+	course_code: string | null;
+	course_name: string | null;
+	faculty_id: string | null;
+	faculty_slug: string | null;
+	faculty_name: string | null;
+	data: DraftData;
+	updated_at: string;
+}
+
+export interface SaveDraft {
+	course_id?: string;
+	faculty_id?: string;
+	data: DraftData;
+}
+
 export interface PatchCourse {
 	code?: string;
 	name: string;

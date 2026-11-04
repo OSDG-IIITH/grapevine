@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
+	import { beforeNavigate } from '$app/navigation';
 	import { onMount, untrack } from 'svelte';
-	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview, proposeReview } from '$lib/api';
-	import type { CourseLean, FacultyLean, Offering } from '$lib/types';
+	import { toast } from 'svelte-sonner';
+	import { getCourses, getFaculty, getCourse, createCourseReview, createAdvisorReview, proposeReview, getDrafts, saveDraft, deleteDraft } from '$lib/api';
+	import type { CourseLean, FacultyLean, Offering, Draft } from '$lib/types';
 	import {
 		COURSE_AXIS_ORDER,
 		COURSE_AXIS_LABELS,
@@ -18,6 +20,7 @@
 	import Combobox from '$lib/components/Combobox.svelte';
 	import Loader from "@lucide/svelte/icons/loader";
 	import { rendermarkdown } from '$lib/markdown';
+	import { ago } from '$lib/utils';
 
 	const precourse = page.url.searchParams.get('course');
 	const prefaculty = page.url.searchParams.get('faculty');
@@ -45,6 +48,18 @@
 	let proposeYearError = $state(false);
 	let proposeFaculty = $state<FacultyLean[]>([]);
 
+	let drafts = $state<Draft[]>([]);
+	let draftid = $state<string | null>(null);
+	let savestate = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
+	let savedat = $state(0);
+	let now = $state(Date.now());
+	let confirmdiscard = $state(false);
+	let slot = { id: null as string | null, saved: '' };
+	let queue = Promise.resolve();
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	let wantoffering: string | null = null;
+	let offeringsfor = '';
+
 	function removeProposeFaculty(fid: string) {
 		proposeFaculty = proposeFaculty.filter((f) => f.id !== fid);
 	}
@@ -68,23 +83,13 @@
 	}
 
 	onMount(async () => {
-		const [courses, faculty] = await Promise.all([getCourses(), getFaculty()]);
+		const [courses, faculty, mine] = await Promise.all([getCourses(), getFaculty(), getDrafts()]);
 		allcourses = courses ?? [];
 		allfaculty = faculty ?? [];
+		drafts = mine ?? [];
 
-		if (allcourses.length) {
-			const init = precourse
-				? allcourses.find((c) => c.id === precourse || c.code === precourse)
-				: allcourses[0];
-			courseid = init?.id ?? allcourses[0].id;
-		}
-
-		if (allfaculty.length) {
-			const init = prefaculty
-				? allfaculty.find((f) => f.id === prefaculty || f.slug === prefaculty)
-				: allfaculty[0];
-			facultyid = init?.id ?? allfaculty[0].id;
-		}
+		if (precourse) courseid = allcourses.find((c) => c.id === precourse || c.code === precourse)?.id ?? '';
+		if (prefaculty) facultyid = allfaculty.find((f) => f.id === prefaculty || f.slug === prefaculty)?.id ?? '';
 
 		loading = false;
 	});
@@ -106,16 +111,23 @@
 			});
 			if (seq !== fetchseq) return;
 			offerings = detail?.offerings ?? [];
-			if (offerings.length) offeringid = offerings[0].id;
-			else offeringid = 'propose';
+			offeringsfor = id;
+			pickoffering(wantoffering);
+			wantoffering = null;
 		});
 	});
 
+	function pickoffering(want: string | null) {
+		offeringid = want && (want === 'propose' || offerings.some((o) => o.id === want)) ? want : (offerings[0]?.id ?? 'propose');
+	}
+
+	const targetid = $derived(kind === 'course' ? courseid : facultyid);
 	const axisorder = $derived(kind === 'course' ? [...COURSE_AXIS_ORDER] : [...ADVISOR_AXIS_ORDER]);
 	const axislabels = $derived(kind === 'course' ? COURSE_AXIS_LABELS : ADVISOR_AXIS_LABELS);
 	const axisscalelabels = $derived(kind === 'course' ? COURSE_AXIS_SCALE_LABELS : ADVISOR_AXIS_SCALE_LABELS);
 	const cansubmit = $derived(
 		!submitting &&
+		!!targetid &&
 		body.trim().length > 20 &&
 		axisorder.every((a) => axes[a]) &&
 		(kind !== 'course' || offeringid !== 'propose' || parseyear(proposeYear) !== null)
@@ -128,7 +140,168 @@
 	});
 	const overall = $derived(manualoverall !== null ? manualoverall : calculatedaverage);
 
+	const draftkey = $derived(JSON.stringify({
+		course_id: kind === 'course' ? courseid : undefined,
+		faculty_id: kind === 'advisor' ? facultyid : undefined,
+		data: {
+			offering_id: offeringid,
+			axes,
+			overall: manualoverall,
+			body,
+			anonymous: anon,
+			propose: { season: proposeSeason, year: proposeYear, faculty_ids: proposeFaculty.map((f) => f.id) }
+		}
+	}));
+	const otherdrafts = $derived(drafts.filter((d) => d.id !== draftid));
+	const hascontent = $derived(body.trim().length > 0 || Object.keys(axes).length > 0);
+
+	let lastkey = '';
+	let lasttarget = '';
+	$effect(() => {
+		const key = draftkey;
+		const target = `${kind}:${targetid}`;
+		if (loading) return;
+		untrack(() => {
+			if (target !== lasttarget) {
+				switchtarget(lastkey, !lasttarget.split(':')[1]);
+				lasttarget = `${kind}:${targetid}`;
+				lastkey = draftkey;
+				return;
+			}
+			lastkey = key;
+			if (!targetid || submitting || submitted || key === slot.saved || (!slot.id && !hascontent)) return;
+			clearTimeout(timer);
+			timer = setTimeout(flush, 1000);
+		});
+	});
+
+	$effect(() => {
+		const t = setInterval(() => (now = Date.now()), 15000);
+		return () => clearInterval(t);
+	});
+
+	beforeNavigate(() => {
+		if (timer) flush();
+	});
+
+	/** queue a save of the current form into the current draft */
+	function flush() {
+		clearTimeout(timer);
+		timer = undefined;
+		const key = draftkey;
+		const s = slot;
+		queue = queue.then(() => persist(key, s));
+		return queue;
+	}
+
+	async function persist(key: string, s: typeof slot) {
+		if (key === s.saved) return;
+		if (s === slot) savestate = 'saving';
+		const d = await saveDraft(s.id, JSON.parse(key));
+		if (!d) {
+			if (s === slot) savestate = 'error';
+			return;
+		}
+		s.id = d.id;
+		s.saved = key;
+		drafts = [d, ...drafts.filter((x) => x.id !== d.id)];
+		if (s !== slot) return;
+		draftid = d.id;
+		savestate = 'saved';
+		savedat = Date.now();
+	}
+
+	/** save the previous target's draft as is, then open or start the new target's draft */
+	function switchtarget(prevkey: string, fresh: boolean) {
+		const s = slot;
+		const had = !fresh && (!!s.id || hascontent);
+		if (timer) {
+			clearTimeout(timer);
+			timer = undefined;
+			queue = queue.then(() => persist(prevkey, s));
+		}
+		detach();
+		const d = drafts.find((x) => (kind === 'course' ? x.course_id === courseid : x.faculty_id === facultyid));
+		if (d) loaddraft(d);
+		else if (had) resetform();
+	}
+
+	function loaddraft(d: Draft) {
+		clearTimeout(timer);
+		timer = undefined;
+		const x = d.data;
+		if (d.course_id) {
+			kind = 'course';
+			courseid = d.course_id;
+			wantoffering = x.offering_id ?? null;
+			if (offeringsfor === d.course_id) {
+				pickoffering(wantoffering);
+				wantoffering = null;
+			} else {
+				offeringid = wantoffering ?? '';
+			}
+		} else {
+			kind = 'advisor';
+			facultyid = d.faculty_id ?? '';
+		}
+		axes = x.axes ?? {};
+		manualoverall = x.overall ?? null;
+		body = x.body ?? '';
+		anon = x.anonymous ?? true;
+		proposeSeason = x.propose?.season ?? 'M';
+		proposeYear = x.propose?.year ?? '';
+		proposeFaculty = allfaculty.filter((f) => x.propose?.faculty_ids?.includes(f.id));
+		slot = { id: d.id, saved: draftkey };
+		draftid = d.id;
+		savestate = 'saved';
+		savedat = new Date(d.updated_at).getTime();
+	}
+
+	function resume(d: Draft) {
+		if (d.course_id) {
+			kind = 'course';
+			courseid = d.course_id;
+		} else {
+			kind = 'advisor';
+			facultyid = d.faculty_id ?? '';
+		}
+	}
+
+	function resetform() {
+		axes = {};
+		manualoverall = null;
+		body = '';
+		anon = true;
+		proposeYear = '';
+		proposeFaculty = [];
+	}
+
+	function detach() {
+		slot = { id: null, saved: '' };
+		draftid = null;
+		savestate = 'idle';
+		confirmdiscard = false;
+	}
+
+	async function discard() {
+		if (!confirmdiscard) {
+			confirmdiscard = true;
+			setTimeout(() => (confirmdiscard = false), 3000);
+			return;
+		}
+		clearTimeout(timer);
+		timer = undefined;
+		await queue;
+		const id = slot.id;
+		if (id && !(await deleteDraft(id))) return;
+		drafts = drafts.filter((x) => x.id !== id);
+		detach();
+		resetform();
+		toast.success('Draft discarded');
+	}
+
 	function setkind(k: 'course' | 'advisor') {
+		if (k === kind) return;
 		kind = k;
 		axes = {};
 		manualoverall = null;
@@ -137,6 +310,9 @@
 	async function submit() {
 		if (!cansubmit || overall === null) return;
 		submitting = true;
+		clearTimeout(timer);
+		timer = undefined;
+		await queue;
 
 		let result;
 		if (kind === 'course') {
@@ -185,14 +361,18 @@
 			}
 		}
 
+		if (result && slot.id && (await deleteDraft(slot.id))) drafts = drafts.filter((x) => x.id !== slot.id);
 		submitting = false;
 		if (result) submitted = true;
+		else flush();
 	}
 </script>
 
 <svelte:head>
 	<title>Write Review · grapevine</title>
 </svelte:head>
+
+<svelte:window onbeforeunload={() => { if (timer) flush(); }} />
 
 {#if submitted}
 	<div class="mx-auto w-full px-6 pb-[120px] pt-10 sm:px-8" style="max-width: 820px; animation: fadeUp 280ms cubic-bezier(.2,.6,.2,1) both;">
@@ -222,6 +402,31 @@
 		{#if loading}
 			<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
 		{:else}
+			{#if otherdrafts.length}
+				<div class="grid grid-cols-1 gap-3 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-center sm:gap-[32px]">
+					<div class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
+						Drafts
+					</div>
+					<div class="flex min-w-0 flex-wrap items-center gap-[6px]">
+						{#each otherdrafts.slice(0, 3) as d (d.id)}
+							<button
+								type="button"
+								onclick={() => resume(d)}
+								title="edited {ago(d.updated_at, now)}"
+								class="max-w-[220px] truncate rounded-[5px] border border-[var(--border-strong)] bg-[var(--bg-3)] px-[9px] py-[4px] text-[12px] text-[var(--fg-2)] transition-[color,border-color] duration-[120ms] hover:border-[var(--accent)] hover:text-[var(--fg)]"
+								aria-label="Resume draft for {d.course_code ?? d.faculty_name}"
+							>{d.course_code ?? d.faculty_name}</button>
+						{/each}
+						{#if otherdrafts.length > 3}
+							<a
+								href="{base}/profile?tab=drafts"
+								class="px-[4px] text-[12px] text-[var(--fg-4)] transition-colors duration-[120ms] hover:text-[var(--fg-2)]"
+							>+{otherdrafts.length - 3} more</a>
+						{/if}
+					</div>
+				</div>
+			{/if}
+
 			<!-- Kind row -->
 			<div class="grid grid-cols-1 gap-4 border-b border-[var(--border)] py-6 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-[32px]">
 				<div class="pt-2 text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
@@ -452,7 +657,7 @@
 				<div class="text-[11px] uppercase tracking-[0.08em] text-[var(--fg-3)]" style="font-family: var(--mono);">
 					Visibility
 				</div>
-				<div class="flex min-w-0 items-center justify-between gap-4">
+				<div class="flex min-w-0 flex-wrap items-center justify-between gap-4">
 					<label class="inline-flex cursor-pointer items-center gap-[10px] text-[13px] text-[var(--fg-2)]">
 						<input type="checkbox" class="peer sr-only" bind:checked={anon} />
 						<span
@@ -476,12 +681,30 @@
 						</span>
 						<span>Post anonymously</span>
 					</label>
-					<div class="flex gap-2">
-						<button
-							type="button"
-							class="inline-flex items-center gap-2 rounded-[7px] border border-transparent bg-transparent px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg-2)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
-							onclick={() => history.back()}
-						>Cancel</button>
+					<div class="flex flex-wrap items-center justify-end gap-2">
+						<span class="mr-2 text-[11px] whitespace-nowrap {savestate === 'error' ? 'text-[var(--danger)]' : 'text-[var(--fg-4)]'}" style="font-family: var(--mono);" aria-live="polite">
+							{#if savestate === 'saving'}
+								saving…
+							{:else if savestate === 'saved'}
+								saved · {ago(savedat, now)}
+							{:else if savestate === 'error'}
+								<button type="button" onclick={flush} class="underline-offset-2 hover:underline" aria-label="Retry saving draft">not saved · retry</button>
+							{/if}
+						</span>
+						{#if draftid}
+							<button
+								type="button"
+								class="inline-flex items-center gap-2 rounded-[7px] border border-transparent px-[14px] py-2 text-[13px] whitespace-nowrap transition-[color,background] duration-[120ms] {confirmdiscard ? 'bg-[var(--danger-bg)] text-[var(--danger)]' : 'text-[var(--fg-2)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]'}"
+								onclick={discard}
+								aria-label="Discard draft"
+							>{confirmdiscard ? 'Discard?' : 'Discard'}</button>
+						{:else}
+							<button
+								type="button"
+								class="inline-flex items-center gap-2 rounded-[7px] border border-transparent bg-transparent px-[14px] py-2 text-[13px] whitespace-nowrap text-[var(--fg-2)] transition-[color,background] duration-[120ms] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+								onclick={() => history.back()}
+							>Cancel</button>
+						{/if}
 						<button
 							type="button"
 							class="inline-flex items-center gap-2 rounded-[7px] border px-[14px] py-2 text-[13px] whitespace-nowrap transition-[background,border-color] duration-[120ms] {cansubmit ? 'font-medium' : ''}"

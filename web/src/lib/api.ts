@@ -4,7 +4,7 @@ import type {
 	CourseLean, CourseDetail, CourseReview, Offering,
 	FacultyLean, FacultyDetail, AdvisorReview,
 	LabLean, LabDetail, FlagResponse, ReportResponse, ReportTarget, AuthUser,
-	SearchResult, MyReviews,
+	SearchResult, MyReviews, Draft, SaveDraft,
 	CreateCourse, CreateFaculty, CreateLab,
 	CreateCourseReview, EditCourseReview,
 	CreateAdvisorReview, EditAdvisorReview,
@@ -232,6 +232,19 @@ export async function updateMe(display_name: string): Promise<AuthUser | null> {
 
 export async function getMyReviews(): Promise<MyReviews | null> {
 	return apifetch<MyReviews>('/me/reviews');
+}
+
+export async function getDrafts(): Promise<Draft[] | null> {
+	return apifetch<Draft[]>('/me/drafts', undefined, true);
+}
+
+export async function saveDraft(id: string | null, body: SaveDraft): Promise<Draft | null> {
+	const opts = { ...json(body, id ? 'PUT' : 'POST'), keepalive: true };
+	return apifetch<Draft>(id ? `/me/drafts/${id}` : '/me/drafts', opts, true);
+}
+
+export async function deleteDraft(id: string): Promise<boolean> {
+	return apivoid(`/me/drafts/${id}`, { method: 'DELETE' });
 }
 
 export async function createCourseReview(offeringId: string, body: CreateCourseReview): Promise<CourseReview | null> {

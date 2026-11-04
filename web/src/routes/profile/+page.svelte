@@ -1,23 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { currentUser } from '$lib/stores';
-	import { updateMe, getMyReviews } from '$lib/api';
-	import type { MyReviews } from '$lib/types';
+	import { updateMe, getMyReviews, getDrafts } from '$lib/api';
+	import type { MyReviews, Draft } from '$lib/types';
 	import { COURSE_AXIS_ORDER, COURSE_AXIS_LABELS, ADVISOR_AXIS_ORDER, ADVISOR_AXIS_LABELS } from '$lib/types';
 	import Crumbs from '$lib/components/Crumbs.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
+	import DraftCard from '$lib/components/DraftCard.svelte';
 
 	let reviews = $state<MyReviews | null>(null);
-	let tab = $state('course');
+	let drafts = $state<Draft[]>([]);
+	let tab = $state(page.url.searchParams.get('tab') ?? 'course');
 	let editopen = $state(false);
 	let editname = $state('');
 	let saving = $state(false);
 
 	onMount(async () => {
-		const data = await getMyReviews();
+		const [data, mine] = await Promise.all([getMyReviews(), getDrafts()]);
 		if (data) reviews = data;
+		drafts = mine ?? [];
 	});
 
 	function openedit() {
@@ -46,7 +50,8 @@
 
 	const tabs = $derived([
 		{ id: 'course', label: 'Course reviews', count: reviews?.course.length ?? 0 },
-		{ id: 'advisor', label: 'Advisor reviews', count: reviews?.advisor.length ?? 0 }
+		{ id: 'advisor', label: 'Advisor reviews', count: reviews?.advisor.length ?? 0 },
+		{ id: 'drafts', label: 'Drafts', count: drafts.length }
 	]);
 
 	const shown = $derived(tab === 'course' ? (reviews?.course ?? []) : (reviews?.advisor ?? []));
@@ -83,6 +88,18 @@
 
 	{#if reviews === null}
 		<div class="text-[13px] text-[var(--fg-3)]">Loading…</div>
+	{:else if tab === 'drafts'}
+		{#if drafts.length === 0}
+			<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
+				No drafts. Reviews you start writing are saved here automatically.
+			</div>
+		{:else}
+			<div class="grid grid-cols-1 gap-[12px] md:grid-cols-2">
+				{#each drafts as d (d.id)}
+					<DraftCard draft={d} ondelete={(id) => (drafts = drafts.filter((x) => x.id !== id))} />
+				{/each}
+			</div>
+		{/if}
 	{:else if shown.length === 0}
 		<div class="rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] px-5 py-[60px] text-center text-[13px] text-[var(--fg-3)]">
 			No reviews yet.
